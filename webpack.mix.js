@@ -12,7 +12,6 @@ const mix = require('laravel-mix');
  */
 
 mix.js('resources/js/app.js', 'public/js')
-<<<<<<< HEAD
     .sass('resources/sass/app.scss', 'public/css');
 mix.options({
   extractVueStyles: true, // Extract .vue component styling to file, rather than inline.
@@ -22,6 +21,3 @@ mix.options({
 //   terser: {}, // Terser-specific options. https://github.com/webpack-contrib/terser-webpack-plugin#options
 //   postCss: [] // Post-CSS options: https://github.com/postcss/postcss/blob/master/docs/plugins.md
 });
-=======
-   .sass('resources/sass/app.scss', 'public/css');
->>>>>>> 107eb19a9e088a73f123e976eee2b4a80d5da5b6
