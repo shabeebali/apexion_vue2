@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateProductsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name')->unique(true);
+            $table->string('slug')->unique(true);
+            $table->string('sku')->unique(true);
+            $table->string('hsn');
+            $table->decimal('weight',8,3);
+            $table->decimal('mrp',8,2);
+            $table->decimal('landing_price',8,2);
+            $table->decimal('gsp_customer',8,2);
+            $table->decimal('gsp_dealer',8,2);
+            $table->decimal('gst',8,2);
+            $table->integer('total_stock');
+            $table->softDeletes();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('products');
+    }
+}
