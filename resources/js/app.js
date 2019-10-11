@@ -26,11 +26,33 @@ Vue.component('app-component', require('./components/AppComponent.vue').default)
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
+import VueRouter from 'vue-router'
+Vue.use(VueRouter)
+import {routes} from './router.js'
+const router = new VueRouter({
+  routes,
+  base:'/admin',
+  mode:'history',
+});
 import vuetify from './vuetify'
 new Vue({
+  delimiters: ['${', '}$'],
   vuetify,
+  router:router,
+  data(){
+  	return{
+  		'sidebar_left':false,
+  		'sidebar_left_items':[
+        {
+          title:'Link1'
+        },
+        {
+          title:'Link 2'
+        },
+        {
+          title:'Link 3'
+        }
+      ],
+  	}
+  }
 }).$mount('#app')
-
-const app = new Vue({
-    el: '#app',
-});
