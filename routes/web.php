@@ -11,9 +11,15 @@
 |
 */
 Route::middleware('auth')->group(function(){
+<<<<<<< HEAD
 	Route::get('/', function () {
 	    return view('backend.dashboard');
 	});
+=======
+	Route::get('/{any}', function () {
+    	return view('backend.default');
+	})->where('any', '.*');
+>>>>>>> origin/master
 });
 
 Auth::routes();

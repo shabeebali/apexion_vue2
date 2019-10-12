@@ -34,6 +34,12 @@ import Vuetify, {
     VCardText,
     VTextField,
     VCheckbox,
+<<<<<<< HEAD
+=======
+    VNavigationDrawer,
+    VDataTable,
+	VAlert,
+>>>>>>> origin/master
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -71,6 +77,12 @@ Vue.use(Vuetify, {
 	    VCardText,
 	    VTextField,
 	    VCheckbox,
+<<<<<<< HEAD
+=======
+	    VNavigationDrawer,
+	    VDataTable,
+	    VAlert,
+>>>>>>> origin/master
 	},
 })
 const opts = {
