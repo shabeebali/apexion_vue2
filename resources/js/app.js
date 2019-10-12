@@ -38,15 +38,6 @@ import vuetify from './vuetify'
 new Vue({
   delimiters: ['${', '}$'],
   vuetify,
-<<<<<<< HEAD
-  data(){
-		return{
-			sidebar_left:false,
-			sidebar_left_items:[],
-		}
-	}
-}).$mount('#app')
-=======
   router:router,
   data(){
   	return{
@@ -65,4 +56,3 @@ new Vue({
   	}
   }
 }).$mount('#app')
->>>>>>> origin/master

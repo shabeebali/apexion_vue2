@@ -23,15 +23,9 @@
     <div id="app">
         <v-app>
             <v-app-bar dense max-height="48" color="deep-purple accent-4" dark>
-<<<<<<< HEAD
-                <v-app-bar-nav-icon v-if="sidebar_left_items.length > 0"></v-app-bar-nav-icon>
-                <v-toolbar-title>
-                    <v-btn dark text link depressed href="{{ url('/') }}">
-=======
                 <v-app-bar-nav-icon v-if="sidebar_left_items.length > 0" @click="sidebar_left = !sidebar_left"></v-app-bar-nav-icon>
                 <v-toolbar-title>
                     <v-btn dark link text depressed class="navbar-brand" href="{{ url('/') }}">
->>>>>>> origin/master
                         {{ config('app.name', 'Laravel') }}
                     </v-btn>
                 </v-toolbar-title>
@@ -64,11 +58,6 @@
                     </v-menu>
                 @endguest
             </v-app-bar>
-<<<<<<< HEAD
-            <v-content>
-                <v-container fluid class="pa-0">
-                    @yield('content')
-=======
             <v-navigation-drawer v-model="sidebar_left" app class="deep-purple accent-4" dark temporary>
                 <v-list>
                     <v-list-item v-for="(item,index) in sidebar_left_items" :key="index">
@@ -83,7 +72,6 @@
                     <main class="py-4">
                         @yield('content')
                     </main>
->>>>>>> origin/master
                 </v-container>
             </v-content>
         </v-app>
