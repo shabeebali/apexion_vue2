@@ -21,14 +21,13 @@
 </head>
 <body>
     <div id="app">
-<<<<<<< HEAD
         <v-app>
-            <v-app-bar color="deep-purple accent-4" dark>
-                <v-app-bar-nav-icon></v-app-bar-nav-icon>
+            <v-app-bar dense max-height="48" color="deep-purple accent-4" dark>
+                <v-app-bar-nav-icon v-if="sidebar_left_items.length > 0"></v-app-bar-nav-icon>
                 <v-toolbar-title>
-                    <a class="navbar-brand" href="{{ url('/') }}">
+                    <v-btn dark text link depressed href="{{ url('/') }}">
                         {{ config('app.name', 'Laravel') }}
-                    </a>
+                    </v-btn>
                 </v-toolbar-title>
                 <div class="flex-grow-1"></div>
                 
@@ -59,67 +58,12 @@
                     </v-menu>
                 @endguest
             </v-app-bar>
-
-            <main class="py-4">
-                @yield('content')
-            </main>
+            <v-content>
+                <v-container fluid class="pa-0">
+                    @yield('content')
+                </v-container>
+            </v-content>
         </v-app>
-=======
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav mr-auto">
-
-                    </ul>
-
-                    <!-- Right Side Of Navbar -->
-                    <ul class="navbar-nav ml-auto">
-                        <!-- Authentication Links -->
-                        @guest
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                            </li>
-                            @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                </li>
-                            @endif
-                        @else
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name }} <span class="caret"></span>
-                                </a>
-
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
-                                    </a>
-
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                        @csrf
-                                    </form>
-                                </div>
-                            </li>
-                        @endguest
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-        <main class="py-4">
-            @yield('content')
-        </main>
->>>>>>> 107eb19a9e088a73f123e976eee2b4a80d5da5b6
     </div>
 </body>
 </html>

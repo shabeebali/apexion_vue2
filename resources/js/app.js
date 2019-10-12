@@ -29,8 +29,10 @@ Vue.component('app-component', require('./components/AppComponent.vue').default)
 import vuetify from './vuetify'
 new Vue({
   vuetify,
+  data(){
+		return{
+			sidebar_left:false,
+			sidebar_left_items:[],
+		}
+	}
 }).$mount('#app')
-
-const app = new Vue({
-    el: '#app',
-});

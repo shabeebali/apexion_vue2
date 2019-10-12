@@ -32518,7 +32518,7 @@ const defaultMenuProps = { ..._VSelect_VSelect__WEBPACK_IMPORTED_MODULE_1__["def
       const input = _VTextField_VTextField__WEBPACK_IMPORTED_MODULE_2__["default"].options.methods.genInput.call(this);
       input.data = input.data || {};
       input.data.attrs = input.data.attrs || {};
-      input.data.attrs.autocomplete = 'off';
+      input.data.attrs.autocomplete = input.data.attrs.autocomplete || 'disabled';
       input.data.domProps = input.data.domProps || {};
       input.data.domProps.value = this.internalSearch;
       return input;
@@ -41384,19 +41384,6 @@ function sanitizeDateString(dateString, type) {
     },
 
     genDateTable() {
-      let proxyValue = this.value;
-
-      if (this.range && this.value && this.value.length === 2) {
-        proxyValue = [];
-        const [rangeFrom, rangeTo] = [this.value[0], this.value[1]].map(x => new Date(`${x}T00:00:00+00:00`)).sort((a, b) => a > b ? 1 : -1);
-        const diffDays = Math.ceil((rangeTo.getTime() - rangeFrom.getTime()) / (1000 * 60 * 60 * 24));
-
-        for (let i = 0; i <= diffDays; i++) {
-          const current = new Date(+rangeFrom + i * 864e5);
-          proxyValue.push(current.toISOString().substring(0, 10));
-        }
-      }
-
       return this.$createElement(_VDatePickerDateTable__WEBPACK_IMPORTED_MODULE_2__["default"], {
         props: {
           allowedDates: this.allowedDates,
@@ -41412,11 +41399,12 @@ function sanitizeDateString(dateString, type) {
           locale: this.locale,
           min: this.min,
           max: this.max,
+          range: this.range,
           readonly: this.readonly,
           scrollable: this.scrollable,
           showWeek: this.showWeek,
           tableDate: `${Object(_util__WEBPACK_IMPORTED_MODULE_7__["pad"])(this.tableYear, 4)}-${Object(_util__WEBPACK_IMPORTED_MODULE_7__["pad"])(this.tableMonth + 1)}`,
-          value: proxyValue,
+          value: this.value,
           weekdayFormat: this.weekdayFormat
         },
         ref: 'table',
@@ -42185,6 +42173,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     min: String,
     max: String,
+    range: Boolean,
     readonly: Boolean,
     scrollable: Boolean,
     tableDate: {
@@ -42243,7 +42232,7 @@ __webpack_require__.r(__webpack_exports__);
 
     genButton(value, isFloating, mouseEventType, formatter) {
       const isAllowed = Object(_util_isDateAllowed__WEBPACK_IMPORTED_MODULE_5__["default"])(value, this.min, this.max, this.allowedDates);
-      const isSelected = value === this.value || Array.isArray(this.value) && this.value.indexOf(value) !== -1;
+      const isSelected = this.isSelected(value);
       const isCurrent = value === this.current;
       const setColor = isSelected ? this.setBackgroundColor : this.setTextColor;
       const color = (isSelected || isCurrent) && (this.color || 'accent');
@@ -42337,6 +42326,19 @@ __webpack_require__.r(__webpack_exports__);
         } : undefined,
         directives: [touchDirective]
       }, [transition]);
+    },
+
+    isSelected(value) {
+      if (Array.isArray(this.value)) {
+        if (this.range && this.value.length === 2) {
+          const [from, to] = [...this.value].sort();
+          return from <= value && value <= to;
+        } else {
+          return this.value.indexOf(value) !== -1;
+        }
+      }
+
+      return value === this.value;
     }
 
   }
@@ -42416,7 +42418,7 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return isDateAllowed; });
 function isDateAllowed(date, min, max, allowedFn) {
-  return (!allowedFn || allowedFn(date)) && (!min || date >= min) && (!max || date <= max);
+  return (!allowedFn || allowedFn(date)) && (!min || date >= min.substr(0, 10)) && (!max || date <= max);
 }
 //# sourceMappingURL=isDateAllowed.js.map
 
@@ -59096,7 +59098,7 @@ class Vuetify {
 }
 Vuetify.install = _install__WEBPACK_IMPORTED_MODULE_0__["install"];
 Vuetify.installed = false;
-Vuetify.version = "2.1.2";
+Vuetify.version = "2.1.3";
 //# sourceMappingURL=framework.js.map
 
 /***/ }),
@@ -59105,7 +59107,7 @@ Vuetify.version = "2.1.2";
 /*!*******************************************!*\
   !*** ./node_modules/vuetify/lib/index.js ***!
   \*******************************************/
-/*! exports provided: colors, default, ClickOutside, Intersect, Mutate, Resize, Ripple, Scroll, Touch, VApp, VAppBar, VAppBarNavIcon, VAlert, VAutocomplete, VAvatar, VBadge, VBanner, VBottomNavigation, VBottomSheet, VBreadcrumbs, VBreadcrumbsItem, VBreadcrumbsDivider, VBtn, VBtnToggle, VCalendar, VCalendarDaily, VCalendarWeekly, VCalendarMonthly, VCard, VCardTitle, VCardActions, VCardText, VCarousel, VCarouselItem, VCheckbox, VSimpleCheckbox, VChip, VChipGroup, VColorPicker, VColorPickerSwatches, VColorPickerCanvas, VContent, VCombobox, VCounter, VData, VDataIterator, VDataFooter, VDataTable, VEditDialog, VTableOverflow, VDataTableHeader, VSimpleTable, VVirtualTable, VDatePicker, VDatePickerTitle, VDatePickerHeader, VDatePickerDateTable, VDatePickerMonthTable, VDatePickerYears, VDialog, VDivider, VExpansionPanels, VExpansionPanel, VExpansionPanelHeader, VExpansionPanelContent, VFileInput, VFooter, VForm, VContainer, VCol, VRow, VSpacer, VLayout, VFlex, VHover, VIcon, VImg, VInput, VItem, VItemGroup, VLabel, VLazy, VListItemActionText, VListItemContent, VListItemTitle, VListItemSubtitle, VList, VListGroup, VListItem, VListItemAction, VListItemAvatar, VListItemIcon, VListItemGroup, VMenu, VMessages, VNavigationDrawer, VOverflowBtn, VOverlay, VPagination, VSheet, VParallax, VPicker, VProgressCircular, VProgressLinear, VRadioGroup, VRadio, VRangeSlider, VRating, VResponsive, VSelect, VSkeletonLoader, VSlider, VSlideGroup, VSlideItem, VSnackbar, VSparkline, VSpeedDial, VStepper, VStepperContent, VStepperStep, VStepperHeader, VStepperItems, VSubheader, VSwitch, VSystemBar, VTabs, VTab, VTabItem, VTabsItems, VTabsSlider, VTextarea, VTextField, VTimeline, VTimelineItem, VTimePicker, VTimePickerClock, VTimePickerTitle, VToolbar, VToolbarItems, VToolbarTitle, VTooltip, VTreeview, VTreeviewNode, VWindow, VWindowItem, VCarouselTransition, VCarouselReverseTransition, VTabTransition, VTabReverseTransition, VMenuTransition, VFabTransition, VDialogTransition, VDialogBottomTransition, VFadeTransition, VScaleTransition, VScrollXTransition, VScrollXReverseTransition, VScrollYTransition, VScrollYReverseTransition, VSlideXTransition, VSlideXReverseTransition, VSlideYTransition, VSlideYReverseTransition, VExpandTransition, VExpandXTransition */
+/*! exports provided: ClickOutside, Intersect, Mutate, Resize, Ripple, Scroll, Touch, colors, default, VApp, VAppBar, VAppBarNavIcon, VAlert, VAutocomplete, VAvatar, VBadge, VBanner, VBottomNavigation, VBottomSheet, VBreadcrumbs, VBreadcrumbsItem, VBreadcrumbsDivider, VBtn, VBtnToggle, VCalendar, VCalendarDaily, VCalendarWeekly, VCalendarMonthly, VCard, VCardTitle, VCardActions, VCardText, VCarousel, VCarouselItem, VCheckbox, VSimpleCheckbox, VChip, VChipGroup, VColorPicker, VColorPickerSwatches, VColorPickerCanvas, VContent, VCombobox, VCounter, VData, VDataIterator, VDataFooter, VDataTable, VEditDialog, VTableOverflow, VDataTableHeader, VSimpleTable, VVirtualTable, VDatePicker, VDatePickerTitle, VDatePickerHeader, VDatePickerDateTable, VDatePickerMonthTable, VDatePickerYears, VDialog, VDivider, VExpansionPanels, VExpansionPanel, VExpansionPanelHeader, VExpansionPanelContent, VFileInput, VFooter, VForm, VContainer, VCol, VRow, VSpacer, VLayout, VFlex, VHover, VIcon, VImg, VInput, VItem, VItemGroup, VLabel, VLazy, VListItemActionText, VListItemContent, VListItemTitle, VListItemSubtitle, VList, VListGroup, VListItem, VListItemAction, VListItemAvatar, VListItemIcon, VListItemGroup, VMenu, VMessages, VNavigationDrawer, VOverflowBtn, VOverlay, VPagination, VSheet, VParallax, VPicker, VProgressCircular, VProgressLinear, VRadioGroup, VRadio, VRangeSlider, VRating, VResponsive, VSelect, VSkeletonLoader, VSlider, VSlideGroup, VSlideItem, VSnackbar, VSparkline, VSpeedDial, VStepper, VStepperContent, VStepperStep, VStepperHeader, VStepperItems, VSubheader, VSwitch, VSystemBar, VTabs, VTab, VTabItem, VTabsItems, VTabsSlider, VTextarea, VTextField, VTimeline, VTimelineItem, VTimePicker, VTimePickerClock, VTimePickerTitle, VToolbar, VToolbarItems, VToolbarTitle, VTooltip, VTreeview, VTreeviewNode, VWindow, VWindowItem, VCarouselTransition, VCarouselReverseTransition, VTabTransition, VTabReverseTransition, VMenuTransition, VFabTransition, VDialogTransition, VDialogBottomTransition, VFadeTransition, VScaleTransition, VScrollXTransition, VScrollXReverseTransition, VScrollYTransition, VScrollYReverseTransition, VSlideXTransition, VSlideXReverseTransition, VSlideYTransition, VSlideYReverseTransition, VExpandTransition, VExpandXTransition */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -59617,6 +59619,7 @@ const baseMixins = Object(_util_mixins__WEBPACK_IMPORTED_MODULE_2__["default"])(
     openOnHover: Boolean
   },
   data: () => ({
+    // Do not use this directly, call getActivator() instead
     activatorElement: null,
     activatorNode: [],
     events: ['click', 'mouseenter', 'mouseleave'],
@@ -59624,12 +59627,6 @@ const baseMixins = Object(_util_mixins__WEBPACK_IMPORTED_MODULE_2__["default"])(
   }),
   watch: {
     activator: 'resetActivator',
-
-    activatorElement(val) {
-      if (!val) return;
-      this.addActivatorEvents();
-    },
-
     openOnHover: 'resetActivator'
   },
 
@@ -59640,7 +59637,7 @@ const baseMixins = Object(_util_mixins__WEBPACK_IMPORTED_MODULE_2__["default"])(
       Object(_util_console__WEBPACK_IMPORTED_MODULE_4__["consoleError"])(`The activator slot must be bound, try '<template v-slot:activator="{ on }"><v-btn v-on="on">'`, this);
     }
 
-    this.getActivator();
+    this.addActivatorEvents();
   },
 
   beforeDestroy() {
@@ -59649,12 +59646,12 @@ const baseMixins = Object(_util_mixins__WEBPACK_IMPORTED_MODULE_2__["default"])(
 
   methods: {
     addActivatorEvents() {
-      if (!this.activator || this.disabled || !this.activatorElement) return;
+      if (!this.activator || this.disabled || !this.getActivator()) return;
       this.listeners = this.genActivatorListeners();
       const keys = Object.keys(this.listeners);
 
       for (const key of keys) {
-        this.activatorElement.addEventListener(key, this.listeners[key]);
+        this.getActivator().addEventListener(key, this.listeners[key]);
       }
     },
 
@@ -59691,7 +59688,8 @@ const baseMixins = Object(_util_mixins__WEBPACK_IMPORTED_MODULE_2__["default"])(
         };
       } else {
         listeners.click = e => {
-          if (this.activatorElement) this.activatorElement.focus();
+          const activator = this.getActivator(e);
+          if (activator) activator.focus();
           this.isActive = !this.isActive;
         };
       }
@@ -59705,19 +59703,32 @@ const baseMixins = Object(_util_mixins__WEBPACK_IMPORTED_MODULE_2__["default"])(
       let activator = null;
 
       if (this.activator) {
-        const target = this.internalActivator ? this.$el : document; // Selector
+        const target = this.internalActivator ? this.$el : document;
 
         if (typeof this.activator === 'string') {
-          activator = target.querySelector(this.activator); // VNode
+          // Selector
+          activator = target.querySelector(this.activator);
         } else if (this.activator.$el) {
-          activator = this.activator.$el; // HTMLElement | Element
+          // Component (ref)
+          activator = this.activator.$el;
         } else {
+          // HTMLElement | Element
           activator = this.activator;
         }
       } else if (e) {
+        // Activated by a click event
         activator = e.currentTarget || e.target;
       } else if (this.activatorNode.length) {
-        activator = this.activatorNode[0].elm;
+        // Last resort, use the contents of the activator slot
+        const vm = this.activatorNode[0].componentInstance;
+
+        if (vm && vm.$options.mixins && //                         Activatable is indirectly used via Menuable
+        vm.$options.mixins.some(m => m.options && ['activatable', 'menuable'].includes(m.options.name))) {
+          // Activator is actually another activatible component, use its activator (#8846)
+          activator = vm.getActivator();
+        } else {
+          activator = this.activatorNode[0].elm;
+        }
       }
 
       this.activatorElement = activator;
@@ -59756,6 +59767,7 @@ const baseMixins = Object(_util_mixins__WEBPACK_IMPORTED_MODULE_2__["default"])(
     resetActivator() {
       this.activatorElement = null;
       this.getActivator();
+      this.addActivatorEvents();
     }
 
   }
@@ -66668,11 +66680,14 @@ Vue.component('app-component', __webpack_require__(/*! ./components/AppComponent
 
 
 new Vue({
-  vuetify: _vuetify__WEBPACK_IMPORTED_MODULE_0__["default"]
+  vuetify: _vuetify__WEBPACK_IMPORTED_MODULE_0__["default"],
+  data: function data() {
+    return {
+      sidebar_left: false,
+      sidebar_left_items: []
+    };
+  }
 }).$mount('#app');
-var app = new Vue({
-  el: '#app'
-});
 
 /***/ }),
 
@@ -66830,7 +66845,20 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuetify_lib__WEBPACK_IMPORTED_MOD
     VListItemTitle: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VListItemTitle"],
     VMenu: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VMenu"],
     VBtn: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VBtn"],
-    VIcon: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VIcon"]
+    VIcon: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VIcon"],
+    VContainer: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VContainer"],
+    VCol: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VCol"],
+    VRow: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VRow"],
+    VSpacer: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VSpacer"],
+    VLayout: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VLayout"],
+    VFlex: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VFlex"],
+    VContent: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VContent"],
+    VCard: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VCard"],
+    VCardTitle: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VCardTitle"],
+    VCardActions: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VCardActions"],
+    VCardText: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VCardText"],
+    VTextField: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VTextField"],
+    VCheckbox: vuetify_lib__WEBPACK_IMPORTED_MODULE_2__["VCheckbox"]
   }
 });
 var opts = {
