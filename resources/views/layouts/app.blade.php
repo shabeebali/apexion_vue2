@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="base-url" content="{{ url('/') }}">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -22,8 +22,8 @@
 <body>
     <div id="app">
         <v-app>
-            <v-app-bar dense max-height="48" color="deep-purple accent-4" dark>
-                <v-app-bar-nav-icon v-if="sidebar_left_items.length > 0" @click="sidebar_left = !sidebar_left"></v-app-bar-nav-icon>
+            <v-app-bar absolute app color="transparent" flat>
+                <v-app-bar-nav-icon v-if="$vuetify.breakpoint.smAndDown" @click="sidebar_left = !sidebar_left"></v-app-bar-nav-icon>
                 <v-toolbar-title>
                     <v-btn dark link text depressed class="navbar-brand" href="{{ url('/') }}">
                         {{ config('app.name', 'Laravel') }}
@@ -58,7 +58,10 @@
                     </v-menu>
                 @endguest
             </v-app-bar>
-            <v-navigation-drawer v-model="sidebar_left" app class="deep-purple accent-4" dark temporary>
+            <v-navigation-drawer app color="deep-purple darken-4" dark  mobile-break-point="991" :permanent="$vuetify.breakpoint.mdAndUp" width="200" v-model="sidebar_left" >
+                <template v-slot:img="attrs">
+                    <v-img v-bind="attrs" gradient="to top, rgba(0, 0, 0, .7), rgba(0, 0, 0, .7)"/>
+                </template>
                 <v-list>
                     <v-list-item v-for="(item,index) in sidebar_left_items" :key="index">
                         <v-list-item-content>

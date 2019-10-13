@@ -14,5 +14,20 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    return $user->hasRole('Super Admin') ? 'true' : 'null';
+});
+Route::middleware('auth:api')->group(function(){
+	Route::get('users/list',function(){
+		return response()->json([
+            'items' => [
+            	[
+            		'id'=>'1',
+            		'name'=>'shabeeb',
+            		'email'=>'olakka'
+            	]
+            ]
+        ]);
+	});
+	Route::put('users/create','Backend\UserController@store');
 });

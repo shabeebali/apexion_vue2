@@ -10,12 +10,16 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::middleware('auth')->group(function(){
-	Route::get('/{any}', function () {
-    	return view('backend.default');
-	})->where('any', '.*');
+
+
+Route::prefix('/admin')->group(function(){
+	Auth::routes();
+	Route::middleware('auth:web')->group(function(){
+		Route::get('/', function () {
+	    	return view('backend.default');
+		});
+		Route::get('/{any}', function () {
+	    	return view('backend.default');
+		})->where('any', '.*');
+	});
 });
-
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');

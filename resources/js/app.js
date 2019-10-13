@@ -27,11 +27,11 @@ Vue.component('app-component', require('./components/AppComponent.vue').default)
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 import VueRouter from 'vue-router'
-Vue.use(VueRouter)
 import {routes} from './router.js'
+Vue.use(VueRouter)
 const router = new VueRouter({
   routes,
-  base:'/admin',
+  base:'/admin/',
   mode:'history',
 });
 import vuetify from './vuetify'
@@ -54,5 +54,8 @@ new Vue({
         }
       ],
   	}
+  },
+  mounted(){
+    console.log(this.$router.currentRoute);
   }
 }).$mount('#app')

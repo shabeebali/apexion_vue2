@@ -18,6 +18,8 @@ class CreateProductWarehouseTable extends Migration
             $table->bigInteger('product_id');
             $table->bigInteger('warehouse_id');
             $table->integer('stock');
+            $table->string('batch_id');
+            $table->date('expiry_date');
             $table->timestamps();
         });
     }

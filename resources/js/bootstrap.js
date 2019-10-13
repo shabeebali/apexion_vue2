@@ -21,6 +21,9 @@ try {
 
 window.axios = require('axios');
 
+let base_url = document.head.querySelector('meta[name="base-url"]');
+window.axios.defaults.baseURL = base_url.content+'/api';
+
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /**
