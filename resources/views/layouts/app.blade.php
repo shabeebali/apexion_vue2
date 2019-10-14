@@ -58,16 +58,32 @@
                     </v-menu>
                 @endguest
             </v-app-bar>
-            <v-navigation-drawer app color="deep-purple darken-4" dark  mobile-break-point="991" :permanent="$vuetify.breakpoint.mdAndUp" width="200" v-model="sidebar_left" >
+            <v-navigation-drawer app color="teal darken-3" dark  mobile-break-point="991" :permanent="$vuetify.breakpoint.mdAndUp" width="250" v-model="sidebar_left" >
                 <template v-slot:img="attrs">
                     <v-img v-bind="attrs" gradient="to top, rgba(0, 0, 0, .7), rgba(0, 0, 0, .7)"/>
                 </template>
-                <v-list>
-                    <v-list-item v-for="(item,index) in sidebar_left_items" :key="index">
-                        <v-list-item-content>
+                <v-list nav dense dark >
+                    <template v-for="(item,index) in sidebar_left_items">
+                        <v-list-group dark no-action subgroup v-if="item.children" color="#fdfdfd">
+                            <template v-slot:activator>
+                                <v-list-item-content>
+                                    <v-list-item-title>${item.title}$</v-list-item-title>
+                                </v-list-item-content>
+                            </template>
+                            <v-icon slot="prependIcon">${item.icon}$</v-icon>
+                            <v-list-item dark exact v-for="(it,index) in item.children" :key="index" :to="it.target">
+                                <v-list-item-content>
+                                    <v-list-item-title>${it.title}$</v-list-item-title>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list-group>
+                        <v-list-item dark exact v-else :to="item.target">
+                            <v-list-item-icon>
+                                <v-icon>${item.icon}$</v-icon>
+                            </v-list-item-icon>
                             <v-list-item-title>${item.title}$</v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
+                        </v-list-item>
+                    </template>
                 </v-list>
             </v-navigation-drawer>
             <v-content>

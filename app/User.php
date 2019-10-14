@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Http\Requests\CreateUserRequest;
 
 class User extends Authenticatable
 {
@@ -41,13 +42,11 @@ class User extends Authenticatable
     ];
 
 
-    public function isSuperAdmin(){
-        $roles = $this->roles;
-        foreach ($roles as $role) {
-            if($role->slug == 'super_admin'){
-                return true;
-            }
-        }
-        return false;
+    public function dbsave(CreateUserRequest $request){
+        $this->name = $request->name;
+        $this->email = $request->email;
+        $this->password = bcrypt($request->password);
+        $this->save();
+        return true;
     }
 }

@@ -1,5 +1,9 @@
 import Vue from 'vue'
-import '@fortawesome/fontawesome-free/css/all.css'
+import colors from 'vuetify/lib/util/colors'
+import '@mdi/font/css/materialdesignicons.css'
+import { mdiWarehouse } from '@mdi/js';
+import { mdiPrinterPos } from '@mdi/js';
+
 import Vuetify, {
 	VApp,
 	VAppBar,
@@ -48,6 +52,7 @@ import Vuetify, {
     VDialog,
     VForm,
     VDivider,
+    VSnackbar,
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -99,12 +104,24 @@ Vue.use(Vuetify, {
 	    VDialog,
 	    VForm,
 	    VDivider,
+	    VSnackbar,
 	},
 })
 const opts = {
 	icons: {
-    	iconfont: 'fa', // 'mdi' || 'mdiSvg' || 'md' || 'fa' || 'fa4'
+    	iconfont: 'mdi', // 'mdi' || 'mdiSvg' || 'md' || 'fa' || 'fa4'
   	},
+  	theme: {
+		dark: false,
+		themes: {
+			light: {
+				primary: colors.teal.darken2,
+			},
+			dark: {
+				primary: colors.teal.darken2,
+			},
+		},
+	},
 }
 
 export default new Vuetify(opts)

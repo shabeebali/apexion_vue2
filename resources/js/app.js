@@ -44,14 +44,65 @@ new Vue({
   		'sidebar_left':false,
   		'sidebar_left_items':[
         {
-          title:'Link1'
+          title:'Dashboard',
+          target:'/',
+          icon:'mdi-gauge'
         },
         {
-          title:'Link 2'
+          title:'Products',
+          target:'/products',
+          icon:'mdi-inbox-multiple',
         },
         {
-          title:'Link 3'
-        }
+          title:'Categories',
+          target:'/categories',
+          icon:'mdi-book-variant',
+          children:[
+            {
+              title:'Categories',
+              target:'/categories',
+            },
+            {
+              title:'Taxonomy',
+              target:'/categories/taxonomy',
+            },
+          ]
+        },
+        {
+          title:'Inventory',
+          target:'/inventory',
+          icon:'mdi-warehouse',
+          children:[
+            {
+              title:'Inventory',
+              target:'/inventory',
+            },
+            {
+              title:'Warehouse',
+              target:'/inventory/warehouse',
+            },
+          ]
+        },
+        {
+          title:'Sales',
+          target:'/sales',
+          icon:'mdi-printer-pos',
+        },
+        {
+          title:'Users',
+          target:'/users',
+          icon:'mdi-account',
+          children:[
+            {
+              title:'Users',
+              target:'/users',
+            },
+            {
+              title:'Roles',
+              target:'/users/roles',
+            },
+          ]
+        },
       ],
   	}
   },
