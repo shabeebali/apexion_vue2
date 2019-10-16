@@ -33,7 +33,7 @@
 				</v-card-text>
 			</v-card>
 		</v-col>
-		<user-create :openDialog="openDialog" :userId="user_id" :mode="mode" v-on:update-list="getDataFromApi" v-on:close-dialog="openDialog = false" v-on:trigger-sb="triggerSb"></user-create>
+		<user-create :openDialog="openDialog" :userId="user_id" :mode="mode" v-on:update-list="getDataFromApi" v-on:close-dialog="openDialog = false ; mode ='' ; user_id = 0" v-on:trigger-sb="triggerSb"></user-create>
 		<v-snackbar v-model="snackbar" right botttom :color="sbColor" :timeout="sbTimeout" >
 			{{sbText}}
 			<v-btn dark text @click="snackbar = false"> Close</v-btn>
@@ -92,7 +92,6 @@
 				})
 			},
 			triggerSb(val){
-				console.log('kitti2')
 				this.snackbar = false
 				this.sbText = val.text
 				this.sbColor = val.color

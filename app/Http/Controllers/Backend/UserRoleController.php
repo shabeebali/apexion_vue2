@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 use App\Http\Requests\CreateUserRoleRequest;
 class UserRoleController extends Controller
 {
@@ -87,5 +88,22 @@ class UserRoleController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function permissions()
+    {
+        $model = Permission::all();
+        $grouped = $model->groupBy('model');
+        $data = [];
+        foreach ($grouped as $key => $items) {
+            $row = [];
+            foreach ($items as $item) {
+                $name = explode("_",$item->name);
+                $row[$name[0]] = $item->id;
+            }
+            $row['model'] = $key;
+            array_push($data, $row);
+        }
+        return $data;
     }
 }

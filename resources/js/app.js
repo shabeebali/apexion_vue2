@@ -107,6 +107,5 @@ new Vue({
   	}
   },
   mounted(){
-    console.log(this.$router.currentRoute);
   }
 }).$mount('#app')

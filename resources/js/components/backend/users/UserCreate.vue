@@ -27,7 +27,7 @@
 								<v-stepper-content step="1">
 									<v-card flat class="mb-12"height="200px">
 										<v-card-text>
-											<v-form v-model="detailsFormVal">
+											<v-form v-model="detailsFormVal" ref="detailsForm">
 												<v-text-field 
 													name="name"
 													id="name"
@@ -56,7 +56,7 @@
 								<v-stepper-content step="2">
 									<v-card flat class="mb-12"height="200px">
 										<v-card-text>
-											<v-form v-model="passFormVal">
+											<v-form v-model="passFormVal" ref="passForm">
 												<template v-if="mode=='create'">
 													<v-text-field 
 														v-model="nufd.password.value" 
@@ -87,7 +87,7 @@
 								<v-stepper-content step="3">
 									<v-card flat class="mb-12"height="200px">
 										<v-card-text>
-											<v-form v-model="detailsFormVal">
+											<v-form ref="rolesForm">
 												<v-select v-model="nufd.roles.value" multiple item-text="name" item-value="id" :items="nufd.roles.items" label="Select Role"
 												hint="You can assign multiple roles for a user"></v-select>
 											</v-form>
@@ -200,14 +200,9 @@
 		props:['openDialog','mode','userId'],
 		methods:{
 			resetCreateForm(){
-				Object.keys(this.nufd).forEach((key)=>{
-					if(key == 'roles'){
-						this.nufd[key].value = []
-					}
-					else{
-						this.nufd[key].value = ''
-					}
-				})
+				this.$refs.detailsForm.reset()
+				this.$refs.passForm.reset()
+				this.$refs.rolesForm.reset()
 				this.e1=1
 			},
 			saveNewuser(){

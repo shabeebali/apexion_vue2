@@ -23,4 +23,5 @@ Route::middleware('auth:api')->group(function(){
         'users' => 'Backend\UserController'
     ]);
     Route::post('users/chpass/{id}','Backend\UserController@change_pass');
+    Route::get('users/roles/permissions','Backend\UserRoleController@permissions');
 });

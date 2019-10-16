@@ -17,7 +17,13 @@ class UserPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        if($user->hasRole('Super Admin')){
+            return true;
+        }
+        if ($user->can('view_user')) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -29,7 +35,7 @@ class UserPolicy
      */
     public function view(User $user, User $model)
     {
-        //
+        
     }
 
     /**
