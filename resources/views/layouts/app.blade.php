@@ -43,7 +43,7 @@
                     <v-menu left bottom>
                         <template v-slot:activator="{ on }">
                             <v-btn icon v-on="on">
-                                <v-icon>fa-ellipsis-v</v-icon>
+                                <v-icon>mdi-dots-vertical</v-icon>
                             </v-btn>
                         </template>
                         <v-list>

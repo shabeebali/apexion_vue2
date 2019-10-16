@@ -15,19 +15,12 @@ use Illuminate\Http\Request;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     $user = $request->user();
-    return $user->hasRole('Super Admin') ? 'true' : 'null';
+    return $user->toArray();
 });
 Route::middleware('auth:api')->group(function(){
-	Route::get('users/list',function(){
-		return response()->json([
-            'items' => [
-            	[
-            		'id'=>'1',
-            		'name'=>'shabeeb',
-            		'email'=>'olakka'
-            	]
-            ]
-        ]);
-	});
-	Route::put('users/create','Backend\UserController@store');
+    Route::resources([
+        'users_roles'=>'Backend\UserRoleController',
+        'users' => 'Backend\UserController'
+    ]);
+    Route::post('users/chpass/{id}','Backend\UserController@change_pass');
 });

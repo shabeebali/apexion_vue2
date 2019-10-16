@@ -53,6 +53,8 @@ import Vuetify, {
     VForm,
     VDivider,
     VSnackbar,
+    VSelect,
+    VTooltip,
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -105,6 +107,8 @@ Vue.use(Vuetify, {
 	    VForm,
 	    VDivider,
 	    VSnackbar,
+	    VSelect,
+	    VTooltip,
 	},
 })
 const opts = {

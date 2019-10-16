@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\CreateUserRequest;
+use App\Http\Requests\EditUserRequest;
+use App\Http\Resources\Users as UsersResource;
 use App\User;
 class UserController extends Controller
 {
@@ -15,7 +17,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        
+        return new UsersResource(User::all());
     }
 
     /**
@@ -53,7 +55,16 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
+        $usr = User::find($id);
+        $roles = $usr->roles()->get();
+        $role_ids = [];
+        foreach ($roles as $role) {
+            $role_ids[] = $role->id;
+        }
+        return response()->json([
+            'data'=> $usr->toArray(),
+            'roles'=> $role_ids
+        ]);
     }
 
     /**
@@ -64,7 +75,7 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        //
+        
     }
 
     /**
@@ -74,9 +85,13 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(EditUserRequest $request, $id)
     {
-        //
+        $validated = $request->validated();
+        if($validated){
+            $user = User::find($id);
+            $user->dbupdate($request);
+        }
     }
 
     /**
@@ -87,6 +102,19 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $this_user = User::find($id);
+        $this->authorize('delete', $this_user);
+        User::destroy($id);
+    }
+
+    public function change_pass(Request $request,$id)
+    {
+        $request->validate([
+            'password' => 'required|size:8',
+        ]);
+        $usr = User::find($id);
+        $this->authorize('change_password', $usr);
+        $usr->password = bcrypt($request->password);
+        $usr->save();
     }
 }
