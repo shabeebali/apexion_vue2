@@ -5,7 +5,7 @@
 				<v-toolbar-title>User Roles</v-toolbar-title>
 			 	<div class="flex-grow-1"></div>
 				<v-toolbar-items>
-					<v-btn color="primary" dense depressed @click="dialog = true">Create</v-btn>
+					<v-btn color="primary" dense depressed @click="mode = 'create'; dialog = true">Create</v-btn>
 				</v-toolbar-items>
 			</v-toolbar>
 			<v-card class="mt-2">
@@ -14,11 +14,25 @@
 						:headers="headers" 
 						:items="items" 
 						:loading="loading">
+						<template v-slot:item.action="{item}">
+							<v-tooltip bottom v-if="meta.edit == 'true'">
+      							<template v-slot:activator="{ on }">
+									<v-icon small @click="edit(item.id)" v-on="on">mdi-pencil</v-icon>
+									</template>
+								<span>Edit</span>
+							</v-tooltip>
+							<v-tooltip bottom v-if="meta.delete == 'true'">
+      							<template v-slot:activator="{ on }">
+									<v-icon small @click="deleteRole(item.id)" v-on="on">mdi-delete</v-icon>
+									</template>
+								<span>Delete</span>
+							</v-tooltip>
+						</template>
 					</v-data-table>
 				</v-card-text>
 			</v-card>
 		</v-col>
-		<role-create :dialog="dialog" v-on:trigger-sb="triggerSb" v-on:close-dialog="dialog = false" v-on:update-list="getDataFromApi"></role-create>
+		<role-create :dialog="dialog" :mode="mode" :roleId="roleId" v-on:trigger-sb="triggerSb" v-on:close-dialog="mode= ''; roleId = 0; dialog = false" v-on:update-list="getDataFromApi"></role-create>
 		<v-snackbar v-model="snackbar" right botttom :color="sbColor" :timeout="sbTimeout" >
 			{{sbText}}
 			<v-btn dark text @click="snackbar = false"> Close</v-btn>
@@ -34,6 +48,7 @@
 		data(){
 			return{
 				mode:'',
+				roleId : 0,
 				snackbar:false,
 				sbTimeout:3000,
 				sbText:'',
@@ -55,7 +70,8 @@
 						sortable:false,
 					},
 				],
-				items:[]
+				items:[],
+				meta:[],
 			}
 		},
 		mounted(){
@@ -72,40 +88,27 @@
 			getDataFromApi(){
 				axios.get('users_roles').then((response)=>{
 					this.loading = false
-					this.items = response.data
+					this.items = response.data.data
+					this.meta = response.data.meta
 				})
 			},
-			resetCreateForm(){
-				Object.keys(this.nrfd).forEach((key)=>{
-					this.nrfd[key].value = ''
-				})
+			edit(id){
+				this.roleId = id
+				this.mode = 'edit'
+				this.dialog = true
 			},
-			saveNewRole(){
-				this.nrslb = true
-				var fD = new FormData()
-				Object.keys(this.nrfd).forEach((key)=>{
-					fD.append(key,this.nrfd[key].value)
-				})
-				axios.post('users_roles',fD).then((response)=>{
-					this.nrslb = false
-					this.createDialog = false
-					this.resetCreateForm()
-					this.snackbar = false
-					this.sbText = 'User Created Successfully'
-					this.sbColor = 'success'
-					this.snackbar = true
-					this.loading = true
+			deleteRole(id){
+				console.log(id)
+				axios.delete('users_roles/'+id,{_method: 'DELETE'}).then((res)=>{
+					this.triggerSb({text:'User Role is deleted from database',color:'info'})
 					this.getDataFromApi()
 				}).catch((error)=> {
-					this.nrslb = false
-					var errors = error.response.data.errors
-					Object.keys(errors).forEach((key)=>{
-						this.nrfd[key].error = errors[key]
-					})
-					this.snackbar = false
-					this.sbText = 'There is(are) error(s) in the form submitted. Please check!!'
-					this.sbColor = 'error'
-					this.snackbar = true
+					if(error.response.status == 403){
+						this.triggerSb({
+							text:'You are not authorised to do this action',
+							color:'error'
+						})
+					}
 				})
 			}
 		}

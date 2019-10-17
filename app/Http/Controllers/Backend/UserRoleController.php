@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Http\Requests\CreateUserRoleRequest;
+use App\Http\Requests\EditUserRoleRequest;
 class UserRoleController extends Controller
 {
     /**
@@ -16,8 +17,16 @@ class UserRoleController extends Controller
      */
     public function index()
     {
+        $user = \Auth::user();
+        $this->authorize('view',Role::class);
         $roles = Role::all();
-        return $roles->toArray();
+        return response()->json([
+            'data'=>$roles->toArray(),
+            'meta'=>[
+                'edit'=> $user->can('update',Role::class)?'true':'false',
+                'delete'=> $user->can('delete',Role::class)?'true':'false',
+            ]
+        ]);
     }
 
     /**
@@ -38,10 +47,15 @@ class UserRoleController extends Controller
      */
     public function store(CreateUserRoleRequest $request)
     {
+        $this->authorize('create',Role::class);
         $validated = $request->validated();
         if($validated){
             $role = Role::create(['name' => $request->name]);
-            return response()->json(['message'=>'success']);
+            if($request->permissions)
+            {
+                $ids = explode(",",$request->permissions);
+                $role->syncPermissions($ids);
+            }
         }
     }
 
@@ -53,7 +67,18 @@ class UserRoleController extends Controller
      */
     public function show($id)
     {
-        //
+        $role = Role::find($id);
+        $permissions = $role->permissions()->get();
+        $p_ids = [];
+        foreach ($permissions as $p) {
+            $p_ids[] = $p->id;
+        }
+        return response()->json([
+            'data'=>[
+                'name'=>$role->name,
+                'permissions'=>$p_ids,
+            ]
+        ]);
     }
 
     /**
@@ -74,9 +99,20 @@ class UserRoleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(EditUserRoleRequest $request, $id)
     {
-        //
+        $this->authorize('update',Role::class);
+        $validated = $request->validated();
+        if($validated){
+            $role = Role::find($id);
+            $role->name = $request->name;
+            $role->save();
+            if($request->permissions)
+            {
+                $ids = explode(",",$request->permissions);
+                $role->syncPermissions($ids);
+            }
+        }
     }
 
     /**
@@ -87,7 +123,8 @@ class UserRoleController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $this->authorize('delete',Role::class);
+        Role::destroy($id);
     }
 
     public function permissions()
@@ -104,6 +141,13 @@ class UserRoleController extends Controller
             $row['model'] = $key;
             array_push($data, $row);
         }
-        return $data;
+        $p_ids = [];
+        foreach ($model as $p) {
+            $p_ids[] = $p->id;
+        }
+        return response()->json([
+            'data'=>$data,
+            'permissions' => $p_ids,
+        ]);
     }
 }
