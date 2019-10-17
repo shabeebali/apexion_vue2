@@ -12,10 +12,7 @@ class RolePolicy
 
     public function before(User $user)
     {
-        if($user->hasRole('Super Admin'))
-        {
-            return true;
-        }
+        return null;
     }
     /**
      * Determine whether the user can view any roles.
@@ -37,6 +34,10 @@ class RolePolicy
      */
     public function view(User $user)
     {
+        if($user->hasRole('Super Admin'))
+        {
+            return true;
+        }
         if($user->can('view_user_role'))
         {
             return true;
@@ -52,6 +53,10 @@ class RolePolicy
      */
     public function create(User $user)
     {
+        if($user->hasRole('Super Admin'))
+        {
+            return true;
+        }
         if($user->can('create_user_role'))
         {
             return true;
@@ -68,6 +73,10 @@ class RolePolicy
      */
     public function update(User $user)
     {
+        if($user->hasRole('Super Admin'))
+        {
+            return true;
+        }
         if($user->can('edit_user_role'))
         {
             return true;
@@ -82,8 +91,15 @@ class RolePolicy
      * @param  \App\Role  $role
      * @return mixed
      */
-    public function delete(User $user)
+    public function delete(User $user, Role $role)
     {
+        if($role->name == 'Super Admin'){
+            return false;
+        }
+        if($user->hasRole('Super Admin'))
+        {
+            return true;
+        }
         if($user->can('delete_user_role'))
         {
             return true;

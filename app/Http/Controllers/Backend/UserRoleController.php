@@ -20,11 +20,12 @@ class UserRoleController extends Controller
         $user = \Auth::user();
         $this->authorize('view',Role::class);
         $roles = Role::all();
+        $role = Role::find(1);
         return response()->json([
             'data'=>$roles->toArray(),
             'meta'=>[
                 'edit'=> $user->can('update',Role::class)?'true':'false',
-                'delete'=> $user->can('delete',Role::class)?'true':'false',
+                'delete'=> 'true',
             ]
         ]);
     }
@@ -123,7 +124,8 @@ class UserRoleController extends Controller
      */
     public function destroy($id)
     {
-        $this->authorize('delete',Role::class);
+        $role = Role::find($id);
+        $this->authorize('delete',$role);
         Role::destroy($id);
     }
 

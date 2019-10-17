@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Model\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class WarehouseController extends Controller
 {
@@ -15,7 +16,16 @@ class WarehouseController extends Controller
      */
     public function index()
     {
-        //
+        $this->authorize('view',Warehouse::class);
+        $user = \Auth::user();
+        $model = Warehouse::all();
+        return response()->json([
+            'data' => $model ? $model->toArray() : '',
+            'meta' => [
+                'edit' => $user->can('update',Warehouse::class)? 'true': 'false',
+                'delete' => $user->can('delete',Warehouse::class)? 'true': 'false',
+            ]
+        ]);
     }
 
     /**
@@ -36,7 +46,15 @@ class WarehouseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->authorize('create',Warehouse::class);
+        $request->validate([
+            'name'=>'required|unique:warehouses'
+        ]);
+        $wh = new Warehouse;
+        $wh->name = $request->name;
+        $wh->slug = Str::slug($request->name,'_');
+        $wh->save();
+
     }
 
     /**
@@ -45,9 +63,15 @@ class WarehouseController extends Controller
      * @param  \App\Model\Warehouse  $warehouse
      * @return \Illuminate\Http\Response
      */
-    public function show(Warehouse $warehouse)
+    public function show($id)
     {
-        //
+        $this->authorize('view',Warehouse::class);
+        $wh = Warehouse::find($id);
+        return response()->json([
+            'data'=>[
+                'name'=>$wh->name,
+            ]
+        ]);
     }
 
     /**
@@ -68,9 +92,16 @@ class WarehouseController extends Controller
      * @param  \App\Model\Warehouse  $warehouse
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Warehouse $warehouse)
+    public function update(Request $request, $id)
     {
-        //
+        $this->authorize('edit',Warehouse::class);
+        $request->validate([
+            'name' => 'required|unique:warehouses,name,'.$id
+        ]);
+        $wh = Warehouse::find($id);
+        $wh->name = $request->name;
+        $wh->slug = Str::slug($request->name,'_');
+        $wh->save();
     }
 
     /**
@@ -79,8 +110,9 @@ class WarehouseController extends Controller
      * @param  \App\Model\Warehouse  $warehouse
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Warehouse $warehouse)
+    public function destroy($id)
     {
-        //
+        $this->authorize('delete',Warehouse::class);
+        Warehouse::destroy($id);
     }
 }

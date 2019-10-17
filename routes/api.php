@@ -20,7 +20,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::middleware('auth:api')->group(function(){
     Route::resources([
         'users_roles'=>'Backend\UserRoleController',
-        'users' => 'Backend\UserController'
+        'users' => 'Backend\UserController',
+        'pricelists' =>'Backend\PricelistController',
+        'warehouses' =>'Backend\WarehouseController'
     ]);
     Route::post('users/chpass/{id}','Backend\UserController@change_pass');
     Route::get('users/roles/permissions','Backend\UserRoleController@permissions');

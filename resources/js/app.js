@@ -52,6 +52,7 @@ new Vue({
           title:'Products',
           target:'/products',
           icon:'mdi-inbox-multiple',
+
         },
         {
           title:'Categories',
@@ -79,7 +80,7 @@ new Vue({
             },
             {
               title:'Warehouse',
-              target:'/inventory/warehouse',
+              target:'/warehouses',
             },
           ]
         },
@@ -87,6 +88,16 @@ new Vue({
           title:'Sales',
           target:'/sales',
           icon:'mdi-printer-pos',
+          children:[
+            {
+              title:'Sales',
+              target:'/sales',
+            },
+            {
+              title:'Pricelist',
+              target:'/pricelists',
+            },
+          ]
         },
         {
           title:'Users',

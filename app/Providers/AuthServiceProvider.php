@@ -8,6 +8,10 @@ use Laravel\Passport\Passport;
 
 use Spatie\Permission\Models\Role;
 use App\Policies\RolePolicy;
+use App\Model\Pricelist;
+use App\Policies\PricelistPolicy;
+use App\Model\Warehouse;
+use App\Policies\WarehousePolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -18,6 +22,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Role::class => RolePolicy::class,
+        Pricelist::class => PricelistPolicy::class,
+        Warehouse::class => WarehousePolicy::class,
     ];
 
     /**

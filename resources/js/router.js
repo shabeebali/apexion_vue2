@@ -7,6 +7,9 @@ import UserCreate from './components/backend/users/UserCreate.vue'
 import RolesIndex from './components/backend/users/RolesIndex.vue'
 import RolesList from './components/backend/users/RolesList.vue'
 import RoleCreate from './components/backend/users/RoleCreate.vue'
+import PricelistIndex from './components/backend/pricelist/PricelistIndex.vue'
+import WarehouseIndex from './components/backend/warehouse/WarehouseIndex.vue'
+
 export const routes=[
     {
       path: '/products',
@@ -30,6 +33,12 @@ export const routes=[
           ]
         }
       ],
+    },
+    {
+      path:'/pricelists', component:PricelistIndex
+    },
+    {
+      path:'/warehouses', component:WarehouseIndex
     },
     {
       path: '*',

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Model\Pricelist;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Str;
 class PricelistController extends Controller
 {
     /**
@@ -15,7 +15,16 @@ class PricelistController extends Controller
      */
     public function index()
     {
-        //
+        $this->authorize('view',Pricelist::class);
+        $user = \Auth::user();
+        $model = Pricelist::all();
+        return response()->json([
+            'data' => $model ? $model->toArray() : '',
+            'meta' => [
+                'edit' => $user->can('update',Pricelist::class)? 'true': 'false',
+                'delete' => $user->can('delete',Pricelist::class)? 'true': 'false',
+            ]
+        ]);
     }
 
     /**
@@ -25,7 +34,7 @@ class PricelistController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -36,7 +45,14 @@ class PricelistController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->authorize('create',Pricelist::class);
+        $request->validate([
+            'name'=>'required|unique:pricelists'
+        ]);
+        $pl = new Pricelist;
+        $pl->name = $request->name;
+        $pl->slug = Str::slug($request->name,'_');
+        $pl->save();
     }
 
     /**
@@ -45,9 +61,15 @@ class PricelistController extends Controller
      * @param  \App\Model\Pricelist  $pricelist
      * @return \Illuminate\Http\Response
      */
-    public function show(Pricelist $pricelist)
+    public function show($id)
     {
-        //
+        $this->authorize('view',Pricelist::class);
+        $pl = Pricelist::find($id);
+        return response()->json([
+            'data'=>[
+                'name'=>$pl->name,
+            ]
+        ]);
     }
 
     /**
@@ -58,7 +80,7 @@ class PricelistController extends Controller
      */
     public function edit(Pricelist $pricelist)
     {
-        //
+        
     }
 
     /**
@@ -68,9 +90,16 @@ class PricelistController extends Controller
      * @param  \App\Model\Pricelist  $pricelist
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Pricelist $pricelist)
+    public function update(Request $request, $id)
     {
-        //
+        $this->authorize('update',Pricelist::class);
+        $request->validate([
+            'name' => 'required|unique:pricelists,name,'.$id
+        ]);
+        $pl = Pricelist::find($id);
+        $pl->name = $request->name;
+        $pl->slug = Str::slug($request->name,'_');
+        $pl->save();
     }
 
     /**
@@ -79,8 +108,9 @@ class PricelistController extends Controller
      * @param  \App\Model\Pricelist  $pricelist
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Pricelist $pricelist)
+    public function destroy($id)
     {
-        //
+        $this->authorize('delete',Pricelist::class);
+        Pricelist::destroy($id);
     }
 }
