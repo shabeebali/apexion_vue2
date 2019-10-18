@@ -18,6 +18,7 @@ class CreateCategoriesTable extends Migration
             $table->string('name')->unique(true);
             $table->string('slug')->unique(true);
             $table->string('code');
+            $table->bigInteger('taxonomy_id');
             $table->softDeletes();
             $table->timestamps();
         });

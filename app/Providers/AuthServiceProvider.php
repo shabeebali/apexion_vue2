@@ -12,6 +12,9 @@ use App\Model\Pricelist;
 use App\Policies\PricelistPolicy;
 use App\Model\Warehouse;
 use App\Policies\WarehousePolicy;
+use App\Model\Taxonomy;
+use App\Policies\TaxonomyPolicy;
+
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,7 @@ class AuthServiceProvider extends ServiceProvider
         Role::class => RolePolicy::class,
         Pricelist::class => PricelistPolicy::class,
         Warehouse::class => WarehousePolicy::class,
+        Taxonomy::class => TaxonomyPolicy::class,
     ];
 
     /**

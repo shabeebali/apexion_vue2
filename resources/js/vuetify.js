@@ -55,6 +55,7 @@ import Vuetify, {
     VSnackbar,
     VSelect,
     VTooltip,
+    VSwitch,
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -109,6 +110,7 @@ Vue.use(Vuetify, {
 	    VSnackbar,
 	    VSelect,
 	    VTooltip,
+	    VSwitch,
 	},
 })
 const opts = {

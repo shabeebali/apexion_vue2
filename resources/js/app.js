@@ -65,7 +65,7 @@ new Vue({
             },
             {
               title:'Taxonomy',
-              target:'/categories/taxonomy',
+              target:'/taxonomies',
             },
           ]
         },
