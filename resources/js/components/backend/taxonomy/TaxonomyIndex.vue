@@ -92,7 +92,6 @@
 			}
 		},
 		mounted(){
-			this.loading = true
 			this.getDataFromApi()
 		},
 		methods:{
@@ -103,6 +102,7 @@
 				this.snackbar = true
 			},
 			getDataFromApi(){
+				this.loading = true
 				axios.get('taxonomies').then((response)=>{
 					this.loading = false
 					this.items = response.data.data

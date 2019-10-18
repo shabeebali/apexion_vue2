@@ -62,7 +62,7 @@
                 <template v-slot:img="attrs">
                     <v-img v-bind="attrs" gradient="to top, rgba(0, 0, 0, .7), rgba(0, 0, 0, .7)"/>
                 </template>
-                <v-list nav dense dark >
+                <v-list nav dense color="teal darken-3">
                     <template v-for="(item,index) in sidebar_left_items">
                         <v-list-group dark no-action subgroup v-if="item.children" color="#fdfdfd">
                             <template v-slot:activator>

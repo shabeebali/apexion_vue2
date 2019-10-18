@@ -21,11 +21,19 @@ try {
 
 window.axios = require('axios');
 
-let base_url = document.head.querySelector('meta[name="base-url"]');
-window.axios.defaults.baseURL = base_url.content+'/api';
+window.base_url = document.head.querySelector('meta[name="base-url"]');
+window.axios.defaults.baseURL = window.base_url.content+'/api';
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
+window.axios.interceptors.response.use((response)=> {
+    return response;
+},(error)=> {
+    if (401 === error.response.status) {
+        window.location.reload(true)
+    } else {
+        return Promise.reject(error);
+    }
+});
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting

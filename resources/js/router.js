@@ -8,6 +8,7 @@ import RolesList from './components/backend/users/RolesList.vue'
 import PricelistIndex from './components/backend/pricelist/PricelistIndex.vue'
 import WarehouseIndex from './components/backend/warehouse/WarehouseIndex.vue'
 import TaxonomyIndex from './components/backend/taxonomy/TaxonomyIndex.vue'
+import CategoryIndex from './components/backend/category/CategoryIndex.vue'
 export const routes=[
     {
       path: '/products',
@@ -38,6 +39,9 @@ export const routes=[
     },
     {
       path:'/taxonomies', component:TaxonomyIndex
+    },
+    {
+      path:'/categories', component:CategoryIndex
     },
     {
       path: '*',

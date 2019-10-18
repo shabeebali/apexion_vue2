@@ -80,11 +80,11 @@
 			}
 		},
 		mounted(){
-			this.loading = true
 			this.getDataFromApi()
 		},
 		methods:{
 			getDataFromApi(){
+				this.loading = true
 				axios.get('users').then((response)=>{
 					this.loading = false
 					this.items = response.data.data

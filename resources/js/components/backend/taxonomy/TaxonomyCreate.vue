@@ -24,7 +24,7 @@
 							></v-text-field>
 						</v-form>
 						<v-switch v-model="fd.in_pc.value" true-value="1" false-value="0" label="Include in Product Code?"></v-switch>
-						<v-select :disabled="fd.in_pc.value == '0'" label="Code Length" v-model="fd.code_length.value" :items="code_length.options"></v-select>
+						<v-select :disabled="fd.in_pc.value == '0'" label="Code Length" v-model="fd.code_length.value" :items="code_length.options" v-on:change="cTypeUpd"></v-select>
 						<v-switch :disabled="fd.in_pc.value == '0'" v-model="fd.autogen.value" true-value="1" false-value="0" label="Auto Generate?"></v-switch>
 						<v-select :disabled="fd.autogen.value != '1' || fd.in_pc.value == '0'" v-model="fd.code_type.value" label="Code Type" :items="code_type[fd.code_length.value]['options']"></v-select>
 					</v-col>
@@ -168,6 +168,9 @@
 			}
 		},
 		methods:{
+			cTypeUpd(){
+				this.fd.code_type.value = this.code_type[this.fd.code_length.value].options[0].value
+			},
 			closeDialog(){
 				this.$refs.form1.reset()
 				this.$emit('close-dialog')

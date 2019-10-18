@@ -18,13 +18,16 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $user->toArray();
 });
 Route::middleware('auth:api')->group(function(){
+    Route::post('users/chpass/{id}','Backend\UserController@change_pass');
+    Route::get('users/roles/permissions','Backend\UserRoleController@permissions');
+    Route::get('categories/export','Backend\CategoryController@export');
     Route::resources([
         'users_roles'=>'Backend\UserRoleController',
         'users' => 'Backend\UserController',
         'pricelists' =>'Backend\PricelistController',
         'warehouses' =>'Backend\WarehouseController',
         'taxonomies' =>'Backend\TaxonomyController',
+        'categories' =>'Backend\CategoryController',
     ]);
-    Route::post('users/chpass/{id}','Backend\UserController@change_pass');
-    Route::get('users/roles/permissions','Backend\UserRoleController@permissions');
+    
 });
