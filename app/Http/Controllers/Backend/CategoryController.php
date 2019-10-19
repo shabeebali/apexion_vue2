@@ -10,7 +10,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\CategoriesExport;
 use Maatwebsite\Excel\Facades\Excel;
-
+use Illuminate\Validation\Rule;
+use App\Events\CategoryCreated;
 class CategoryController extends Controller
 {
     /**
@@ -23,6 +24,20 @@ class CategoryController extends Controller
         $this->authorize('view',Category::class);
         $user = \Auth::user();
         $model = Category::select('id','name','code','taxonomy_id');
+        $filtered = [];
+        if($request->filterby){
+            $taxonomy_ids = explode("-",$request->filterby);
+            $model = $model->whereIn('taxonomy_id',$taxonomy_ids);
+            foreach ($taxonomy_ids as $id) {
+                $taxonomy = Taxonomy::find($id);
+                $filtered[] = [
+                    'text'=>'Taxonomy: '.$taxonomy->name,
+                    'filter'=>'taxonomy',
+                    'type'=>'array',
+                    'value'=>$id
+                ];
+            }
+        }
         if($request->sortby){
             $model = $request->descending? $model->orderBy($request->sortby,'desc') : $model->orderBy($request->sortby,'asc');
         }
@@ -37,6 +52,7 @@ class CategoryController extends Controller
             'meta' => [
                 'edit' => $user->can('update',Category::class)? 'true': 'false',
                 'delete' => $user->can('delete',Category::class)? 'true': 'false',
+                'filtered' => $filtered
             ],
             'total' => Category::count(),
         ]);
@@ -62,10 +78,12 @@ class CategoryController extends Controller
     {
         $this->authorize('create',Category::class);
         $request->validate([
-            'name'=>'required|unique:categories'
+            'name'=>'required|unique:categories',
+            'code' => Rule::unique('categories')->where('taxonomy_id',$request->taxonomy_id)
         ]);
         $obj = new Category;
         $obj->dbsave($request);
+        event(new CategoryCreated($obj));
     }
 
     /**

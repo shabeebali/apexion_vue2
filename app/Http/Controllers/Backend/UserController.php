@@ -38,7 +38,7 @@ class UserController extends Controller
      */
     public function store(CreateUserRequest $request)
     {
-        $this->authorize('create');
+        $this->authorize('create',User::class);
         $validated = $request->validated();
         if($validated){
             $user = new User;
@@ -57,7 +57,7 @@ class UserController extends Controller
     public function show($id)
     {
         $usr = User::find($id);
-        $this->authorize('view', $usr);
+        $this->authorize('view',User::class);
         $roles = $usr->roles()->get();
         $role_ids = [];
         foreach ($roles as $role) {
@@ -89,7 +89,7 @@ class UserController extends Controller
      */
     public function update(EditUserRequest $request, $id)
     {
-        $this->authorize('update', $this_user);
+        $this->authorize('update',User::class);
         $validated = $request->validated();
         if($validated){
             $user = User::find($id);

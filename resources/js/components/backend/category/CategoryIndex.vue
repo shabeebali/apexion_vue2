@@ -7,6 +7,14 @@
 				<v-toolbar-items>
 					<v-tooltip bottom>
 						<template v-slot:activator="{ on }">
+							<v-btn v-on="on" color="transparent" dense depressed @click="filterToggle">
+								<v-icon>mdi-filter</v-icon>
+							</v-btn>
+						</template>
+						<span>Filter</span>
+					</v-tooltip>
+					<v-tooltip bottom>
+						<template v-slot:activator="{ on }">
 							<v-btn v-on="on" color="transparent" dense depressed @click="exportData">
 								<v-icon>mdi-download</v-icon>
 							</v-btn>
@@ -19,8 +27,47 @@
 					<v-btn color="primary" dense depressed @click="mode = 'create'; dialog = true">Create</v-btn>
 				</v-toolbar-items>
 			</v-toolbar>
+			<v-expansion-panels class="mt-2" v-model="filterPanel">
+				<v-expansion-panel>
+					<v-expansion-panel-content>
+						<v-card flat>
+							<v-toolbar flat>
+								<v-toolbar-title  class="subtitle-1">Filter Options</v-toolbar-title>
+								<div class="flex-grow-1"></div>
+								<v-toolbar-items>
+									<v-btn text @click="$refs.filterForm.reset(); getDataFromApi()">Reset</v-btn>
+									<v-btn text color="primary" @click="getDataFromApi">Apply</v-btn>
+								</v-toolbar-items>
+					        </v-toolbar>
+							<v-card-text>
+								<v-row>
+									<v-col cols="12" md="4">
+										<v-form ref="filterForm">
+											<v-select
+												label="taxonomy"
+												multiple
+												v-model="filterdata.taxonomy"
+												:items="filterables.taxonomy"
+												item-text="name"
+												item-value="id"
+												></v-select>
+										</v-form>
+									</v-col>
+									<v-col cols="12" md="4"></v-col>
+									<v-col cols="12" md="4"></v-col>
+								</v-row>
+							</v-card-text>
+						</v-card>
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+			</v-expansion-panels>
 			<v-card class="mt-2">
 				<v-card-text>
+					<div class="text-center">
+						<template v-for="(item,index) in meta.filtered">
+							<v-chip close v-on:click:close="updFilter(item)">{{item.text}}</v-chip>
+						</template>
+					</div>
 					<v-data-table 
 						:headers="headers" 
 						:items="items" 
@@ -86,14 +133,15 @@
 		},
 		watch:{
 			options: {
-	        handler () {
-	          this.getDataFromApi()
-	        },
+		        handler () {
+		          this.getDataFromApi()
+		        },
 	        deep: true,
 	      }
 		},
 		data(){
 			return{
+				filterPanel:-1,
 				confirmDialog:false,
 				waitDialog:false,
 				delete_id : 0,
@@ -122,14 +170,44 @@
 					},
 				],
 				items:[],
+				filterables:{
+					taxonomy:[]
+				},
+				filterdata:{
+					taxonomy:[]
+				},
+				filtered:[],
 				totalItems:0,
-				meta:[],
+				meta:[
+					{
+						filtered:[],
+					}
+				],
 			}
 		},
 		mounted(){
-			this.getDataFromApi()
+			this.options.page=1
+			this.getFilterables()
 		},
 		methods:{
+			updFilter(item){
+				console.log(item)
+				Object.keys(this.filterdata).forEach((key)=>{
+					if(key == item.filter){
+						if(item.type == 'array'){	
+							for( var i = 0; i < this.filterdata[key].length; i++){ 
+							   if ( this.filterdata[key][i] == item.value) {
+							     this.filterdata[key].splice(i, 1); 
+							   }
+							}
+						}
+					}
+				})
+				this.getDataFromApi()
+			},
+			filterToggle(){
+				this.filterPanel = (this.filterPanel == -1) ? 0: -1
+			},
 			exportData(){
 				this.waitDialog = true
 				axios.get('categories/export').then((res)=>{
@@ -143,6 +221,11 @@
 				this.sbColor = val.color
 				this.snackbar = true
 			},
+			getFilterables(){
+				axios.get('taxonomies').then((res)=>{
+					this.filterables.taxonomy = res.data.data
+				})
+			},
 			getDataFromApi(){
 				this.loading = true
 				const { sortBy, sortDesc, page, itemsPerPage } = this.options
@@ -152,6 +235,14 @@
 				}
 				if(sortDesc.length == 1 && sortDesc[0] == true){
 					params = params+'descending=1&'
+				}
+				if(this.filterdata.taxonomy.length > 0){
+					params = params+'filterby='
+					this.filterdata.taxonomy.forEach((id)=>{
+						params = params+id+'-'
+					})
+					params = params.substring(0,params.length -1)
+					params = params+'&'
 				}
 				axios.get('categories'+params).then((response)=>{
 					this.loading = false

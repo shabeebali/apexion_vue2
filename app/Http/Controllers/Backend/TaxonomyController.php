@@ -57,6 +57,21 @@ class TaxonomyController extends Controller
         $obj->autogen = $request->autogen;
         $obj->code_type = $request->code_type;
         $obj->slug = Str::slug($request->name,'_');
+
+        if($request->autogen && $request->in_pc)
+        {
+            $next_code = '';
+            $ct_arr = explode('-',$request->code_type);
+            foreach ($ct_arr as $key => $value) {
+                if($value == 'alpha'){
+                    $next_code = $next_code.'A';
+                }
+                else{
+                    $next_code = $next_code.'0';
+                }
+            }
+            $obj->next_code = $next_code;
+        }
         $obj->save();
     }
 

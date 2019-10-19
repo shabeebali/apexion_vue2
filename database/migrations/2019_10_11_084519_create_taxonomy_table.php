@@ -21,7 +21,7 @@ class CreateTaxonomyTable extends Migration
             $table->unsignedInteger('code_length');
             $table->boolean('autogen');
             $table->boolean('in_pc');
-            $table->string('next_code');
+            $table->string('next_code')->nullable();
             $table->timestamps();
         });
     }

@@ -124,7 +124,7 @@
 	export default{
 		mounted(){
 			axios.get('users_roles').then((response)=>{
-				this.nufd.roles.items = response.data
+				this.nufd.roles.items = response.data.data
 			})
 		},
 		watch:{

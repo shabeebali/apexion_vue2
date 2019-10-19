@@ -56,6 +56,10 @@ import Vuetify, {
     VSelect,
     VTooltip,
     VSwitch,
+    VExpansionPanels,
+    VExpansionPanel,
+    VExpansionPanelContent,
+    VChip,
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -111,6 +115,10 @@ Vue.use(Vuetify, {
 	    VSelect,
 	    VTooltip,
 	    VSwitch,
+	    VExpansionPanels,
+	    VExpansionPanel,
+    	VExpansionPanelContent,
+    	VChip,
 	},
 })
 const opts = {

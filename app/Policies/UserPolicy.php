@@ -17,13 +17,7 @@ class UserPolicy
      */
     public function viewAny(User $user)
     {
-        if($user->hasRole('Super Admin')){
-            return true;
-        }
-        if ($user->can('view_user')) {
-            return true;
-        }
-        return false;
+        
     }
 
     /**
@@ -33,9 +27,15 @@ class UserPolicy
      * @param  \App\User  $model
      * @return mixed
      */
-    public function view(User $user, User $model)
+    public function view(User $user)
     {
-        
+        if($user->hasRole('Super Admin')){
+            return true;
+        }
+        if ($user->can('view_user')) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -62,7 +62,7 @@ class UserPolicy
      * @param  \App\User  $model
      * @return mixed
      */
-    public function update(User $user, User $model)
+    public function update(User $user)
     {
         if($user->hasRole('Super Admin')){
             return true;

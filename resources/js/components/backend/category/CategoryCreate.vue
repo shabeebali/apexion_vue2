@@ -33,7 +33,9 @@
 								v-model="fd.code.value"
 								:maxlength="fd.code.size"
 								label="Code"
-								:disabled="fd.code.disable">
+								:disabled="fd.code.disable"
+								:error-messages="fd.code.error"
+								@keydown="fd.code.error = ''">
 							</v-text-field>
 						</v-form>
 					</v-col>
@@ -56,9 +58,7 @@
 <script>
 	export default{
 		mounted(){
-			axios.get('taxonomies').then((res)=>{
-				this.taxonomy.options = res.data.data
-			})
+			this.updateTaxonomy()
 		},
 		watch:{
 			dialog:function(){
@@ -97,6 +97,7 @@
 	                },
 	                code:{
 	                    value:'',
+	                    error:'',
 	                    size:1,
 	                    disable:false,
 	                },
@@ -110,6 +111,11 @@
 			}
 		},
 		methods:{
+			updateTaxonomy(){
+				axios.get('taxonomies').then((res)=>{
+					this.taxonomy.options = res.data.data
+				})
+			},
 			sizeUpd(){
 				var arr = this.taxonomy.options
 				this.fd.code.value = ''
@@ -120,6 +126,7 @@
 							this.fd.code.disable = true
 						}
 						else if(item.autogen == 1){
+							this.fd.code.value = item.next_code
 							this.fd.code.disable = true
 						}
 						else{
@@ -158,6 +165,7 @@
 						this.emitSb('Category Updated Successfully','success')
 					}
 					else{
+						this.updateTaxonomy()
 						this.emitSb('Category Created Successfully','success')
 					}
 					this.closeDialog()
@@ -167,6 +175,7 @@
 						this.btnloading = false
 						var errors = error.response.data.errors
 						this.fd.name.error = errors.name
+						this.fd.code.error = errors.code
 						this.emitSb('There are errors in the form submitted. Please check!!','error')
 					}
 					if(error.response.status == 403){
