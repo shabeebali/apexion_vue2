@@ -60,6 +60,8 @@ import Vuetify, {
     VExpansionPanel,
     VExpansionPanelContent,
     VChip,
+    VFileInput,
+    VProgressLinear,
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -119,6 +121,8 @@ Vue.use(Vuetify, {
 	    VExpansionPanel,
     	VExpansionPanelContent,
     	VChip,
+    	VFileInput,
+    	VProgressLinear,
 	},
 })
 const opts = {

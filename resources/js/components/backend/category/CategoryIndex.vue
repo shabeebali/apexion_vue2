@@ -15,6 +15,14 @@
 					</v-tooltip>
 					<v-tooltip bottom>
 						<template v-slot:activator="{ on }">
+							<v-btn v-on="on" color="transparent" dense depressed @click="importDialog = true">
+								<v-icon>mdi-upload</v-icon>
+							</v-btn>
+						</template>
+						<span>Import</span>
+					</v-tooltip>
+					<v-tooltip bottom>
+						<template v-slot:activator="{ on }">
 							<v-btn v-on="on" color="transparent" dense depressed @click="exportData">
 								<v-icon>mdi-download</v-icon>
 							</v-btn>
@@ -62,6 +70,15 @@
 				</v-expansion-panel>
 			</v-expansion-panels>
 			<v-card class="mt-2">
+		    <v-card-title>
+				<v-text-field
+					v-model="search"
+					append-icon="mdi-magnify"
+					label="Search"
+					single-line
+					hide-details
+					></v-text-field>
+		    </v-card-title>
 				<v-card-text>
 					<div class="text-center">
 						<template v-for="(item,index) in meta.filtered">
@@ -123,6 +140,45 @@
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
+		<v-dialog v-model="importDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+			<v-card>
+				<v-toolbar dark color="primary">
+					<v-toolbar-title>
+						Upload File to Import
+					</v-toolbar-title>
+					<div class="flex-grow-1"></div>
+					<v-toolbar-items>
+						<v-btn text @click="$refs.importForm.reset(); importAlert=false;importDialog =false">Cancel</v-btn>
+					</v-toolbar-items>
+				</v-toolbar>
+				<v-card-text>
+					<v-form ref="importForm">
+						<v-row class="mx-4">
+							<v-col>
+								<v-file-input label="Click Here to select file.." persistent-hint hint="Please upload Excel file (.xslx) only" @change="fileUpdate"></v-file-input>
+								<v-select label="Taxonomy" :items="filterables.taxonomy" item-text="name" item-value="id" v-model="importTaxonomy"></v-select>
+								<v-select label="Method" :items="methods" v-model="importMethod"></v-select>
+							</v-col>
+						</v-row>
+					</v-form>
+				</v-card-text>
+				<v-card-actions>
+					<v-row class="mx-4">
+						<v-col>
+							<v-btn text :disabled="file == '' || file == undefined || importTaxonomy == '' || importMethod == ''" @click="upload">Submit</v-btn>
+							<v-btn text  @click="$refs.importForm.reset();importAlert=false; importDialog = false">Cancel</v-btn>
+						</v-col>
+					</v-row>
+				</v-card-actions>
+				<v-row class="mx-4">
+					<v-col>
+						<v-alert v-model="importAlert" type="error" dismissible>
+							<span v-html="importErrors"></span>
+						</v-alert>
+					</v-col>
+				</v-row>.
+			</v-card>
+		</v-dialog>
 	</v-row>
 </template>
 <script>
@@ -136,14 +192,28 @@
 		        handler () {
 		          this.getDataFromApi()
 		        },
-	        deep: true,
-	      }
+	        	deep: true,
+	      	},
+			search: {
+				handler () {
+				    this.deboucedSearch();
+				},
+				deep: true
+			},
 		},
+
 		data(){
 			return{
+				search:'',
 				filterPanel:-1,
 				confirmDialog:false,
+				importDialog:false,
+				importTaxonomy:'',
+				importMethod:'',
+				importErrors:'',
+				importAlert:false,
 				waitDialog:false,
+				file:'',
 				delete_id : 0,
 				mode:'',
 				catId : 0,
@@ -183,13 +253,65 @@
 						filtered:[],
 					}
 				],
+				methods:[
+					{
+						'text':'Create',
+						'value':'create'
+					},
+					{
+						'text':'Update',
+						'value':'update'
+					}
+				],
 			}
 		},
 		mounted(){
 			this.options.page=1
+			this.deboucedSearch = _.debounce(()=>{
+	            this.getDataFromApi()
+	        },300);
 			this.getFilterables()
 		},
 		methods:{
+			upload(){
+				if(this.file == '' || this.file === undefined){
+					alert('Please Select a file first')
+				}
+				else{
+					this.importErrors = ''
+					this.importAlert = false
+					this.waitDialog = true
+					this.type_error = ''
+					var fD = new FormData()
+					fD.append('file',this.file)
+					fD.append('taxonomy_id',this.importTaxonomy)
+					fD.append('method',this.importMethod)
+					axios.post('/categories/import',fD,{
+						headers: {
+					        'Content-Type': 'multipart/form-data'
+					    }
+					}).then((response)=>{
+						this.waitDialog = false
+					}).catch((error)=>{
+						this.waitDialog = false
+						if(error.response.status == 422){
+							var str = '';
+							Object.keys(error.response.data.messages).forEach((key)=>{
+								str += '<p>Error in Line:'+(parseInt(key)+1)+'<br><ul>'
+								Object.keys(error.response.data.messages[key]).forEach((item)=>{
+									str+='<li>'+error.response.data.messages[key][item].message+'</li>'
+								})
+								str+='</ul></p>'
+							})
+							this.importErrors = str;
+							this.importAlert = true
+						}
+					})
+				}
+			},
+			fileUpdate(file){
+				this.file = file
+			},
 			updFilter(item){
 				console.log(item)
 				Object.keys(this.filterdata).forEach((key)=>{
@@ -229,7 +351,7 @@
 			getDataFromApi(){
 				this.loading = true
 				const { sortBy, sortDesc, page, itemsPerPage } = this.options
-				var params = '?page='+page+'&rpp='+itemsPerPage+'&'
+				var params = '?page='+page+'&rpp='+itemsPerPage+'&search='+this.search+'&'
 				if(sortBy.length == 1){
 					params = params+'sortby='+sortBy[0]+'&'
 				}

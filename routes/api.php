@@ -21,6 +21,7 @@ Route::middleware('auth:api')->group(function(){
     Route::post('users/chpass/{id}','Backend\UserController@change_pass');
     Route::get('users/roles/permissions','Backend\UserRoleController@permissions');
     Route::get('categories/export','Backend\CategoryController@export');
+    Route::post('categories/import','Backend\CategoryController@import');
     Route::resources([
         'users_roles'=>'Backend\UserRoleController',
         'users' => 'Backend\UserController',

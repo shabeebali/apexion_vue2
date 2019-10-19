@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 class Category extends Model
 {
 	protected $table = 'categories';
-
+        protected $guarded = ['id'];
 	public function taxonomy(){
 		return $this->belongsTo('App\Model\Taxonomy');
 	}

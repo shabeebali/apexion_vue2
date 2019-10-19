@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\CategoriesExport;
+use App\Imports\CategoriesImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Validation\Rule;
 use App\Events\CategoryCreated;
@@ -25,6 +26,9 @@ class CategoryController extends Controller
         $user = \Auth::user();
         $model = Category::select('id','name','code','taxonomy_id');
         $filtered = [];
+        if($request->search){
+            $model->where('name','like','%'.$request->search.'%');
+        }
         if($request->filterby){
             $taxonomy_ids = explode("-",$request->filterby);
             $model = $model->whereIn('taxonomy_id',$taxonomy_ids);
@@ -92,14 +96,14 @@ class CategoryController extends Controller
      * @param  \App\Model\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function show(Category $category)
+    public function show($id)
     {
         $this->authorize('view',Category::class);
         $obj = Category::find($id);
         return response()->json([
             'data'=>[
                 'name'=>$obj->name,
-                'taxonomy_id' => strval($obj->taxonomy_id),
+                'taxonomy_id' => $obj->taxonomy_id,
                 'code' => $obj->code,
             ]
         ]);
@@ -123,7 +127,7 @@ class CategoryController extends Controller
      * @param  \App\Model\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, $id)
     {
         $this->authorize('update',Category::class);
         $request->validate([
@@ -145,7 +149,7 @@ class CategoryController extends Controller
      * @param  \App\Model\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Category $category)
+    public function destroy($id)
     {
         $this->authorize('delete',Category::class);
         Category::destroy($id);
@@ -156,5 +160,42 @@ class CategoryController extends Controller
         $filename = 'categories_'.Str::slug(today()->toDateString(),'_').'.xlsx';
         Excel::store(new CategoriesExport, $filename, 'public');
         return asset(Storage::url($filename));
+    }
+
+    public function import(Request $request) 
+    {
+        $taxonomy_id = $request->taxonomy_id;
+        $file = $request->file('file');
+        $method =  $request->method;
+        //dd($file->extension());
+        if($file->extension() != 'xlsx' && $file->extension() != 'zip')
+        {
+            return response()->json([
+                'status' => 'file_failed',
+                'message' => 'Error: The uploaded file is not valid. Please try again'
+            ],422);
+        }
+        else{
+            try {
+                $import = new CategoriesImport($taxonomy_id,$method);
+                $import->import($request->file('file'));
+            } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+
+                 $failures = $e->failures();
+                
+                 foreach ($failures as $failure) {
+                    $msg = $failure->errors();
+                    $messages[$failure->row()][$failure->attribute()]['message'] = $msg[0];
+                 }
+                 return response()->json([
+                    'status' => 'failed',
+                    'messages' => $messages
+                ],422);
+            }
+           return response()->json([
+                'status' => 'success',
+                'message' => 'Import Completed successfully'
+            ]);
+        }
     }
 }
