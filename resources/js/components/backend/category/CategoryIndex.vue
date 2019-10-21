@@ -234,6 +234,10 @@
 						value:'name'
 					},
 					{
+						text:'Code',
+						value:'code'
+					},
+					{
 						text:'Action',
 						value:'action',
 						sortable:false,

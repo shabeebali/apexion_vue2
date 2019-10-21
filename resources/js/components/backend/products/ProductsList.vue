@@ -48,8 +48,8 @@
 								</v-toolbar-items>
 					        </v-toolbar>
 							<v-card-text>
-								<v-row>
-									<v-form ref="filterForm">
+								<v-form ref="filterForm">
+									<v-row>
 										<v-col cols="12" md="3">
 											<v-autocomplete
 												cache-items
@@ -69,10 +69,17 @@
 												:items="filterables.gst"
 												></v-select>
 										</v-col>
+										<v-col cols="12" md="3">
+											<v-select
+												label="Status"
+												multiple
+												v-model="filterdata.status"
+												:items="filterables.status"
+												></v-select>
+										</v-col>
 										<v-col cols="12" md="3"></v-col>
-										<v-col cols="12" md="3"></v-col>
-									</v-form>
-								</v-row>
+									</v-row>
+								</v-form>
 							</v-card-text>
 						</v-card>
 					</v-expansion-panel-content>
@@ -209,8 +216,19 @@
 				},
 				deep: true
 			},
+			$route() {
+				this.filterdata.status = [this.$route.params.status == undefined ?'': this.$route.params.status]
+				this.getDataFromApi()
+		    }
 		},
-
+		mounted(){
+			console.log(this.$route.params)
+			this.filterdata.status = [this.$route.params.status == undefined ?'': this.$route.params.status]
+			this.options.page=1
+			this.deboucedSearch = _.debounce(()=>{
+	            this.getDataFromApi()
+	        },300);
+		},
 		data(){
 			return{
 				search:'',
@@ -225,7 +243,7 @@
 				file:'',
 				delete_id : 0,
 				mode:'',
-				catId : 0,
+				pId : 0,
 				snackbar:false,
 				sbTimeout:3000,
 				sbText:'',
@@ -271,11 +289,16 @@
 						{text:'5%', value:'5'},
 						{text:'12%', value:'12'},
 						{text:'18%', value:'18'},
+					],
+					status:[
+						{text:'Pending', value:'pending'},
+						{text:'Tally Sync', value:'tally'},
 					]
 				},
 				filterdata:{
-					taxonomy:[],
+					categories:[],
 					gst:[],
+					status:[],
 				},
 				filtered:[],
 				totalItems:0,
@@ -295,12 +318,6 @@
 					}
 				],
 			}
-		},
-		mounted(){
-			this.options.page=1
-			this.deboucedSearch = _.debounce(()=>{
-	            this.getDataFromApi()
-	        },300);
 		},
 		methods:{
 			upload(){
@@ -394,6 +411,14 @@
 					params = params.substring(0,params.length -1)
 					params = params+'&'
 				}
+				if(this.filterdata.status.length > 0){
+					params = params+'status='
+					this.filterdata.status.forEach((id)=>{
+						params = params+id+'-'
+					})
+					params = params.substring(0,params.length -1)
+					params = params+'&'
+				}
 				axios.get('products'+params).then((response)=>{
 					this.loading = false
 					this.items = response.data.data
@@ -410,7 +435,7 @@
 				this.delete_id = id
 				this.confirmDialog = true
 			},
-			deleteTx(){
+			deleteProduct(){
 				this.confirmDialog = false
 				axios.delete('products/'+this.delete_id,{_method: 'DELETE'}).then((res)=>{
 					this.triggerSb({text:'Product is deleted from database',color:'info'})

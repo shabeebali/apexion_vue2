@@ -16,6 +16,8 @@ use App\Model\Taxonomy;
 use App\Policies\TaxonomyPolicy;
 use App\Model\Category;
 use App\Policies\CategoryPolicy;
+use App\Model\Product;
+use App\Policies\ProductPolicy;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -29,6 +31,7 @@ class AuthServiceProvider extends ServiceProvider
         Warehouse::class => WarehousePolicy::class,
         Taxonomy::class => TaxonomyPolicy::class,
         Category::class => CategoryPolicy::class,
+        Product::class => ProductPolicy::class,
     ];
 
     /**

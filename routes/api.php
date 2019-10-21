@@ -18,6 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $user->toArray();
 });
 Route::middleware('auth:api')->group(function(){
+    Route::get('menu','Backend\MenuController');
     Route::post('users/chpass/{id}','Backend\UserController@change_pass');
     Route::get('users/roles/permissions','Backend\UserRoleController@permissions');
     Route::get('categories/export','Backend\CategoryController@export');
@@ -29,6 +30,7 @@ Route::middleware('auth:api')->group(function(){
         'warehouses' =>'Backend\WarehouseController',
         'taxonomies' =>'Backend\TaxonomyController',
         'categories' =>'Backend\CategoryController',
+        'products' =>'Backend\ProductController',
     ]);
     
 });

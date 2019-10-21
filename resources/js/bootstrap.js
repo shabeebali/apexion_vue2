@@ -50,3 +50,16 @@ window.axios.interceptors.response.use((response)=> {
 //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
 //     encrypted: true
 // });
+import Echo from "laravel-echo"
+
+window.io = require('socket.io-client');
+
+window.Echo = new Echo({
+    broadcaster: 'socket.io',
+    host: window.location.hostname + ':6001',
+    auth: {
+        headers: {
+            'Authorization': 'Bearer ' + 'ca28d51fe3d42527ed90c3bfcc13ab11'
+        }
+    }
+});

@@ -86,7 +86,7 @@ class CategoryController extends Controller
             'code' => Rule::unique('categories')->where('taxonomy_id',$request->taxonomy_id)
         ]);
         $obj = new Category;
-        $obj->dbsave($request);
+        $obj = $obj->dbsave($request->toArray());
         event(new CategoryCreated($obj));
     }
 

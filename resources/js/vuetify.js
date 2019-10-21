@@ -62,6 +62,7 @@ import Vuetify, {
     VChip,
     VFileInput,
     VProgressLinear,
+    VAutocomplete,
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -123,6 +124,7 @@ Vue.use(Vuetify, {
     	VChip,
     	VFileInput,
     	VProgressLinear,
+    	VAutocomplete,
 	},
 })
 const opts = {

@@ -43,80 +43,15 @@ new Vue({
   	return{
   		'sidebar_left':false,
   		'sidebar_left_items':[
-        {
-          title:'Dashboard',
-          target:'/',
-          icon:'mdi-gauge'
-        },
-        {
-          title:'Products',
-          target:'/products',
-          icon:'mdi-inbox-multiple',
-
-        },
-        {
-          title:'Categories',
-          target:'/categories',
-          icon:'mdi-book-variant',
-          children:[
-            {
-              title:'Categories',
-              target:'/categories',
-            },
-            {
-              title:'Taxonomy',
-              target:'/taxonomies',
-            },
-          ]
-        },
-        {
-          title:'Inventory',
-          target:'/inventory',
-          icon:'mdi-warehouse',
-          children:[
-            {
-              title:'Inventory',
-              target:'/inventory',
-            },
-            {
-              title:'Warehouse',
-              target:'/warehouses',
-            },
-          ]
-        },
-        {
-          title:'Sales',
-          target:'/sales',
-          icon:'mdi-printer-pos',
-          children:[
-            {
-              title:'Sales',
-              target:'/sales',
-            },
-            {
-              title:'Pricelist',
-              target:'/pricelists',
-            },
-          ]
-        },
-        {
-          title:'Users',
-          target:'/users',
-          icon:'mdi-account',
-          children:[
-            {
-              title:'Users',
-              target:'/users',
-            },
-            {
-              title:'Roles',
-              target:'/users/roles',
-            },
-          ]
-        },
+        
       ],
   	}
   },
   mounted(){
+    if(this.$router.currentRoute.path != '/login'){
+      axios.get('menu').then((res)=>{
+        this.sidebar_left_items = res.data
+      })
+    }
   }
 }).$mount('#app')

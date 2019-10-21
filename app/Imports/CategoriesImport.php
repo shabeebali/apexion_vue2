@@ -67,7 +67,7 @@ class CategoriesImport implements ToCollection, WithHeadingRow
             }
             foreach ($rows as $row) {
                 $obj = new Category;
-                $row->taxonomy_id = $this->$taxonomy_id;
+                $row['taxonomy_id'] = $this->taxonomy_id;
                 $obj->dbsave($row);
             }
         }

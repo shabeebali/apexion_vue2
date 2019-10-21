@@ -40,7 +40,7 @@
                     </v-toolbar-items>
                 @else
                     <v-btn text>Welcome {{ Auth::user()->name }}</v-btn>
-                    <v-menu left bottom>
+                    <v-menu left bottom offset-y>
                         <template v-slot:activator="{ on }">
                             <v-btn icon v-on="on">
                                 <v-icon>mdi-dots-vertical</v-icon>

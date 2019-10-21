@@ -14,10 +14,10 @@ class Category extends Model
 		return $this->belongsTo('App\Model\Taxonomy');
 	}
 
-	public function dbsave(Request $request)
+	public function dbsave($row)
 	{
-		$taxonomy = Taxonomy::find($request->taxonomy_id);
-        $this->name = $request->name;
+	   $taxonomy = Taxonomy::find($row['taxonomy_id']);
+        $this->name = $row['name'];
         $this->taxonomy()->associate($taxonomy);
         if($taxonomy->in_pc == 1)
         {
@@ -25,14 +25,15 @@ class Category extends Model
         		$this->code = $taxonomy->next_code;
         	}
         	else{
-        		$this->code = $request->code;
+        		$this->code = $row['code'];
         	}
         }
         else{
         	$this->code = '';
         }
         
-        $this->slug = Str::slug($request->name,'_');
+        $this->slug = Str::slug($row['name'],'_');
         $this->save();
+        return $this;
 	}
 }

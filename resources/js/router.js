@@ -10,13 +10,7 @@ import WarehouseIndex from './components/backend/warehouse/WarehouseIndex.vue'
 import TaxonomyIndex from './components/backend/taxonomy/TaxonomyIndex.vue'
 import CategoryIndex from './components/backend/category/CategoryIndex.vue'
 export const routes=[
-    {
-      path: '/products',
-      component:ProductsIndex,
-      children:[
-        {path:'',component:ProductsList}
-      ]
-    },
+    {path: '/products/:status?',component:ProductsList},
     {
       path: '/users',
       component:UsersIndex,

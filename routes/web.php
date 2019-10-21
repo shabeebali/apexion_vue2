@@ -23,3 +23,4 @@ Route::prefix('/admin')->group(function(){
 		})->where('any', '.*');
 	});
 });
+Route::get('/home','HomeController@index');

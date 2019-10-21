@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-<app-component></app-component>
+	<div class="headline">Hello Shabeeb</div>
 @endsection

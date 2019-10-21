@@ -13,9 +13,22 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $this->authorize('view',Product::class);
+        $user = \Auth::user();
+        $product = new Product;
+        $data =  $product->getIndex($request);
+        $model = $data['model'];
+        return response()->json([
+            'data' => $model ? $model->toArray() : '',
+            'meta' => [
+                'edit' => $user->can('update',Product::class)? 'true': 'false',
+                'delete' => $user->can('delete',Product::class)? 'true': 'false',
+                'filtered' => $data['filtered']
+            ],
+            'total' => Product::count(),
+        ]);
     }
 
     /**

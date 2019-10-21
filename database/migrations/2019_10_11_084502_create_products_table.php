@@ -26,7 +26,8 @@ class CreateProductsTable extends Migration
             $table->decimal('gsp_dealer',8,2);
             $table->decimal('gst',8,2);
             $table->integer('total_stock');
-            $table->boolean('approve')->default(0);
+            $table->boolean('publish')->default(0);
+            $table->boolean('tally')->default(0);
             $table->softDeletes();
             $table->timestamps();
         });
