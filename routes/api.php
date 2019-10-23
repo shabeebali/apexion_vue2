@@ -19,6 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 Route::middleware('auth:api')->group(function(){
     Route::get('products/notif_test','Backend\ProductController@notif_test');
+    Route::post('products/import','Backend\ProductController@import');
     Route::get('menu','Backend\MenuController');
     Route::post('products/upload','Backend\ProductController@upload');
     Route::post('users/chpass/{id}','Backend\UserController@change_pass');

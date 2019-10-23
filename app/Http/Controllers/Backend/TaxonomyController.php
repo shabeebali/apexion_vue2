@@ -14,11 +14,17 @@ class TaxonomyController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('view',Taxonomy::class);
         $user = \Auth::user();
         $model = Taxonomy::all();
+        if($request->withcat){
+            $model = Taxonomy::with('categories')->get();
+        }
+        else{
+            $model = Taxonomy::all();
+        }
         return response()->json([
             'data' => $model ? $model->toArray() : '',
             'meta' => [

@@ -40,22 +40,25 @@
                     </v-toolbar-items>
                 @else
                     <v-btn text>Welcome {{ Auth::user()->name }}</v-btn>
-                    <v-menu left bottom offset-y>
+                    <v-menu left bottom offset-y min-width="200">
                         <template v-slot:activator="{ on }">
                             <v-btn icon v-on="on">
-                                <v-icon>mdi-dots-vertical</v-icon>
+                                <v-icon>mdi-account-circle</v-icon>
                             </v-btn>
                         </template>
                         <v-list>
-                            <v-list-item>
-                                <v-list-item-title onclick="event.preventDefault();
-                             document.getElementById('logout-form').submit();" href="{{ route('logout') }}">{{ __('Logout') }}</v-list-item-title>
+                            <v-list-item to="/profile">
+                                <v-list-item-title >Profile</v-list-item-title>
                             </v-list-item>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                @csrf
-                            </form>
+                            <v-list-item onclick="event.preventDefault();
+                             document.getElementById('logout-form').submit();" href="{{ route('logout') }}">
+                                <v-list-item-title >{{ __('Logout') }}</v-list-item-title>
+                            </v-list-item>
                         </v-list>
                     </v-menu>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
                 @endguest
             </v-app-bar>
             <v-navigation-drawer app color="teal darken-3" dark  mobile-break-point="991" :permanent="$vuetify.breakpoint.mdAndUp" width="250" v-model="sidebar_left" >

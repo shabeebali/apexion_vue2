@@ -4,12 +4,14 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Model\Category;
+use App\Model\Tag;
 use App\Model\ProductAlias;
 use App\Model\ProductMedias;
 use Illuminate\Support\Str;
-
+use Validator;
 class Product extends Model
 {
+    protected $guarded = [];
     protected $table = 'products';
     public function categories(){
     	return $this->belongsToMany('App\Model\Category','product_category','product_id','category_id')->withTimestamps();
@@ -33,6 +35,10 @@ class Product extends Model
 	public function website_info(){
     	return $this->hasOne('App\Model\ProductWebsite','product_id');
 	}
+    public function tags()
+    {
+        return $this->morphToMany('App\Model\Tag', 'taggable');
+    }
     public function getIndex($request)
     {
         $model = Product::with('categories');
@@ -47,7 +53,16 @@ class Product extends Model
             ]);
         }
         if($request->search){
-            $model->where('name','like','%'.$request->search.'%');
+            $search_terms = explode(" ",$request->search);
+            $tags = Tag::with('products');
+            foreach ($search_terms as $term) {
+                $tags = $tags->orWhere('name','like','%'.$term.'%');
+            }
+            $tags = $tags->get();
+            foreach ($tags as $tag) {
+                $p_ids = $tag->products->groupBy('id')->keys();
+            }
+            $model->whereIn('id',$p_ids);
         }
         if($request->sortby){
             $model = $request->descending? $model->orderBy($request->sortby,'desc') : $model->orderBy($request->sortby,'asc');
@@ -113,13 +128,16 @@ class Product extends Model
         $this->weight = $row['weight'];
         $this->gst = $row['gst'];
         $this->mrp = $row['mrp'];
+        $this->total_stock = 0;
         $this->save();
         $cat_ids = [];
+        $code = [];
         foreach ($taxonomies as $taxonomy) {
             $cat_ids[] = $row[$taxonomy->slug];
         }
         $this->categories()->syncWithoutDetaching($cat_ids);
-        
+        $sku = $this->getSku($cat_ids);
+        $this->sku = $sku;
         $pl_sync = [];
         foreach ($pricelists as $pricelist) {
             $pl_sync[$pricelist->id] = ['margin' => $row[$pricelist->slug] ];
@@ -127,9 +145,12 @@ class Product extends Model
         $this->pricelists()->syncWithoutDetaching($pl_sync);
         
         $wh_sync = [];
+        $total_stock = 0;
         foreach ($warehouses as $warehouse) {
             $wh_sync[$warehouse->id] = ['stock'=>$row[$warehouse->slug],'batch_id'=>0,'expiry_date'=>today()];
+            $total_stock+=$row[$warehouse->slug];
         }
+        $this->total_stock = $total_stock;
         $this->warehouses()->syncWithoutDetaching($wh_sync);
 
         $medias = explode(",", $row['medias']);
@@ -139,12 +160,67 @@ class Product extends Model
             $media->product_id = $this->id;
             $media->save();
         }
-        $aliases = explode(",", $row['aliases']);
+        $aliases = json_decode($row['aliases']);
         foreach ($aliases as $name) {
             $alias = new ProductAlias;
             $alias->alias = $name;
             $alias->product_id = $this->id;
             $alias->save();
         }
+        $this->save();
+        $tag_arr = [];
+        $tag_arr = explode(" ",$row['name']);
+        foreach ($aliases as $alias) {
+            $temp = explode(" ", $alias);
+            $tag_arr = array_merge($tag_arr,$temp);
+        }
+        $tag_arr[] = $sku;
+        $tag_arr = array_filter($tag_arr,function($tag){
+            if(strlen($tag) > 1){
+                return true;
+            }
+        });
+        $tag_arr = array_unique($tag_arr);
+        $tag_arr[] = $row['name'];
+        foreach ($aliases as $alias) {
+            $tag_arr[] = $alias;
+        }
+        $tag_ids = [];
+        foreach ($tag_arr as $tag) {
+            $obj = Tag::firstOrCreate(['name'=>$tag]);
+            $tag_ids[] = $obj->id;
+        }
+        $this->tags()->syncWithoutDetaching($tag_ids);
+    }
+
+    public function getSku($cat_ids,$id = NULL)
+    {
+        $pc = '';
+        foreach ($cat_ids as $cat_id) {
+            $category = Category::find($cat_id);
+            $pc = $pc.$category->code;
+        }
+        $count = 0;
+        $pc = $pc.str_pad($count, 3,0,STR_PAD_LEFT);
+        if(!$id){
+
+            $data['sku'] = $pc;
+            while(Validator::make($data,['sku'=>'unique:products,sku'])->fails()){
+                $pc = substr($pc, 0, -3);
+                $count = $count + 1;
+                $pc = $pc.str_pad($count, 3,0,STR_PAD_LEFT);
+                $data['sku'] = $pc;
+            }
+        }
+        else{
+            $data['sku'] = $pc;
+            while(Validator::make($data,['sku'=>'unique:products,sku,'.$id])->fails()){
+                $pc = substr($pc, 0, -3);
+                $count = $count + 1;
+                $pc = $pc.str_pad($count, 3,0,STR_PAD_LEFT);
+                $data['sku'] = $pc;
+            }
+        }
+        return $pc;
     }
 }

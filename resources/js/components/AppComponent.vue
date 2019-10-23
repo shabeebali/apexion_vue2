@@ -10,17 +10,21 @@
     export default {
     	data(){
     		return{
+                user:null,
     			notify:false,
     			notify_message:'',
     		}
     	},
         mounted() {
-
-            Echo.private('App.User.1')
-		    .notification((notification) => {
-		        this.notify_message = notification.message
-		        this.notify = true
-		    });
+            axios.get('user').then((res)=>{
+                this.user = res.data
+                Echo.private('App.User.'+this.user.id)
+                .notification((notification) => {
+                    this.notify_message = notification.message
+                    this.notify = true
+                });
+            })
+            
         }
     }
 </script>

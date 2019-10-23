@@ -37,12 +37,14 @@ class CategoriesImport implements ToCollection, WithHeadingRow
                     'required',
                     Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id),
                 ],
-                '*.code' => [
-                    Rule::requiredIf(!$taxonomy->autogen),
-                    'size:'.$taxonomy->code_length,
-                    Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id),
-                ]
             ];
+            if($taxonomy->in_pc){
+                $val_array['*.code'] = [
+                    'required',
+                    'size:'.$taxonomy->code_length,
+                    Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id)
+                ];
+            }
             $rows = $rows->toArray();
             $validator = Validator::make($rows, $val_array, [], []);
             if($validator->fails()){
@@ -68,7 +70,7 @@ class CategoriesImport implements ToCollection, WithHeadingRow
             foreach ($rows as $row) {
                 $obj = new Category;
                 $row['taxonomy_id'] = $this->taxonomy_id;
-                $obj->dbsave($row);
+                $obj->dbsave($row, $taxonomy);
             }
         }
         if($this->method == 'update')
@@ -103,12 +105,14 @@ class CategoriesImport implements ToCollection, WithHeadingRow
                         'required',
                         Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id)->ignore($row['id']),
                     ],
-                    'code' => [
-                        Rule::requiredIf(!$taxonomy->autogen),
-                        'size:'.$taxonomy->code_length,
-                        Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id)->ignore($row['id']),
-                    ]
                 ];
+                if($taxonomy->in_pc){
+                    $val_array['code'] = [
+                        'required',
+                        'size:'.$taxonomy->code_length,
+                        Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id)->ignore($row['id'])
+                    ];
+                }
                 $validator = Validator::make($row, $val_array, [], []);
                 if($validator->fails()){
                     $e1 = new IlluminateValidationException($validator->errors());
@@ -128,14 +132,8 @@ class CategoriesImport implements ToCollection, WithHeadingRow
                     );
                 }
                 $obj = Category::find($row['id']);
-                $obj->name = trim($row['name']);
-                $obj->slug = Str::slug($row['name'],'_');
-                $obj->taxonomy_id = $this->taxonomy_id;
-                if(!$taxonomy->autogen)
-                {
-                    $obj->code = strtoupper($row['code']);
-                }
-                $obj->save();
+                $row['taxonomy_id'] = $this->taxonomy_id;
+                $obj->dbupdate($row, $taxonomy);
                 $count++;
             }
         }

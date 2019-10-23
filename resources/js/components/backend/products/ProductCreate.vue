@@ -61,7 +61,7 @@
 												<v-text-field 
 													label="MRP"
 													v-model.number="fd.mrp.value"
-													:rules="[rules.price]"
+													:rules="[rules.price,rules.required]"
 													:error-messages="fd.mrp.error"
 													@keydown="fd.mrp.error = ''"
 													prepend-inner-icon="mdi-currency-inr">
@@ -71,7 +71,7 @@
 												<v-text-field 
 													label="GSP Customer"
 													v-model.number="fd.gsp_customer.value"
-													:rules="[rules.price]"
+													:rules="[rules.price,rules.required]"
 													:error-messages="fd.gsp_customer.error"
 													@keydown="fd.gsp_customer.error = ''"
 													hint="General Selling Price Customer"
@@ -83,7 +83,7 @@
 												<v-text-field 
 													label="GSP Dealer"
 													v-model.number="fd.gsp_dealer.value"
-													:rules="[rules.price]"
+													:rules="[rules.price,rules.required]"
 													:error-messages="fd.gsp_dealer.error"
 													@keydown="fd.gsp_dealer.error = ''"
 													hint="General Selling Price Dealer"
@@ -97,7 +97,7 @@
 												<v-text-field 
 													label="Weight"
 													v-model.number="fd.weight.value"
-													:rules="[rules.weight]"
+													:rules="[rules.weight,rules.required]"
 													:error-messages="fd.weight.error"
 													@keydown="fd.weight.error = ''"
 													hint="weight in grams"
@@ -109,7 +109,7 @@
 												<v-text-field 
 													label="Landing Price"
 													v-model.number="fd.landing_price.value"
-													:rules="[rules.price]"
+													:rules="[rules.price,rules.required]"
 													:error-messages="fd.landing_price.error"
 													@keydown="fd.landing_price.error = ''"
 													prepend-inner-icon="mdi-currency-inr">
@@ -152,7 +152,7 @@
 												<template v-for="(item,index) in taxonomies">
 													<v-select 
 														:label="taxonomies[index].name"
-														:items="taxonomies[index].items"
+														:items="taxonomies[index].categories"
 														item-text="name"
 														item-value="id"
 														v-model="taxonomies[index].value"
@@ -182,7 +182,7 @@
 															<v-text-field
 																v-model.number="pricelists[index].value"
 																:label="pricelists[index].name"
-																:rules="[rules.price]"
+																:rules="[rules.price,rules.required]"
 																hint="Margin"
 																persistent-hint
 																suffix="%">
@@ -220,7 +220,7 @@
 													<v-text-field 
 														:label="'Warehouse: ' + warehouses[index].name"
 														v-model="warehouses[index].value"
-														:rules="[rules.whole]"></v-text-field>
+														:rules="[rules.whole,rules.required]"></v-text-field>
 												</template>
 											</v-col>
 											<v-col cols="12" md="4"></v-col>
@@ -448,13 +448,8 @@
 <script>
 	export default{
 		mounted(){
-			axios.get('taxonomies').then((res)=>{
+			axios.get('taxonomies?withcat=1').then((res)=>{
 				this.taxonomies = res.data.data
-				Object.keys(this.taxonomies).forEach((key)=>{
-					axios.get('categories?filterby='+this.taxonomies[key].id).then((res2)=>{
-						this.taxonomies[key].items = res2.data.data
-					})
-				})
 			})
 			axios.get('pricelists').then((res)=>{
 				var data = res.data.data
@@ -628,9 +623,9 @@
 			getCatName(item){
 				if(item.value){
 					const val = item.value
-					var grouped = _.groupBy(item.items,'id')
+					var grouped = _.groupBy(item.categories,'id')
 					var index = Object.keys(grouped).indexOf(item.value.toString())
-					return item.items[index].name
+					return item.categories[index].name
 				}
 				return ''
 			},
@@ -695,6 +690,11 @@
 			},
 			save(){
 				this.btnloading = true
+				this.$refs.formDetails.validate();
+				this.$refs.formCategory.validate();
+				this.$refs.formPl.validate();
+				this.$refs.formStock.validate();
+				this.$refs.formMedia.validate();
 				if(this.detailsFormVal == false || this.categoryFormVal == false || this.plFormVal == false || this.stockFormVal  == false){
 					this.emitSb('There are errors in the form submitted. Please check!!','error')
 					this.btnloading = false
@@ -718,7 +718,7 @@
 					this.aliases.forEach((item)=>{
 						aliasArr.push(item.value)
 					})
-					fD.append('aliases',aliasArr)
+					fD.append('aliases',JSON.stringify(aliasArr))
 					if(this.mode == 'edit'){
 						fD.append('_method','PUT')
 						var route = 'products/'+this.pId
@@ -729,10 +729,10 @@
 					axios.post(route,fD).then((response)=>{
 						this.btnloading = false
 						if(this.mode == 'edit'){
-							this.emitSb('Category Updated Successfully','success')
+							this.$emit('trigger-sb',{text:'Category Updated Successfully',color:'success'})
 						}
 						else{
-							this.emitSb('Category Created Successfully','success')
+							this.$emit('trigger-sb',{text:'Category Created Successfully',color:'success'})
 						}
 						this.closeDialog()
 						this.$emit('update-list')

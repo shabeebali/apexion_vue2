@@ -26,6 +26,7 @@ class CategoryController extends Controller
         $user = \Auth::user();
         $model = Category::with('taxonomy')->select('id','name','code','taxonomy_id');
         $filtered = [];
+        
         if($request->search){
             $model->where('name','like','%'.$request->search.'%');
         }
@@ -81,12 +82,20 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create',Category::class);
-        $request->validate([
+        $taxonomy = Taxonomy::find($request->taxonomy_id);
+        $val_array = [
             'name'=>'required|unique:categories',
-            'code' => Rule::unique('categories')->where('taxonomy_id',$request->taxonomy_id)
-        ]);
+        ];
+        if($taxonomy->in_pc){
+            $val_array['code'] = [
+                'required',
+                'size:'.$taxonomy->code_length,
+                Rule::unique('categories')->where('taxonomy_id',$request->taxonomy_id) 
+            ];
+        }
+        $request->validate($val_array);
         $obj = new Category;
-        $obj = $obj->dbsave($request->toArray());
+        $obj = $obj->dbsave($request->toArray(), $taxonomy);
         event(new CategoryCreated($obj));
     }
 
@@ -99,13 +108,9 @@ class CategoryController extends Controller
     public function show($id)
     {
         $this->authorize('view',Category::class);
-        $obj = Category::find($id);
+        $obj = Category::with('taxonomy')->find($id);
         return response()->json([
-            'data'=>[
-                'name'=>$obj->name,
-                'taxonomy_id' => $obj->taxonomy_id,
-                'code' => $obj->code,
-            ]
+            'data'=> $obj->toArray()
         ]);
     }
 
@@ -130,17 +135,20 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $this->authorize('update',Category::class);
-        $request->validate([
-            'name' => 'required|unique:categories,name,'.$id
-        ]);
         $taxonomy = Taxonomy::find($request->taxonomy_id);
+        $val_array = [
+            'name'=>'required|unique:categories,name,'.$id,
+        ];
+        if($taxonomy->in_pc){
+            $val_array['code'] = [
+                'required',
+                'size:'.$taxonomy->code_length,
+                Rule::unique('categories')->where('taxonomy_id',$request->taxonomy_id)->ignore($id)
+            ];
+        }
+        $request->validate($val_array);
         $obj = Category::find($id);
-        $obj->name = $request->name;
-        $obj->taxonomy()->dissociate();
-        $obj->taxonomy()->associate($taxonomy);
-        $obj->code = $request->code;
-        $obj->slug = Str::slug($request->name,'_');
-        $obj->save();
+        $obj = $obj->dbupdate($request->toArray(), $taxonomy);
     }
 
     /**

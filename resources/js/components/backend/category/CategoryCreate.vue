@@ -28,6 +28,7 @@
 								item-text="name"
 								item-value="id"
 								:rules=[rules.required]
+								:disabled="mode == 'edit'"
 								v-on:change="sizeUpd"></v-select>
 							<v-text-field
 								v-model="fd.code.value"
@@ -53,16 +54,17 @@
 				</v-row>
 			</v-card-actions>
 	    </v-card>
+	    <v-snackbar bottom right v-model="snackbar" timeout=3000 :color="sbColor">{{sbText}} <v-btn text @click="snackbar = false">CLOSE</v-btn></v-snackbar>
 	</v-dialog>
 </template>
 <script>
 	export default{
 		mounted(){
-			this.updateTaxonomy()
+			
 		},
 		watch:{
 			dialog:function(){
-				this.$vuetify.goTo(0)
+				this.updateTaxonomy()
 				if(this.mode == 'create'){
 					this.submitTxt = 'Save'
 					this.formTitle = 'Create Category'
@@ -76,6 +78,7 @@
 						this.fd.name.value = dd.name
 						this.fd.taxonomy.value = dd.taxonomy_id
 						this.fd.code.value = dd.code
+						this.fd.code.disable = dd.taxonomy.autogen == 1 ? true : false
 					})
 				}
 			}
@@ -83,6 +86,9 @@
 		props:['mode','dialog','catId'],
 		data(){
 			return{
+				snackbar:false,
+				sbColor:'',
+				sbText:'',
 				submitTxt:'',
 				formTitle:'',
 				btnloading:false,
@@ -146,6 +152,11 @@
 				}
 				this.$emit('trigger-sb',val)
 			},
+			triggerSb(text,color){
+				this.sbText = text
+				this.sbColor = color
+				this.snackbar = true
+			},
 			save(){
 				this.btnloading = true
 				var fD = new FormData()
@@ -176,11 +187,11 @@
 						var errors = error.response.data.errors
 						this.fd.name.error = errors.name
 						this.fd.code.error = errors.code
-						this.emitSb('There are errors in the form submitted. Please check!!','error')
+						this.triggerSb('There are errors in the form submitted. Please check!!','error')
 					}
 					if(error.response.status == 403){
 						this.btnloading = false
-						this.emitSb('You are not authorised to do this action','error')
+						this.triggerSb('You are not authorised to do this action','error')
 					}
 				})
 			}

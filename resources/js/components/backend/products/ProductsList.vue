@@ -188,7 +188,6 @@
 						<v-row class="mx-4">
 							<v-col>
 								<v-file-input label="Click Here to select file.." persistent-hint hint="Please upload Excel file (.xslx) only" @change="fileUpdate"></v-file-input>
-								<v-select label="Taxonomy" :items="filterables.taxonomy" item-text="name" item-value="id" v-model="importProduct"></v-select>
 								<v-select label="Method" :items="methods" v-model="importMethod"></v-select>
 							</v-col>
 						</v-row>
@@ -197,7 +196,7 @@
 				<v-card-actions>
 					<v-row class="mx-4">
 						<v-col>
-							<v-btn text :disabled="file == '' || file == undefined || importProduct == '' || importMethod == ''" @click.stop="upload">Submit</v-btn>
+							<v-btn text :disabled="file == '' || file == undefined || importMethod == ''" @click.stop="upload">Submit</v-btn>
 							<v-btn text  @click.stop="$refs.importForm.reset();importAlert=false; importDialog = false">Cancel</v-btn>
 						</v-col>
 					</v-row>
@@ -292,6 +291,10 @@
 						value:'name'
 					},
 					{
+						text:'SKU',
+						value:'sku',
+					},
+					{
 						text:'MRP',
 						value:'mrp',
 					},
@@ -302,10 +305,6 @@
 					{
 						text:'GST',
 						value:'gst',
-					},
-					{
-						text:'Last Remark',
-						value:'remark',
 					},
 					{
 						text:'Action',
@@ -358,7 +357,6 @@
 				this.type_error = ''
 				var fD = new FormData()
 				fD.append('file',this.file)
-				fD.append('taxonomy_id',this.importProduct)
 				fD.append('method',this.importMethod)
 				axios.post('/products/import',fD,{
 					headers: {

@@ -8,6 +8,7 @@ use App\Model\Taxonomy;
 use App\Model\Pricelist;
 use App\Model\Warehouse;
 use Illuminate\Http\Request;
+use App\Imports\ProductImport;
 use App\User;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ProductCreated;
@@ -54,6 +55,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        //dd(json_decode($request->aliases));
         $val_arr = [
             'name' => 'required|unique:products',
             'mrp' => 'numeric',
@@ -78,10 +80,14 @@ class ProductController extends Controller
         $product->dbsave($request->toArray(), $taxonomies, $pricelists, $warehouses);
         $users = User::with('roles')->get();
         $users = $users->filter(function($item){
-            if($item->roles->name == 'Admin' || $item->roles->name == 'Super Admin'){
-                return true;
+            $roles = $item->roles;
+            foreach ($roles as $role) {
+                if($role->name == 'Admin' || $role->name == 'Super Admin'){
+                    return true;
+                }
             }
         });
+        Notification::send($users, new ProductCreated);
     }
 
     /**
@@ -166,5 +172,23 @@ class ProductController extends Controller
         });
         $usr = \Auth::user();
         $usr->notify(new ProductCreated);
+    }
+
+    public function import(Request $request) 
+    {
+        $file = $request->file('file');
+        $method =  $request->method;
+        //dd($file->extension());
+        if($file->extension() != 'xlsx' && $file->extension() != 'zip')
+        {
+            return response()->json([
+                'status' => 'file_failed',
+                'message' => 'Error: The uploaded file is not valid. Please try again'
+            ],422);
+        }
+        else{
+            $import = new ProductImport($method);
+            $import->import($request->file('file'));
+        }
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProductRemarksTable extends Migration
+class CreateTagTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,9 @@ class CreateProductRemarksTable extends Migration
      */
     public function up()
     {
-        Schema::create('product_remarks', function (Blueprint $table) {
+        Schema::create('tag', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->text('remark');
-            $table->bigInteger('product_id');
-            $table->bigInteger('user_id');
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ class CreateProductRemarksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('product_remarks');
+        Schema::dropIfExists('tag');
     }
 }

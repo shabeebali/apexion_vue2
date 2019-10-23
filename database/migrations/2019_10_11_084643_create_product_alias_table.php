@@ -15,7 +15,7 @@ class CreateProductAliasTable extends Migration
     {
         Schema::create('product_alias', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('alias')->unique(true);
+            $table->string('alias');
             $table->bigInteger('product_id');
             $table->timestamps();
         });
