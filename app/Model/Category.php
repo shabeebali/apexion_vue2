@@ -16,7 +16,7 @@ class Category extends Model
 
 	public function dbsave($row)
 	{
-	   $taxonomy = Taxonomy::find($row['taxonomy_id']);
+	    $taxonomy = Taxonomy::find($row['taxonomy_id']);
         $this->name = $row['name'];
         $this->taxonomy()->associate($taxonomy);
         if($taxonomy->in_pc == 1)

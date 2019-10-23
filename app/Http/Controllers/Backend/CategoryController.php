@@ -24,7 +24,7 @@ class CategoryController extends Controller
     {
         $this->authorize('view',Category::class);
         $user = \Auth::user();
-        $model = Category::select('id','name','code','taxonomy_id');
+        $model = Category::with('taxonomy')->select('id','name','code','taxonomy_id');
         $filtered = [];
         if($request->search){
             $model->where('name','like','%'.$request->search.'%');

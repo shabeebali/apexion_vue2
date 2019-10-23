@@ -42,8 +42,6 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-
     public function dbsave(CreateUserRequest $request){
 
         $this->name = $request->name;

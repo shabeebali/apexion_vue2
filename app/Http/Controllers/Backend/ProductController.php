@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Model\Product;
+use App\Model\Taxonomy;
+use App\Model\Pricelist;
+use App\Model\Warehouse;
 use Illuminate\Http\Request;
-
+use App\User;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\ProductCreated;
 class ProductController extends Controller
 {
     /**
@@ -49,7 +54,34 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $val_arr = [
+            'name' => 'required|unique:products',
+            'mrp' => 'numeric',
+            'landing_price' => 'numeric',
+            'gsp_customer' => 'numeric',
+            'gsp_dealer' => 'numeric',
+            'weight' => 'numeric',
+            'gst' => 'required'
+        ];
+        $taxonomies = Taxonomy::all();
+        $pricelists = Pricelist::all();
+        $warehouses = Warehouse::all();
+        foreach ($taxonomies as $taxonomy) {
+            if($taxonomy->in_pc)
+            {
+                $val_arr[$taxonomy->slug] = 'required';
+            }
+        }
+        $request->validate($val_arr);
+
+        $product = new Product;
+        $product->dbsave($request->toArray(), $taxonomies, $pricelists, $warehouses);
+        $users = User::with('roles')->get();
+        $users = $users->filter(function($item){
+            if($item->roles->name == 'Admin' || $item->roles->name == 'Super Admin'){
+                return true;
+            }
+        });
     }
 
     /**
@@ -58,9 +90,11 @@ class ProductController extends Controller
      * @param  \App\Model\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function show($id)
     {
-        //
+        $product = Product::with(['categories.taxonomy','pricelists','warehouses','alias','medias'])->find($id);
+        return $product;
+
     }
 
     /**
@@ -92,8 +126,45 @@ class ProductController extends Controller
      * @param  \App\Model\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy($id)
     {
-        //
+        $product = Product::find($id);
+        $product->categories()->sync([]);
+        $product->pricelists()->sync([]);
+        $product->warehouses()->sync([]);
+        $aliases = $product->alias()->get();
+        if($aliases->count() > 0)
+        {
+            foreach ($aliases as $alias) {
+                $alias->delete();
+            }
+        }
+        $medias = $product->medias()->get();
+        if($medias->count() > 0){
+            foreach ($medias as $media) {
+                $media->delete();
+            }
+        }
+        $product->delete();
+    }
+
+    public function upload(Request $request)
+    {
+        $path = $request->file('file')->store('products');
+        return 'storage/'.$path;
+    }
+
+    public function notif_test(){
+        $users = User::with('roles')->get();
+        $users = $users->filter(function($item){
+            $roles = $item->roles;
+            foreach ($roles as $role) {
+                if($role->name == 'Admin' || $role->name == 'Super Admin'){
+                    return true;
+                }
+            }
+        });
+        $usr = \Auth::user();
+        $usr->notify(new ProductCreated);
     }
 }

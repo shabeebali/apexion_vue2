@@ -10,7 +10,6 @@
 | used to check if an authenticated user can listen to the channel.
 |
 */
-
 Broadcast::channel('App.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
@@ -18,5 +17,8 @@ Broadcast::channel('product.{productId}', function ($user, $productId) {
     return true;
 });
 Broadcast::channel('category', function ($user) {
+    return true;
+});
+Broadcast::channel('users', function ($user) {
     return true;
 });

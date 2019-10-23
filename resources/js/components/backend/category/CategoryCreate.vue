@@ -154,7 +154,7 @@
 				fD.append('code', this.fd.code.value)
 				if(this.mode == 'edit'){
 					fD.append('_method','PUT')
-					var route = 'categories/'+this.txId
+					var route = 'categories/'+this.catId
 				}
 				else{
 					var route = 'categories'

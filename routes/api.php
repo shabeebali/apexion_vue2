@@ -18,7 +18,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $user->toArray();
 });
 Route::middleware('auth:api')->group(function(){
+    Route::get('products/notif_test','Backend\ProductController@notif_test');
     Route::get('menu','Backend\MenuController');
+    Route::post('products/upload','Backend\ProductController@upload');
     Route::post('users/chpass/{id}','Backend\UserController@change_pass');
     Route::get('users/roles/permissions','Backend\UserRoleController@permissions');
     Route::get('categories/export','Backend\CategoryController@export');

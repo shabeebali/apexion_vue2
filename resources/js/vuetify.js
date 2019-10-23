@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import colors from 'vuetify/lib/util/colors'
 import '@mdi/font/css/materialdesignicons.css'
-import { mdiWarehouse } from '@mdi/js';
-import { mdiPrinterPos } from '@mdi/js';
 
 import Vuetify, {
 	VApp,
@@ -63,6 +61,9 @@ import Vuetify, {
     VFileInput,
     VProgressLinear,
     VAutocomplete,
+    VSimpleTable,
+    VCarousel,
+	VCarouselItem,
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -125,6 +126,9 @@ Vue.use(Vuetify, {
     	VFileInput,
     	VProgressLinear,
     	VAutocomplete,
+    	VSimpleTable,
+    	VCarousel,
+    	VCarouselItem,
 	},
 })
 const opts = {

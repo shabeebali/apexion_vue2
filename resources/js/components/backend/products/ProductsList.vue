@@ -2,12 +2,12 @@
 	<v-row>
 		<v-col class="mx-4">
 			<v-toolbar dense color="transparent" flat>
-				<v-toolbar-title>Products</v-toolbar-title>
+				<v-toolbar-title>{{pageTitle}}</v-toolbar-title>
 			 	<div class="flex-grow-1"></div>
 				<v-toolbar-items>
 					<v-tooltip bottom>
 						<template v-slot:activator="{ on }">
-							<v-btn v-on="on" color="transparent" dense depressed @click="filterToggle">
+							<v-btn v-on="on" color="transparent" dense depressed @click.stop="filterToggle">
 								<v-icon>mdi-filter</v-icon>
 							</v-btn>
 						</template>
@@ -15,7 +15,7 @@
 					</v-tooltip>
 					<v-tooltip bottom>
 						<template v-slot:activator="{ on }">
-							<v-btn v-on="on" color="transparent" dense depressed @click="importDialog = true">
+							<v-btn v-on="on" color="transparent" dense depressed @click.stop="importDialog = true">
 								<v-icon>mdi-upload</v-icon>
 							</v-btn>
 						</template>
@@ -23,16 +23,16 @@
 					</v-tooltip>
 					<v-tooltip bottom>
 						<template v-slot:activator="{ on }">
-							<v-btn v-on="on" color="transparent" dense depressed @click="exportData">
+							<v-btn v-on="on" color="transparent" dense depressed @click.stop="exportData">
 								<v-icon>mdi-download</v-icon>
 							</v-btn>
 						</template>
 						<span>Export</span>
 					</v-tooltip>
-					<v-btn color="transparent" class="mr-2" dense depressed @click="getDataFromApi">
+					<v-btn color="transparent" class="mr-2" dense depressed @click.stop="getDataFromApi">
 						<v-icon>mdi-refresh</v-icon>
 					</v-btn>
-					<v-btn color="primary" dense depressed @click="mode = 'create'; dialog = true">Create</v-btn>
+					<v-btn color="primary" dense depressed @click.stop="mode = 'create'; dialog = true">Create</v-btn>
 				</v-toolbar-items>
 			</v-toolbar>
 			<v-expansion-panels class="mt-2" v-model="filterPanel">
@@ -43,23 +43,42 @@
 								<v-toolbar-title  class="subtitle-1">Filter Options</v-toolbar-title>
 								<div class="flex-grow-1"></div>
 								<v-toolbar-items>
-									<v-btn text @click="$refs.filterForm.reset(); getDataFromApi()">Reset</v-btn>
-									<v-btn text color="primary" @click="getDataFromApi">Apply</v-btn>
+									<v-btn text @click.stop="$refs.filterForm.reset(); getDataFromApi()">Reset</v-btn>
+									<v-btn text color="primary" @click.stop="getDataFromApi">Apply</v-btn>
 								</v-toolbar-items>
 					        </v-toolbar>
 							<v-card-text>
 								<v-form ref="filterForm">
 									<v-row>
-										<v-col cols="12" md="3">
+										<v-col cols="12" md="6">
 											<v-autocomplete
-												cache-items
 												label="Category"
 												multiple
 												v-model="filterdata.categories"
 												:items="filterables.categories"
 												item-text="name"
 												item-value="id"
-												></v-autocomplete>	
+												chips
+												dense
+												>
+												<template v-slot:selection="data">
+													<v-chip
+														v-bind="data.attrs"
+														:input-value="data.selected"
+														close
+														@click="data.select"
+														@click:close="removeCat(data.item)"
+														>
+														{{ data.item.name }}
+													</v-chip>
+												</template>
+												<template v-slot:item="data">
+													<v-list-item-content>
+													<v-list-item-title v-html="		data.item.name"></v-list-item-title>
+													<v-list-item-subtitle> {{data.item.taxonomy.name}}</v-list-item-subtitle>
+													</v-list-item-content>
+												</template>
+											</v-autocomplete>	
 										</v-col>
 										<v-col cols="12" md="3">
 											<v-select
@@ -70,14 +89,7 @@
 												></v-select>
 										</v-col>
 										<v-col cols="12" md="3">
-											<v-select
-												label="Status"
-												multiple
-												v-model="filterdata.status"
-												:items="filterables.status"
-												></v-select>
 										</v-col>
-										<v-col cols="12" md="3"></v-col>
 									</v-row>
 								</v-form>
 							</v-card-text>
@@ -113,25 +125,29 @@
 						<template v-slot:item.action="{item}">
 							<v-tooltip bottom v-if="meta.edit == 'true'">
       							<template v-slot:activator="{ on }">
-									<v-icon small @click="edit(item.id)" v-on="on">mdi-pencil</v-icon>
+									<v-icon small @click.stop="edit(item.id)" v-on="on">mdi-pencil</v-icon>
 									</template>
 								<span>Edit</span>
 							</v-tooltip>
 							<v-tooltip bottom v-if="meta.delete == 'true'">
       							<template v-slot:activator="{ on }">
-									<v-icon small @click="deleteConfirm(item.id)" v-on="on">mdi-delete</v-icon>
+									<v-icon small @click.stop="deleteConfirm(item.id)" v-on="on">mdi-delete</v-icon>
 									</template>
 								<span>Delete</span>
 							</v-tooltip>
+						</template>
+						<template v-slot:item.name="{item}">
+							<a @click.stop="showProduct(item.id)">{{item.name}}</a>
 						</template>
 					</v-data-table>
 				</v-card-text>
 			</v-card>
 		</v-col>
-		<product-create :dialog="dialog" :mode="mode" :pId="pId" v-on:trigger-sb="triggerSb" v-on:close-dialog="mode= ''; txId = 0; dialog = false" v-on:update-list="getDataFromApi"></product-create>
+		<product-create :dialog="dialog" :mode="mode" :pId="pId" v-on:trigger-sb="triggerSb" v-on:close-dialog="mode= ''; pId = 0; dialog = false" v-on:update-list="getDataFromApi"></product-create>
+		<product-show :dialog="showDialog" :pId="pId" v-on:close-dialog="showDialog = false"></product-show>
 		<v-snackbar v-model="snackbar" right botttom :color="sbColor" :timeout="sbTimeout" >
 			{{sbText}}
-			<v-btn dark text @click="snackbar = false"> Close</v-btn>
+			<v-btn dark text @click.stop="snackbar = false"> Close</v-btn>
 		</v-snackbar>
 		<v-dialog v-model="waitDialog" persistent width="300">
 			<v-card color="primary" dark>
@@ -151,8 +167,8 @@
 					Do you really Want to continue?</v-alert>
 				</v-card-text>
 				<v-card-actions>
-					<v-btn text color="error" @click="deleteProduct">Yes</v-btn>
-					<v-btn text color="success" @click="confirmDialog = false">No</v-btn>
+					<v-btn text color="error" @click.stop="deleteProduct">Yes</v-btn>
+					<v-btn text color="success" @click.stop="confirmDialog = false">No</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -164,7 +180,7 @@
 					</v-toolbar-title>
 					<div class="flex-grow-1"></div>
 					<v-toolbar-items>
-						<v-btn text @click="$refs.importForm.reset(); importAlert=false;importDialog =false">Cancel</v-btn>
+						<v-btn text @click.stop="$refs.importForm.reset(); importAlert=false;importDialog =false">Cancel</v-btn>
 					</v-toolbar-items>
 				</v-toolbar>
 				<v-card-text>
@@ -181,8 +197,8 @@
 				<v-card-actions>
 					<v-row class="mx-4">
 						<v-col>
-							<v-btn text :disabled="file == '' || file == undefined || importProduct == '' || importMethod == ''" @click="upload">Submit</v-btn>
-							<v-btn text  @click="$refs.importForm.reset();importAlert=false; importDialog = false">Cancel</v-btn>
+							<v-btn text :disabled="file == '' || file == undefined || importProduct == '' || importMethod == ''" @click.stop="upload">Submit</v-btn>
+							<v-btn text  @click.stop="$refs.importForm.reset();importAlert=false; importDialog = false">Cancel</v-btn>
 						</v-col>
 					</v-row>
 				</v-card-actions>
@@ -192,16 +208,18 @@
 							<span v-html="importErrors"></span>
 						</v-alert>
 					</v-col>
-				</v-row>.
+				</v-row>
 			</v-card>
 		</v-dialog>
 	</v-row>
 </template>
 <script>
 	import ProductCreate from './ProductCreate.vue'
+	import ProductShow from './ProductShow.vue'
 	export default{
 		components:{
-			ProductCreate
+			ProductCreate,
+			ProductShow
 		},
 		watch:{
 			options: {
@@ -217,20 +235,32 @@
 				deep: true
 			},
 			$route() {
-				this.filterdata.status = [this.$route.params.status == undefined ?'': this.$route.params.status]
+				this.pending = this.$route.params.status == undefined ? false : this.$route.params.status == 'pending' ? true : false
+				this.tally = this.$route.params.status == undefined ? false : this.$route.params.status == 'tally' ? true : false
+				this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Product to be synced with Taly' : 'Products pending approval'
 				this.getDataFromApi()
 		    }
 		},
 		mounted(){
-			console.log(this.$route.params)
-			this.filterdata.status = [this.$route.params.status == undefined ?'': this.$route.params.status]
+			this.pending = this.$route.params.status == undefined ? false : this.$route.params.status == 'pending' ? true : false
+			this.tally = this.$route.params.status == undefined ? false : this.$route.params.status == 'tally' ? true : false
+			this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Product to be synced with Taly' : 'Products pending approval'
 			this.options.page=1
+			axios.get('categories').then((res)=>{
+				this.filterables.categories = res.data.data
+			})
+			axios.get('taxonomies').then((res)=>{
+				this.filterables.taxonomies = _.groupBy(res.data.data,'id')
+			})
 			this.deboucedSearch = _.debounce(()=>{
 	            this.getDataFromApi()
 	        },300);
 		},
 		data(){
 			return{
+				pageTitle:'',
+				pending:false,
+				tally:false,
 				search:'',
 				filterPanel:-1,
 				confirmDialog:false,
@@ -240,6 +270,7 @@
 				importErrors:'',
 				importAlert:false,
 				waitDialog:false,
+				showDialog:false,
 				file:'',
 				delete_id : 0,
 				mode:'',
@@ -262,7 +293,7 @@
 					},
 					{
 						text:'MRP',
-						value:'value',
+						value:'mrp',
 					},
 					{
 						text:'Landing Price',
@@ -290,15 +321,11 @@
 						{text:'12%', value:'12'},
 						{text:'18%', value:'18'},
 					],
-					status:[
-						{text:'Pending', value:'pending'},
-						{text:'Tally Sync', value:'tally'},
-					]
+					taxonomies:[],
 				},
 				filterdata:{
 					categories:[],
 					gst:[],
-					status:[],
 				},
 				filtered:[],
 				totalItems:0,
@@ -320,6 +347,10 @@
 			}
 		},
 		methods:{
+			removeCat(item) {
+				const index = this.filterdata.categories.indexOf(item.id)
+				if (index >= 0) this.filterdata.categories.splice(index, 1)
+			},
 			upload(){
 				this.importErrors = ''
 				this.importAlert = false
@@ -355,7 +386,6 @@
 				this.file = file
 			},
 			updFilter(item){
-				console.log(item)
 				Object.keys(this.filterdata).forEach((key)=>{
 					if(key == item.filter){
 						if(item.type == 'array'){	
@@ -389,6 +419,12 @@
 				this.loading = true
 				const { sortBy, sortDesc, page, itemsPerPage } = this.options
 				var params = '?page='+page+'&rpp='+itemsPerPage+'&search='+this.search+'&'
+				if(this.pending){
+					params = params+'pending=1&'
+				}
+				if(this.tally){
+					params = params+'tally=1&'
+				}
 				if(sortBy.length == 1){
 					params = params+'sortby='+sortBy[0]+'&'
 				}
@@ -411,14 +447,6 @@
 					params = params.substring(0,params.length -1)
 					params = params+'&'
 				}
-				if(this.filterdata.status.length > 0){
-					params = params+'status='
-					this.filterdata.status.forEach((id)=>{
-						params = params+id+'-'
-					})
-					params = params.substring(0,params.length -1)
-					params = params+'&'
-				}
 				axios.get('products'+params).then((response)=>{
 					this.loading = false
 					this.items = response.data.data
@@ -427,7 +455,7 @@
 				})
 			},
 			edit(id){
-				this.catId = id
+				this.pId = id
 				this.mode = 'edit'
 				this.dialog = true
 			},
@@ -448,6 +476,10 @@
 						})
 					}
 				})
+			},
+			showProduct(id){
+				this.pId = id
+				this.showDialog = true
 			}
 		}
 	}

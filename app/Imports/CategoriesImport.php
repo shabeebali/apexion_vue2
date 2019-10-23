@@ -38,8 +38,8 @@ class CategoriesImport implements ToCollection, WithHeadingRow
                     Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id),
                 ],
                 '*.code' => [
-                    //Rule::requiredIf(!$taxonomy->autogen),
-                    //'size:'.$taxonomy->code_length,
+                    Rule::requiredIf(!$taxonomy->autogen),
+                    'size:'.$taxonomy->code_length,
                     Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id),
                 ]
             ];
