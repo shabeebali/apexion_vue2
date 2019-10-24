@@ -28,16 +28,31 @@ Vue.component('app-component', require('./components/AppComponent.vue').default)
  */
 import VueRouter from 'vue-router'
 import {routes} from './router.js'
+import Vuex from 'vuex'
+Vue.use(Vuex)
 Vue.use(VueRouter)
 const router = new VueRouter({
   routes,
   base:'/admin/',
   mode:'history',
 });
+const store = new Vuex.Store({
+  state: {
+    user: {
+      id:0
+    }
+  },
+  mutations: {
+    setUser (state,user) {
+      state.user = user
+    }
+  }
+})
 import vuetify from './vuetify'
 new Vue({
   delimiters: ['${', '}$'],
   vuetify,
+  store,
   router:router,
   data(){
   	return{
@@ -47,11 +62,19 @@ new Vue({
       ],
   	}
   },
-  mounted(){
+  beforeMount(){
     if(this.$router.currentRoute.path != '/login'){
       axios.get('menu').then((res)=>{
         this.sidebar_left_items = res.data
       })
     }
+    axios.get('user').then((res)=>{
+        this.$store.commit('setUser',res.data)
+        Echo.private('App.User.'+this.$store.state.user)
+        .notification((notification) => {
+            this.notify_message = notification.message
+            this.notify = true
+        });
+    })
   }
 }).$mount('#app')

@@ -40,6 +40,25 @@ class MenuController extends Controller
                 ],
             ]
         ];
+        $menu[] = [
+            'title'=>'Customers',
+            'target'=>'/customers',
+            'icon'=>'mdi-inbox-multiple',
+            'children'=>[
+                [
+                  'title'=>'Customers',
+                  'target'=>'/customers',
+                ],
+                [
+                  'title'=>'Pending',
+                  'target'=>'/customers/pending',
+                ],
+                [
+                  'title'=>'Tally',
+                  'target'=>'/customers/tally',
+                ],
+            ]
+        ];
         $menu[] =[
           'title'=>'Categories',
           'target'=>'/categories',

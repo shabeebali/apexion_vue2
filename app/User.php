@@ -42,6 +42,10 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function addresses(){
+        return $this->belongsToMany('App\Model\Address','address_saleperson','saleperson_id','address_id');
+    }
     public function dbsave(CreateUserRequest $request){
 
         $this->name = $request->name;

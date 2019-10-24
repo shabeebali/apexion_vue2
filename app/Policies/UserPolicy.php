@@ -81,12 +81,12 @@ class UserPolicy
      * @return mixed
      */
     public function delete(User $user, User $model)
-    {
-        if($model->hasRole('Super Admin')){
-            return false;
-        }
+    { 
         if($user->id == $model->id){
             return false;
+        }
+        if($model->hasRole('Super Admin')){
+            return true;
         }
         if ($user->can('delete_user')) {
             return true;

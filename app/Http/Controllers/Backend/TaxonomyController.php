@@ -30,6 +30,7 @@ class TaxonomyController extends Controller
             'meta' => [
                 'edit' => $user->can('update',Taxonomy::class)? 'true': 'false',
                 'delete' => $user->can('delete',Taxonomy::class)? 'true': 'false',
+                'create' => $user->can('create',Taxonomy::class)? 'true': 'false',
             ]
         ]);
     }

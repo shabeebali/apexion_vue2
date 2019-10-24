@@ -66,6 +66,10 @@
 				</v-row>
 			</v-card-actions>
 	    </v-card>
+	    <v-snackbar v-model="snackbar" right botttom :color="sbColor" :timeout="sbTimeout" >
+			{{sbText}}
+			<v-btn dark text @click="snackbar = false"> Close</v-btn>
+		</v-snackbar>
 	</v-dialog>
 </template>
 <script>
@@ -100,6 +104,10 @@
 		props:['mode','dialog','roleId'],
 		data(){
 			return{
+				snackbar:false,
+				sbTimeout:3000,
+				sbText:'',
+				sbColor:'',
 				submitTxt:'',
 				formTitle:'',
 				formLoading:false,
@@ -158,6 +166,12 @@
 				}
 				this.$emit('trigger-sb',val)
 			},
+			triggerSb(val){
+				this.snackbar = false
+				this.sbText = val.text
+				this.sbColor = val.color
+				this.snackbar = true
+			},
 			saveNewRole(){
 				this.btnloading = true
 				var fD = new FormData()
@@ -185,11 +199,11 @@
 						this.btnloading = false
 						var errors = error.response.data.errors
 						this.fd.name.error = errors.name
-						this.emitSb('There are errors in the form submitted. Please check!!','error')
+						this.triggerSb({text:'There are errors in the form submitted. Please check!!',color:'error'})
 					}
 					if(error.response.status == 403){
 						this.btnloading = false
-						this.emitSb('You are not authorised to do this action','error')
+						this.triggerSb({text:'You are not authorised to do this action',color:'error'})
 					}
 				})
 			}

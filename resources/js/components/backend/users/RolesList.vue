@@ -5,7 +5,7 @@
 				<v-toolbar-title>User Roles</v-toolbar-title>
 			 	<div class="flex-grow-1"></div>
 				<v-toolbar-items>
-					<v-btn color="primary" dense depressed @click="mode = 'create'; dialog = true">Create</v-btn>
+					<v-btn  v-if="meta.create == 'true'" color="primary" dense depressed @click="mode = 'create'; dialog = true">Create</v-btn>
 				</v-toolbar-items>
 			</v-toolbar>
 			<v-card class="mt-2">

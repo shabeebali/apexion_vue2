@@ -2,20 +2,21 @@
 	<v-row>
 		<v-col class="mx-4">
 			<v-toolbar dense color="transparent" flat>
-				<v-toolbar-title>Categories</v-toolbar-title>
+				<v-toolbar-title>{{pageTitle}}</v-toolbar-title>
 			 	<div class="flex-grow-1"></div>
 				<v-toolbar-items>
 					<v-tooltip bottom>
 						<template v-slot:activator="{ on }">
-							<v-btn v-on="on" color="transparent" dense depressed @click="filterToggle">
+							<v-btn v-on="on" color="transparent" dense depressed @click.stop="filterToggle">
 								<v-icon>mdi-filter</v-icon>
 							</v-btn>
 						</template>
 						<span>Filter</span>
 					</v-tooltip>
-					<v-tooltip bottom>
-						<template v-slot:activator="{ on }" v-if="$store.state.user.id == 1">
-							<v-btn v-on="on" color="transparent" dense depressed @click="importDialog = true">
+					<!-- user.id ==1 means Super User -->
+					<v-tooltip bottom v-if="$store.state.user.id == 1">
+						<template v-slot:activator="{ on }">
+							<v-btn v-on="on" color="transparent" dense depressed @click.stop="importDialog = true">
 								<v-icon>mdi-upload</v-icon>
 							</v-btn>
 						</template>
@@ -23,16 +24,16 @@
 					</v-tooltip>
 					<v-tooltip bottom>
 						<template v-slot:activator="{ on }">
-							<v-btn v-on="on" color="transparent" dense depressed @click="exportData">
+							<v-btn v-on="on" color="transparent" dense depressed @click.stop="exportData">
 								<v-icon>mdi-download</v-icon>
 							</v-btn>
 						</template>
 						<span>Export</span>
 					</v-tooltip>
-					<v-btn color="transparent" class="mr-2" dense depressed @click="getDataFromApi">
+					<v-btn color="transparent" class="mr-2" dense depressed @click.stop="getDataFromApi">
 						<v-icon>mdi-refresh</v-icon>
 					</v-btn>
-					<v-btn v-if="meta.create == 'true'" color="primary" dense depressed @click="mode = 'create'; dialog = true">Create</v-btn>
+					<v-btn v-if="meta.create == 'true'" color="primary" dense depressed @click.stop="mode = 'create'; dialog = true">Create</v-btn>
 				</v-toolbar-items>
 			</v-toolbar>
 			<v-expansion-panels class="mt-2" v-model="filterPanel">
@@ -43,42 +44,56 @@
 								<v-toolbar-title  class="subtitle-1">Filter Options</v-toolbar-title>
 								<div class="flex-grow-1"></div>
 								<v-toolbar-items>
-									<v-btn text @click="$refs.filterForm.reset(); getDataFromApi()">Reset</v-btn>
-									<v-btn text color="primary" @click="getDataFromApi">Apply</v-btn>
+									<v-btn text @click.stop="$refs.filterForm.reset(); getDataFromApi()">Reset</v-btn>
+									<v-btn text color="primary" @click.stop="getDataFromApi">Apply</v-btn>
 								</v-toolbar-items>
 					        </v-toolbar>
 							<v-card-text>
-								<v-row>
-									<v-col cols="12" md="4">
-										<v-form ref="filterForm">
-											<v-select
-												label="taxonomy"
+								<v-form ref="filterForm">
+									<v-row>
+										<v-col cols="12" md="6">
+											<v-autocomplete
+												label="Category"
 												multiple
-												v-model="filterdata.taxonomy"
-												:items="filterables.taxonomy"
+												v-model="filterdata.salepersons"
+												:items="filterables.salepersons"
 												item-text="name"
 												item-value="id"
-												></v-select>
-										</v-form>
-									</v-col>
-									<v-col cols="12" md="4"></v-col>
-									<v-col cols="12" md="4"></v-col>
-								</v-row>
+												chips
+												dense
+												>
+												<template v-slot:selection="data">
+													<v-chip
+														v-bind="data.attrs"
+														:input-value="data.selected"
+														close
+														@click="data.select"
+														@click:close="removeCat(data.item)"
+														>
+														{{ data.item.name }}
+													</v-chip>
+												</template>
+											</v-autocomplete>	
+										</v-col>
+										<v-col cols="12" md="6">
+										</v-col>
+									</v-row>
+								</v-form>
 							</v-card-text>
 						</v-card>
 					</v-expansion-panel-content>
 				</v-expansion-panel>
 			</v-expansion-panels>
 			<v-card class="mt-2">
-		    <v-card-title>
-				<v-text-field
-					v-model="search"
-					append-icon="mdi-magnify"
-					label="Search"
-					single-line
-					hide-details
-					></v-text-field>
-		    </v-card-title>
+			    <v-card-title>
+					<v-text-field
+						v-model="search"
+						append-icon="mdi-magnify"
+						label="Search"
+						single-line
+						hide-details
+						></v-text-field>
+			    </v-card-title>
 				<v-card-text>
 					<div class="text-center">
 						<template v-for="(item,index) in meta.filtered">
@@ -97,25 +112,29 @@
 						<template v-slot:item.action="{item}">
 							<v-tooltip bottom v-if="meta.edit == 'true'">
       							<template v-slot:activator="{ on }">
-									<v-icon small @click="edit(item.id)" v-on="on">mdi-pencil</v-icon>
+									<v-icon small @click.stop="edit(item.id)" v-on="on">mdi-pencil</v-icon>
 									</template>
 								<span>Edit</span>
 							</v-tooltip>
 							<v-tooltip bottom v-if="meta.delete == 'true'">
       							<template v-slot:activator="{ on }">
-									<v-icon small @click="deleteConfirm(item.id)" v-on="on">mdi-delete</v-icon>
+									<v-icon small @click.stop="deleteConfirm(item.id)" v-on="on">mdi-delete</v-icon>
 									</template>
 								<span>Delete</span>
 							</v-tooltip>
+						</template>
+						<template v-slot:item.name="{item}">
+							<a @click.stop="showCustomer(item.id)">{{item.name}}</a>
 						</template>
 					</v-data-table>
 				</v-card-text>
 			</v-card>
 		</v-col>
-		<category-create :dialog="dialog" :mode="mode" :catId="catId" v-on:trigger-sb="triggerSb" v-on:close-dialog="mode= ''; txId = 0; dialog = false" v-on:update-list="getDataFromApi"></category-create>
+		<customer-create :dialog="dialog" :mode="mode" :cId="cId" v-on:trigger-sb="triggerSb" v-on:close-dialog="mode= ''; cId = 0; dialog = false" v-on:update-list="getDataFromApi"></customer-create>
+		<customer-show :dialog="showDialog" :cId="cId" v-on:close-dialog="showDialog = false"></customer-show>
 		<v-snackbar v-model="snackbar" right botttom :color="sbColor" :timeout="sbTimeout" >
 			{{sbText}}
-			<v-btn dark text @click="snackbar = false"> Close</v-btn>
+			<v-btn dark text @click.stop="snackbar = false"> Close</v-btn>
 		</v-snackbar>
 		<v-dialog v-model="waitDialog" persistent width="300">
 			<v-card color="primary" dark>
@@ -135,8 +154,8 @@
 					Do you really Want to continue?</v-alert>
 				</v-card-text>
 				<v-card-actions>
-					<v-btn text color="error" @click="deleteTx">Yes</v-btn>
-					<v-btn text color="success" @click="confirmDialog = false">No</v-btn>
+					<v-btn text color="error" @click.stop="deleteCustomer">Yes</v-btn>
+					<v-btn text color="success" @click.stop="confirmDialog = false">No</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -148,7 +167,7 @@
 					</v-toolbar-title>
 					<div class="flex-grow-1"></div>
 					<v-toolbar-items>
-						<v-btn text @click="$refs.importForm.reset(); importAlert=false;importDialog =false">Cancel</v-btn>
+						<v-btn text @click.stop="$refs.importForm.reset(); importAlert=false;importDialog =false">Cancel</v-btn>
 					</v-toolbar-items>
 				</v-toolbar>
 				<v-card-text>
@@ -156,7 +175,6 @@
 						<v-row class="mx-4">
 							<v-col>
 								<v-file-input label="Click Here to select file.." persistent-hint hint="Please upload Excel file (.xslx) only" @change="fileUpdate"></v-file-input>
-								<v-select label="Taxonomy" :items="filterables.taxonomy" item-text="name" item-value="id" v-model="importTaxonomy"></v-select>
 								<v-select label="Method" :items="methods" v-model="importMethod"></v-select>
 							</v-col>
 						</v-row>
@@ -165,8 +183,8 @@
 				<v-card-actions>
 					<v-row class="mx-4">
 						<v-col>
-							<v-btn text :disabled="file == '' || file == undefined || importTaxonomy == '' || importMethod == ''" @click="upload">Submit</v-btn>
-							<v-btn text  @click="$refs.importForm.reset();importAlert=false; importDialog = false">Cancel</v-btn>
+							<v-btn text :disabled="file == '' || file == undefined || importMethod == ''" @click.stop="upload">Submit</v-btn>
+							<v-btn text  @click.stop="$refs.importForm.reset();importAlert=false; importDialog = false">Cancel</v-btn>
 						</v-col>
 					</v-row>
 				</v-card-actions>
@@ -176,16 +194,18 @@
 							<span v-html="importErrors"></span>
 						</v-alert>
 					</v-col>
-				</v-row>.
+				</v-row>
 			</v-card>
 		</v-dialog>
 	</v-row>
 </template>
 <script>
-	import CategoryCreate from './CategoryCreate.vue'
+	import CustomerCreate from './CustomerCreate.vue'
+	import CustomerShow from './CustomerShow.vue'
 	export default{
 		components:{
-			CategoryCreate
+			CustomerCreate,
+			CustomerShow
 		},
 		watch:{
 			options: {
@@ -200,23 +220,44 @@
 				},
 				deep: true
 			},
+			$route() {
+				this.pending = this.$route.params.status == undefined ? false : this.$route.params.status == 'pending' ? true : false
+				this.tally = this.$route.params.status == undefined ? false : this.$route.params.status == 'tally' ? true : false
+				this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Customers to be synced with Tally' : 'Customers pending approval'
+				this.getDataFromApi()
+		    }
 		},
-
+		mounted(){
+			this.pending = this.$route.params.status == undefined ? false : this.$route.params.status == 'pending' ? true : false
+			this.tally = this.$route.params.status == undefined ? false : this.$route.params.status == 'tally' ? true : false
+			this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Customers to be synced with Tally' : 'Customers pending approval'
+			this.options.page=1
+			axios.get('users?role="sale"').then((res)=>{
+				this.filterables.salepersons = res.data.data
+			})
+			this.deboucedSearch = _.debounce(()=>{
+	            this.getDataFromApi()
+	        },300);
+		},
 		data(){
 			return{
+				pageTitle:'',
+				pending:false,
+				tally:false,
 				search:'',
 				filterPanel:-1,
 				confirmDialog:false,
 				importDialog:false,
-				importTaxonomy:'',
+				importProduct:'',
 				importMethod:'',
 				importErrors:'',
 				importAlert:false,
 				waitDialog:false,
+				showDialog:false,
 				file:'',
 				delete_id : 0,
 				mode:'',
-				catId : 0,
+				cId : 0,
 				snackbar:false,
 				sbTimeout:3000,
 				sbText:'',
@@ -234,10 +275,6 @@
 						value:'name'
 					},
 					{
-						text:'Code',
-						value:'code'
-					},
-					{
 						text:'Action',
 						value:'action',
 						sortable:false,
@@ -245,10 +282,10 @@
 				],
 				items:[],
 				filterables:{
-					taxonomy:[]
+					salepersons:[],
 				},
 				filterdata:{
-					taxonomy:[]
+					salepersons:[],
 				},
 				filtered:[],
 				totalItems:0,
@@ -269,58 +306,43 @@
 				],
 			}
 		},
-		mounted(){
-			this.options.page=1
-			this.deboucedSearch = _.debounce(()=>{
-	            this.getDataFromApi()
-	        },300);
-			this.getFilterables()
-		},
 		methods:{
+			removeCat(item) {
+				const index = this.filterdata.salepersons.indexOf(item.id)
+				if (index >= 0) this.filterdata.salepersons.splice(index, 1)
+			},
 			upload(){
-				if(this.file == '' || this.file === undefined){
-					alert('Please Select a file first')
-				}
-				else{
-					this.importErrors = ''
-					this.importAlert = false
-					this.waitDialog = true
-					this.type_error = ''
-					var fD = new FormData()
-					fD.append('file',this.file)
-					fD.append('taxonomy_id',this.importTaxonomy)
-					fD.append('method',this.importMethod)
-					axios.post('/categories/import',fD,{
-						headers: {
-					        'Content-Type': 'multipart/form-data'
-					    }
-					}).then((response)=>{
-						this.waitDialog = false
-						this.importDialog = false
-						this.triggerSb({text:'Import Successful',color:'success'})
-						this.getDataFromApi()
-					}).catch((error)=>{
-						this.waitDialog = false
-						if(error.response.status == 422){
-							var str = '';
-							Object.keys(error.response.data.messages).forEach((key)=>{
-								str += '<p>Error in Line:'+(parseInt(key)+1)+'<br><ul>'
-								Object.keys(error.response.data.messages[key]).forEach((item)=>{
-									str+='<li>'+error.response.data.messages[key][item].message+'</li>'
-								})
-								str+='</ul></p>'
-							})
-							this.importErrors = str;
-							this.importAlert = true
-						}
-					})
-				}
+				this.importErrors = ''
+				this.importAlert = false
+				this.waitDialog = true
+				this.type_error = ''
+				var fD = new FormData()
+				fD.append('file',this.file)
+				fD.append('method',this.importMethod)
+				axios.post('/customers/import',fD,{
+					headers: {
+				        'Content-Type': 'multipart/form-data'
+				    }
+				}).then((response)=>{
+					this.waitDialog = false
+				}).catch((error)=>{
+					this.waitDialog = false
+					if(error.response.status == 422){
+						var str = '<ul>';
+						Object.keys(error.response.data.errors).forEach((key)=>{
+							var key_terms = key.split(".")
+							str+='<li>Error in Line'+parseInt(key_terms[0]+1)+', Column '+key_terms[1]+', Message:'+error.response.data.errors[key]+'</li>'
+						})
+						str+='</ul>'
+						this.importErrors = str;
+						this.importAlert = true
+					}
+				})
 			},
 			fileUpdate(file){
 				this.file = file
 			},
 			updFilter(item){
-				console.log(item)
 				Object.keys(this.filterdata).forEach((key)=>{
 					if(key == item.filter){
 						if(item.type == 'array'){	
@@ -339,7 +361,7 @@
 			},
 			exportData(){
 				this.waitDialog = true
-				axios.get('categories/export').then((res)=>{
+				axios.get('customers/export').then((res)=>{
 					this.waitDialog = false
 					window.location = res.data
 				})
@@ -350,30 +372,31 @@
 				this.sbColor = val.color
 				this.snackbar = true
 			},
-			getFilterables(){
-				axios.get('taxonomies').then((res)=>{
-					this.filterables.taxonomy = res.data.data
-				})
-			},
 			getDataFromApi(){
 				this.loading = true
 				const { sortBy, sortDesc, page, itemsPerPage } = this.options
 				var params = '?page='+page+'&rpp='+itemsPerPage+'&search='+this.search+'&'
+				if(this.pending){
+					params = params+'pending=1&'
+				}
+				if(this.tally){
+					params = params+'tally=1&'
+				}
 				if(sortBy.length == 1){
 					params = params+'sortby='+sortBy[0]+'&'
 				}
 				if(sortDesc.length == 1 && sortDesc[0] == true){
 					params = params+'descending=1&'
 				}
-				if(this.filterdata.taxonomy.length > 0){
-					params = params+'filterby='
-					this.filterdata.taxonomy.forEach((id)=>{
+				if(this.filterdata.salepersons.length > 0){
+					params = params+'salepersons='
+					this.filterdata.salepersons.forEach((id)=>{
 						params = params+id+'-'
 					})
 					params = params.substring(0,params.length -1)
 					params = params+'&'
 				}
-				axios.get('categories'+params).then((response)=>{
+				axios.get('customers'+params).then((response)=>{
 					this.loading = false
 					this.items = response.data.data
 					this.meta = response.data.meta
@@ -381,7 +404,7 @@
 				})
 			},
 			edit(id){
-				this.catId = id
+				this.pId = id
 				this.mode = 'edit'
 				this.dialog = true
 			},
@@ -389,10 +412,10 @@
 				this.delete_id = id
 				this.confirmDialog = true
 			},
-			deleteTx(){
+			deleteProduct(){
 				this.confirmDialog = false
-				axios.delete('categories/'+this.delete_id,{_method: 'DELETE'}).then((res)=>{
-					this.triggerSb({text:'Category is deleted from database',color:'info'})
+				axios.delete('customers/'+this.delete_id,{_method: 'DELETE'}).then((res)=>{
+					this.triggerSb({text:'Customer is deleted from database',color:'info'})
 					this.getDataFromApi()
 				}).catch((error)=> {
 					if(error.response.status == 403){
@@ -402,6 +425,10 @@
 						})
 					}
 				})
+			},
+			showCustomer(id){
+				this.cId = id
+				this.showDialog = true
 			}
 		}
 	}

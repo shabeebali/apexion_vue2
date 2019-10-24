@@ -5,7 +5,7 @@
 				<v-toolbar-title>Users</v-toolbar-title>
 			 	<div class="flex-grow-1"></div>
 				<v-toolbar-items>
-					<v-btn color="primary" dense depressed @click="mode='create';openDialog = true">Create 
+					<v-btn  v-if="meta.create == 'true'" color="primary" dense depressed @click="mode='create';openDialog = true">Create 
 						<v-icon right>mdi-account-plus</v-icon></v-btn>
 				</v-toolbar-items>
 			</v-toolbar>

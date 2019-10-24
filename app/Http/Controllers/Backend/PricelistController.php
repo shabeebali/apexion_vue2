@@ -23,6 +23,7 @@ class PricelistController extends Controller
             'meta' => [
                 'edit' => $user->can('update',Pricelist::class)? 'true': 'false',
                 'delete' => $user->can('delete',Pricelist::class)? 'true': 'false',
+                'create' => $user->can('create',Pricelist::class)? 'true': 'false',
             ]
         ]);
     }

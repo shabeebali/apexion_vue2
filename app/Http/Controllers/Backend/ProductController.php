@@ -31,9 +31,10 @@ class ProductController extends Controller
             'meta' => [
                 'edit' => $user->can('update',Product::class)? 'true': 'false',
                 'delete' => $user->can('delete',Product::class)? 'true': 'false',
-                'filtered' => $data['filtered']
+                'filtered' => $data['filtered'],
+                'create' => $user->can('create',Product::class) ? 'true': 'false',
             ],
-            'total' => Product::count(),
+            'total' => $model->count(),
         ]);
     }
 
@@ -138,6 +139,7 @@ class ProductController extends Controller
         $product->categories()->sync([]);
         $product->pricelists()->sync([]);
         $product->warehouses()->sync([]);
+        $product->tags()->sync([]);
         $aliases = $product->alias()->get();
         if($aliases->count() > 0)
         {
@@ -151,6 +153,7 @@ class ProductController extends Controller
                 $media->delete();
             }
         }
+
         $product->delete();
     }
 

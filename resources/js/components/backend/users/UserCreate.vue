@@ -118,6 +118,10 @@
 	    		</v-card-actions>
 	    	</v-card>
 	    </v-dialog>
+	    <v-snackbar v-model="snackbar" right botttom :color="sbColor" :timeout="sbTimeout" >
+			{{sbText}}
+			<v-btn dark text @click="snackbar = false"> Close</v-btn>
+		</v-snackbar>
 	</v-dialog>
 </template>
 <script>
@@ -151,6 +155,10 @@
 		},
 		data(){
 			return{
+				snackbar:false,
+				sbTimeout:3000,
+				sbText:'',
+				sbColor:'',
 				passChangeDialog : false,
 				submitTxt:'',
 				formTitle:'',
@@ -274,6 +282,12 @@
 				}
 				this.$emit('trigger-sb',val)
 			},
+			triggerSb(val){
+				this.snackbar = false
+				this.sbText = val.text
+				this.sbColor = val.color
+				this.snackbar = true
+			},
 			changePass(){
 				var fD = new FormData()
 				fD.append('password',this.passCh)
@@ -284,10 +298,10 @@
 					if(error.response.status == 422){
 						var errors = error.response.data.errors
 						this.passChError = errors.password
-						this.emitSb('There are errors in the form submitted. Please check!!','error')
+						this.triggerSb({text:'There are errors in the form submitted. Please check!!',color:'error'})
 					}
 					if(error.response.status == 403){
-						this.emitSb('You are not authorised to do this action','error')
+						this.triggerSb({text:'You are not authorised to do this action',color:'error'})
 					}
 				})
 			}

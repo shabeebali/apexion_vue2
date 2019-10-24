@@ -64,6 +64,11 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        'db' => [
+            'driver' => 'local',
+            'root' => storage_path('database/seeds')
+        ]
+
     ],
 
 ];

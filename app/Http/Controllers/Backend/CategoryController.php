@@ -57,9 +57,10 @@ class CategoryController extends Controller
             'meta' => [
                 'edit' => $user->can('update',Category::class)? 'true': 'false',
                 'delete' => $user->can('delete',Category::class)? 'true': 'false',
-                'filtered' => $filtered
+                'filtered' => $filtered,
+                'create' => $user->can('create',Category::class)? 'true': 'false',
             ],
-            'total' => Category::count(),
+            'total' => $model->count(),
         ]);
     }
 

@@ -13,7 +13,8 @@
 						</template>
 						<span>Filter</span>
 					</v-tooltip>
-					<v-tooltip bottom>
+					<!-- user.id ==1 means Super User -->
+					<v-tooltip bottom v-if="$store.state.user.id == 1">
 						<template v-slot:activator="{ on }">
 							<v-btn v-on="on" color="transparent" dense depressed @click.stop="importDialog = true">
 								<v-icon>mdi-upload</v-icon>
@@ -32,7 +33,7 @@
 					<v-btn color="transparent" class="mr-2" dense depressed @click.stop="getDataFromApi">
 						<v-icon>mdi-refresh</v-icon>
 					</v-btn>
-					<v-btn color="primary" dense depressed @click.stop="mode = 'create'; dialog = true">Create</v-btn>
+					<v-btn v-if="meta.create == 'true'" color="primary" dense depressed @click.stop="mode = 'create'; dialog = true">Create</v-btn>
 				</v-toolbar-items>
 			</v-toolbar>
 			<v-expansion-panels class="mt-2" v-model="filterPanel">
@@ -236,14 +237,14 @@
 			$route() {
 				this.pending = this.$route.params.status == undefined ? false : this.$route.params.status == 'pending' ? true : false
 				this.tally = this.$route.params.status == undefined ? false : this.$route.params.status == 'tally' ? true : false
-				this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Product to be synced with Taly' : 'Products pending approval'
+				this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Product to be synced with Tally' : 'Products pending approval'
 				this.getDataFromApi()
 		    }
 		},
 		mounted(){
 			this.pending = this.$route.params.status == undefined ? false : this.$route.params.status == 'pending' ? true : false
 			this.tally = this.$route.params.status == undefined ? false : this.$route.params.status == 'tally' ? true : false
-			this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Product to be synced with Taly' : 'Products pending approval'
+			this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Product to be synced with Tally' : 'Products pending approval'
 			this.options.page=1
 			axios.get('categories').then((res)=>{
 				this.filterables.categories = res.data.data

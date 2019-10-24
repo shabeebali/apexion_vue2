@@ -24,6 +24,7 @@ class WarehouseController extends Controller
             'meta' => [
                 'edit' => $user->can('update',Warehouse::class)? 'true': 'false',
                 'delete' => $user->can('delete',Warehouse::class)? 'true': 'false',
+                'create' => $user->can('create',Warehouse::class)? 'true': 'false',
             ]
         ]);
     }

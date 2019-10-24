@@ -1,9 +1,8 @@
 <?php
 
 namespace App\Http\Resources;
-
+use App\User;
 use Illuminate\Http\Resources\Json\ResourceCollection;
-
 class Users extends ResourceCollection
 {
     /**
@@ -14,11 +13,13 @@ class Users extends ResourceCollection
      */
     public function toArray($request)
     {
+        $user = \Auth::user();
         return [
             'data' => $this->collection,
             'meta' => [
-                'edit' => 'true',
-                'delete'=> 'true'
+                'edit' => $user->can('update',User::class) ? 'true': 'false',
+                'delete'=> 'true',
+                'create'=> $user->can('create',User::class) ? 'true': 'false',
             ],
         ];
     }

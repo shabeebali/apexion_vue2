@@ -26,6 +26,7 @@ class UserRoleController extends Controller
             'meta'=>[
                 'edit'=> $user->can('update',Role::class)?'true':'false',
                 'delete'=> 'true',
+                'create'=> $user->can('create',Role::class)?'true':'false',
             ]
         ]);
     }

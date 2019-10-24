@@ -34,6 +34,7 @@ Route::middleware('auth:api')->group(function(){
         'taxonomies' =>'Backend\TaxonomyController',
         'categories' =>'Backend\CategoryController',
         'products' =>'Backend\ProductController',
+        'customers'=>'Backend\CustomerController',
     ]);
     
 });
