@@ -705,13 +705,13 @@
 						fD.append(key,this.fd[key].value)
 					})
 					this.taxonomies.forEach((item)=>{
-						fD.append(item.slug,item.value)
+						fD.append('taxonomy_'+item.slug,item.value)
 					})
 					this.pricelists.forEach((item)=>{
-						fD.append(item.slug,item.value)
+						fD.append('pricelist_'+item.slug,item.value)
 					})
 					this.warehouses.forEach((item)=>{
-						fD.append(item.slug,item.value)
+						fD.append('warehouse_'+item.slug,item.value)
 					})
 					fD.append('medias',this.medias)
 					var aliasArr = []

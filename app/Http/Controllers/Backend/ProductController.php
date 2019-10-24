@@ -71,7 +71,7 @@ class ProductController extends Controller
         foreach ($taxonomies as $taxonomy) {
             if($taxonomy->in_pc)
             {
-                $val_arr[$taxonomy->slug] = 'required';
+                $val_arr['taxonomy_'.$taxonomy->slug] = 'required';
             }
         }
         $request->validate($val_arr);
@@ -187,7 +187,10 @@ class ProductController extends Controller
             ],422);
         }
         else{
-            $import = new ProductImport($method);
+            $taxonomies = Taxonomy::all();
+            $pricelists = Pricelist::all();
+            $warehouses = Warehouse::all();
+            $import = new ProductImport($method, $taxonomies, $pricelists, $warehouses);
             $import->import($request->file('file'));
         }
     }

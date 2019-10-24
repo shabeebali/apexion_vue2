@@ -2080,6 +2080,7 @@ __webpack_require__.r(__webpack_exports__);
       snackbar: false,
       sbColor: '',
       sbText: '',
+      sbTimeout: 3000,
       submitTxt: '',
       formTitle: '',
       btnloading: false,
@@ -2504,6 +2505,14 @@ __webpack_require__.r(__webpack_exports__);
           }
         }).then(function (response) {
           _this2.waitDialog = false;
+          _this2.importDialog = false;
+
+          _this2.triggerSb({
+            text: 'Import Successful',
+            color: 'success'
+          });
+
+          _this2.getDataFromApi();
         })["catch"](function (error) {
           _this2.waitDialog = false;
 
@@ -3683,13 +3692,13 @@ __webpack_require__.r(__webpack_exports__);
           fD.append(key, _this5.fd[key].value);
         });
         this.taxonomies.forEach(function (item) {
-          fD.append(item.slug, item.value);
+          fD.append('taxonomy_' + item.slug, item.value);
         });
         this.pricelists.forEach(function (item) {
-          fD.append(item.slug, item.value);
+          fD.append('pricelist_' + item.slug, item.value);
         });
         this.warehouses.forEach(function (item) {
-          fD.append(item.slug, item.value);
+          fD.append('warehouse_' + item.slug, item.value);
         });
         fD.append('medias', this.medias);
         var aliasArr = [];
@@ -4348,14 +4357,12 @@ __webpack_require__.r(__webpack_exports__);
         _this2.waitDialog = false;
 
         if (error.response.status == 422) {
-          var str = '';
-          Object.keys(error.response.data.messages).forEach(function (key) {
-            str += '<p>Error in Line:' + (parseInt(key) + 1) + '<br><ul>';
-            Object.keys(error.response.data.messages[key]).forEach(function (item) {
-              str += '<li>' + error.response.data.messages[key][item].message + '</li>';
-            });
-            str += '</ul></p>';
+          var str = '<ul>';
+          Object.keys(error.response.data.errors).forEach(function (key) {
+            var key_terms = key.split(".");
+            str += '<li>Error in Line' + parseInt(key_terms[0] + 1) + ', Column ' + key_terms[1] + ', Message:' + error.response.data.errors[key] + '</li>';
           });
+          str += '</ul>';
           _this2.importErrors = str;
           _this2.importAlert = true;
         }
@@ -35376,7 +35383,12 @@ var render = function() {
       _c(
         "v-snackbar",
         {
-          attrs: { bottom: "", right: "", timeout: "3000", color: _vm.sbColor },
+          attrs: {
+            bottom: "",
+            right: "",
+            timeout: _vm.sbTimeout,
+            color: _vm.sbColor
+          },
           model: {
             value: _vm.snackbar,
             callback: function($$v) {
@@ -57947,7 +57959,7 @@ __webpack_require__.r(__webpack_exports__);
     computedIcon() {
       if (this.icon === false) return false;
       if (typeof this.icon === 'string' && this.icon) return this.icon;
-      if (!['error', 'info', 'success', 'warning'].includes(this.type)) return false;
+      if (!['error', 'info', 'sucess', 'warning'].includes(this.type)) return false;
       return `$${this.type}`;
     },
 
@@ -58704,7 +58716,7 @@ const defaultMenuProps = { ..._VSelect_VSelect__WEBPACK_IMPORTED_MODULE_1__["def
     changeSelectedIndex(keyCode) {
       // Do not allow changing of selectedIndex
       // when search is dirty
-      if (this.searchIsDirty || !this.multiple) return;
+      if (this.searchIsDirty) return;
       if (![_util_helpers__WEBPACK_IMPORTED_MODULE_3__["keyCodes"].backspace, _util_helpers__WEBPACK_IMPORTED_MODULE_3__["keyCodes"].left, _util_helpers__WEBPACK_IMPORTED_MODULE_3__["keyCodes"].right, _util_helpers__WEBPACK_IMPORTED_MODULE_3__["keyCodes"].delete].includes(keyCode)) return;
       const index = this.selectedItems.length - 1;
 
@@ -62436,33 +62448,30 @@ __webpack_require__.r(__webpack_exports__);
 /*!************************************************************!*\
   !*** ./node_modules/vuetify/lib/components/VCard/index.js ***!
   \************************************************************/
-/*! exports provided: VCard, VCardActions, VCardSubtitle, VCardText, VCardTitle, default */
+/*! exports provided: VCard, VCardTitle, VCardActions, VCardText, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VCardActions", function() { return VCardActions; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VCardSubtitle", function() { return VCardSubtitle; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VCardText", function() { return VCardText; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VCardTitle", function() { return VCardTitle; });
-/* harmony import */ var _VCard__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./VCard */ "./node_modules/vuetify/lib/components/VCard/VCard.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCard", function() { return _VCard__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VCardActions", function() { return VCardActions; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VCardText", function() { return VCardText; });
+/* harmony import */ var _util_helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../util/helpers */ "./node_modules/vuetify/lib/util/helpers.js");
+/* harmony import */ var _VCard__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./VCard */ "./node_modules/vuetify/lib/components/VCard/VCard.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCard", function() { return _VCard__WEBPACK_IMPORTED_MODULE_1__["default"]; });
 
-/* harmony import */ var _util_helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../util/helpers */ "./node_modules/vuetify/lib/util/helpers.js");
 
 
-const VCardActions = Object(_util_helpers__WEBPACK_IMPORTED_MODULE_1__["createSimpleFunctional"])('v-card__actions');
-const VCardSubtitle = Object(_util_helpers__WEBPACK_IMPORTED_MODULE_1__["createSimpleFunctional"])('v-card__subtitle');
-const VCardText = Object(_util_helpers__WEBPACK_IMPORTED_MODULE_1__["createSimpleFunctional"])('v-card__text');
-const VCardTitle = Object(_util_helpers__WEBPACK_IMPORTED_MODULE_1__["createSimpleFunctional"])('v-card__title');
+const VCardActions = Object(_util_helpers__WEBPACK_IMPORTED_MODULE_0__["createSimpleFunctional"])('v-card__actions');
+const VCardText = Object(_util_helpers__WEBPACK_IMPORTED_MODULE_0__["createSimpleFunctional"])('v-card__text');
+const VCardTitle = Object(_util_helpers__WEBPACK_IMPORTED_MODULE_0__["createSimpleFunctional"])('v-card__title');
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   $_vuetify_subcomponents: {
-    VCard: _VCard__WEBPACK_IMPORTED_MODULE_0__["default"],
+    VCard: _VCard__WEBPACK_IMPORTED_MODULE_1__["default"],
+    VCardTitle,
     VCardActions,
-    VCardSubtitle,
-    VCardText,
-    VCardTitle
+    VCardText
   }
 });
 //# sourceMappingURL=index.js.map
@@ -62619,9 +62628,6 @@ __webpack_require__.r(__webpack_exports__);
       for (let i = 0; i < length; i++) {
         const child = this.$createElement(_VBtn__WEBPACK_IMPORTED_MODULE_2__["default"], {
           staticClass: 'v-carousel__controls__item',
-          attrs: {
-            'aria-label': this.$vuetify.lang.t('$vuetify.carousel.ariaLabel.delimiter', i + 1, length)
-          },
           props: {
             icon: true,
             small: true,
@@ -66166,13 +66172,6 @@ function searchTableItems(items, search, headersWithCustomFilters, headersWithou
         slot: 'row.content'
       }, this.genDefaultRows(items, props))];
 
-      const toggleFn = () => this.$set(this.openCache, group, !this.openCache[group]);
-
-      const removeFn = () => props.updateOptions({
-        groupBy: [],
-        groupDesc: []
-      });
-
       if (this.$scopedSlots['group.header']) {
         children.unshift(this.$createElement('template', {
           slot: 'column.header'
@@ -66180,9 +66179,7 @@ function searchTableItems(items, search, headersWithCustomFilters, headersWithou
           group,
           groupBy: props.options.groupBy,
           items,
-          headers: this.computedHeaders,
-          toggle: toggleFn,
-          remove: removeFn
+          headers: this.computedHeaders
         })]));
       } else {
         const toggle = this.$createElement(_VBtn__WEBPACK_IMPORTED_MODULE_3__["default"], {
@@ -66192,7 +66189,7 @@ function searchTableItems(items, search, headersWithCustomFilters, headersWithou
             small: true
           },
           on: {
-            click: toggleFn
+            click: () => this.$set(this.openCache, group, !this.openCache[group])
           }
         }, [this.$createElement(_VIcon__WEBPACK_IMPORTED_MODULE_5__["default"], [isOpen ? '$minus' : '$plus'])]);
         const remove = this.$createElement(_VBtn__WEBPACK_IMPORTED_MODULE_3__["default"], {
@@ -66202,7 +66199,10 @@ function searchTableItems(items, search, headersWithCustomFilters, headersWithou
             small: true
           },
           on: {
-            click: removeFn
+            click: () => props.updateOptions({
+              groupBy: [],
+              groupDesc: []
+            })
           }
         }, [this.$createElement(_VIcon__WEBPACK_IMPORTED_MODULE_5__["default"], ['$close'])]);
         const column = this.$createElement('td', {
@@ -75744,23 +75744,21 @@ __webpack_require__.r(__webpack_exports__);
     iconProps() {
       const {
         dark,
+        medium,
         large,
         light,
-        medium,
         small,
         size,
-        xLarge,
-        xSmall
+        xLarge
       } = this.$props;
       return {
         dark,
+        medium,
         large,
         light,
-        medium,
         size,
         small,
-        xLarge,
-        xSmall
+        xLarge
       };
     },
 
@@ -76350,7 +76348,7 @@ const baseMixins = Object(_util_mixins__WEBPACK_IMPORTED_MODULE_11__["default"])
     },
 
     genCommaSelection(item, index, last) {
-      const color = index === this.selectedIndex && this.computedColor;
+      const color = index === this.selectedIndex && this.color;
       const isDisabled = this.disabled || this.getDisabled(item);
       return this.$createElement('div', this.setTextColor(color, {
         staticClass: 'v-select__selection v-select__selection--comma',
@@ -78475,23 +78473,17 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _src_components_VSparkline_VSparkline_sass__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../src/components/VSparkline/VSparkline.sass */ "./node_modules/vuetify/src/components/VSparkline/VSparkline.sass");
-/* harmony import */ var _src_components_VSparkline_VSparkline_sass__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_src_components_VSparkline_VSparkline_sass__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _mixins_colorable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../mixins/colorable */ "./node_modules/vuetify/lib/mixins/colorable/index.js");
-/* harmony import */ var _mixins_themeable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../mixins/themeable */ "./node_modules/vuetify/lib/mixins/themeable/index.js");
-/* harmony import */ var _util_mixins__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../util/mixins */ "./node_modules/vuetify/lib/util/mixins.js");
-/* harmony import */ var _helpers_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./helpers/core */ "./node_modules/vuetify/lib/components/VSparkline/helpers/core.js");
-/* harmony import */ var _helpers_path__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./helpers/path */ "./node_modules/vuetify/lib/components/VSparkline/helpers/path.js");
-// Styles
- // Mixins
-
-
+/* harmony import */ var _mixins_colorable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../mixins/colorable */ "./node_modules/vuetify/lib/mixins/colorable/index.js");
+/* harmony import */ var _util_mixins__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../util/mixins */ "./node_modules/vuetify/lib/util/mixins.js");
+/* harmony import */ var _helpers_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helpers/core */ "./node_modules/vuetify/lib/components/VSparkline/helpers/core.js");
+/* harmony import */ var _helpers_path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helpers/path */ "./node_modules/vuetify/lib/components/VSparkline/helpers/path.js");
+// Mixins
  // Utilities
 
 
 
 
-/* harmony default export */ __webpack_exports__["default"] = (Object(_util_mixins__WEBPACK_IMPORTED_MODULE_3__["default"])(_mixins_colorable__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_themeable__WEBPACK_IMPORTED_MODULE_2__["default"]).extend({
+/* harmony default export */ __webpack_exports__["default"] = (Object(_util_mixins__WEBPACK_IMPORTED_MODULE_1__["default"])(_mixins_colorable__WEBPACK_IMPORTED_MODULE_0__["default"]).extend({
   name: 'VSparkline',
   inheritAttrs: false,
   props: {
@@ -78568,13 +78560,6 @@ __webpack_require__.r(__webpack_exports__);
     lastLength: 0
   }),
   computed: {
-    classes() {
-      return {
-        'v-sparkline': true,
-        ...this.themeClasses
-      };
-    },
-
     parsedPadding() {
       return Number(this.padding);
     },
@@ -78663,7 +78648,7 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     _values() {
-      return this.type === 'trend' ? Object(_helpers_core__WEBPACK_IMPORTED_MODULE_4__["genPoints"])(this.normalizedValues, this.boundary) : Object(_helpers_core__WEBPACK_IMPORTED_MODULE_4__["genBars"])(this.normalizedValues, this.boundary);
+      return this.type === 'trend' ? Object(_helpers_core__WEBPACK_IMPORTED_MODULE_2__["genPoints"])(this.normalizedValues, this.boundary) : Object(_helpers_core__WEBPACK_IMPORTED_MODULE_2__["genBars"])(this.normalizedValues, this.boundary);
     },
 
     textY() {
@@ -78746,11 +78731,11 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     genPath() {
-      const points = Object(_helpers_core__WEBPACK_IMPORTED_MODULE_4__["genPoints"])(this.normalizedValues, this.boundary);
+      const points = Object(_helpers_core__WEBPACK_IMPORTED_MODULE_2__["genPoints"])(this.normalizedValues, this.boundary);
       return this.$createElement('path', {
         attrs: {
           id: this._uid,
-          d: Object(_helpers_path__WEBPACK_IMPORTED_MODULE_5__["genPath"])(points, this._radius, this.fill, this.parsedHeight),
+          d: Object(_helpers_path__WEBPACK_IMPORTED_MODULE_3__["genPath"])(points, this._radius, this.fill, this.parsedHeight),
           fill: this.fill ? `url(#${this._uid})` : 'none',
           stroke: this.fill ? 'none' : `url(#${this._uid})`
         },
@@ -78778,14 +78763,13 @@ __webpack_require__.r(__webpack_exports__);
 
     genBars() {
       if (!this.value || this.totalValues < 2) return undefined;
-      const bars = Object(_helpers_core__WEBPACK_IMPORTED_MODULE_4__["genBars"])(this.normalizedValues, this.boundary);
+      const bars = Object(_helpers_core__WEBPACK_IMPORTED_MODULE_2__["genBars"])(this.normalizedValues, this.boundary);
       const offsetX = (Math.abs(bars[0].x - bars[1].x) - this._lineWidth) / 2;
       return this.$createElement('svg', {
         attrs: {
           display: 'block',
           viewBox: `0 0 ${this.totalWidth} ${this.totalHeight}`
-        },
-        class: this.classes
+        }
       }, [this.genGradient(), this.genClipPath(bars, offsetX, this._lineWidth, 'sparkline-bar-' + this._uid), this.hasLabels ? this.genLabels(offsetX) : undefined, this.$createElement('g', {
         attrs: {
           'clip-path': `url(#sparkline-bar-${this._uid}-clip)`,
@@ -78835,8 +78819,7 @@ __webpack_require__.r(__webpack_exports__);
           display: 'block',
           'stroke-width': this._lineWidth || 1,
           viewBox: `0 0 ${this.width} ${this.totalHeight}`
-        },
-        class: this.classes
+        }
       }), [this.genGradient(), this.hasLabels && this.genLabels(-(this._lineWidth / 2)), this.genPath()]);
     }
 
@@ -81084,7 +81067,7 @@ const dirtyTypes = ['color', 'file', 'time', 'date', 'datetime-local', 'week', '
 
     setLabelWidth() {
       if (!this.outlined || !this.$refs.label) return;
-      this.labelWidth = this.$refs.label.scrollWidth * 0.75 + 6;
+      this.labelWidth = this.$refs.label.offsetWidth * 0.75 + 6;
     },
 
     setPrefixWidth() {
@@ -83313,7 +83296,7 @@ const VTreeviewNodeProps = {
           click: () => {
             if (this.disabled) return;
 
-            if (this.openOnClick && this.hasChildren) {
+            if (this.openOnClick && this.children) {
               this.open();
             } else if (this.activatable) {
               this.isActive = !this.isActive;
@@ -83931,7 +83914,7 @@ __webpack_require__.r(__webpack_exports__);
 /*!******************************************************!*\
   !*** ./node_modules/vuetify/lib/components/index.js ***!
   \******************************************************/
-/*! exports provided: VApp, VAppBar, VAppBarNavIcon, VAlert, VAutocomplete, VAvatar, VBadge, VBanner, VBottomNavigation, VBottomSheet, VBreadcrumbs, VBreadcrumbsItem, VBreadcrumbsDivider, VBtn, VBtnToggle, VCalendar, VCalendarDaily, VCalendarWeekly, VCalendarMonthly, VCard, VCardActions, VCardSubtitle, VCardText, VCardTitle, VCarousel, VCarouselItem, VCheckbox, VSimpleCheckbox, VChip, VChipGroup, VColorPicker, VColorPickerSwatches, VColorPickerCanvas, VContent, VCombobox, VCounter, VData, VDataIterator, VDataFooter, VDataTable, VEditDialog, VTableOverflow, VDataTableHeader, VSimpleTable, VVirtualTable, VDatePicker, VDatePickerTitle, VDatePickerHeader, VDatePickerDateTable, VDatePickerMonthTable, VDatePickerYears, VDialog, VDivider, VExpansionPanels, VExpansionPanel, VExpansionPanelHeader, VExpansionPanelContent, VFileInput, VFooter, VForm, VContainer, VCol, VRow, VSpacer, VLayout, VFlex, VHover, VIcon, VImg, VInput, VItem, VItemGroup, VLabel, VLazy, VListItemActionText, VListItemContent, VListItemTitle, VListItemSubtitle, VList, VListGroup, VListItem, VListItemAction, VListItemAvatar, VListItemIcon, VListItemGroup, VMenu, VMessages, VNavigationDrawer, VOverflowBtn, VOverlay, VPagination, VSheet, VParallax, VPicker, VProgressCircular, VProgressLinear, VRadioGroup, VRadio, VRangeSlider, VRating, VResponsive, VSelect, VSkeletonLoader, VSlider, VSlideGroup, VSlideItem, VSnackbar, VSparkline, VSpeedDial, VStepper, VStepperContent, VStepperStep, VStepperHeader, VStepperItems, VSubheader, VSwitch, VSystemBar, VTabs, VTab, VTabItem, VTabsItems, VTabsSlider, VTextarea, VTextField, VTimeline, VTimelineItem, VTimePicker, VTimePickerClock, VTimePickerTitle, VToolbar, VToolbarItems, VToolbarTitle, VTooltip, VTreeview, VTreeviewNode, VWindow, VWindowItem, VCarouselTransition, VCarouselReverseTransition, VTabTransition, VTabReverseTransition, VMenuTransition, VFabTransition, VDialogTransition, VDialogBottomTransition, VFadeTransition, VScaleTransition, VScrollXTransition, VScrollXReverseTransition, VScrollYTransition, VScrollYReverseTransition, VSlideXTransition, VSlideXReverseTransition, VSlideYTransition, VSlideYReverseTransition, VExpandTransition, VExpandXTransition */
+/*! exports provided: VApp, VAppBar, VAppBarNavIcon, VAlert, VAutocomplete, VAvatar, VBadge, VBanner, VBottomNavigation, VBottomSheet, VBreadcrumbs, VBreadcrumbsItem, VBreadcrumbsDivider, VBtn, VBtnToggle, VCalendar, VCalendarDaily, VCalendarWeekly, VCalendarMonthly, VCard, VCardTitle, VCardActions, VCardText, VCarousel, VCarouselItem, VCheckbox, VSimpleCheckbox, VChip, VChipGroup, VColorPicker, VColorPickerSwatches, VColorPickerCanvas, VContent, VCombobox, VCounter, VData, VDataIterator, VDataFooter, VDataTable, VEditDialog, VTableOverflow, VDataTableHeader, VSimpleTable, VVirtualTable, VDatePicker, VDatePickerTitle, VDatePickerHeader, VDatePickerDateTable, VDatePickerMonthTable, VDatePickerYears, VDialog, VDivider, VExpansionPanels, VExpansionPanel, VExpansionPanelHeader, VExpansionPanelContent, VFileInput, VFooter, VForm, VContainer, VCol, VRow, VSpacer, VLayout, VFlex, VHover, VIcon, VImg, VInput, VItem, VItemGroup, VLabel, VLazy, VListItemActionText, VListItemContent, VListItemTitle, VListItemSubtitle, VList, VListGroup, VListItem, VListItemAction, VListItemAvatar, VListItemIcon, VListItemGroup, VMenu, VMessages, VNavigationDrawer, VOverflowBtn, VOverlay, VPagination, VSheet, VParallax, VPicker, VProgressCircular, VProgressLinear, VRadioGroup, VRadio, VRangeSlider, VRating, VResponsive, VSelect, VSkeletonLoader, VSlider, VSlideGroup, VSlideItem, VSnackbar, VSparkline, VSpeedDial, VStepper, VStepperContent, VStepperStep, VStepperHeader, VStepperItems, VSubheader, VSwitch, VSystemBar, VTabs, VTab, VTabItem, VTabsItems, VTabsSlider, VTextarea, VTextField, VTimeline, VTimelineItem, VTimePicker, VTimePickerClock, VTimePickerTitle, VToolbar, VToolbarItems, VToolbarTitle, VTooltip, VTreeview, VTreeviewNode, VWindow, VWindowItem, VCarouselTransition, VCarouselReverseTransition, VTabTransition, VTabReverseTransition, VMenuTransition, VFabTransition, VDialogTransition, VDialogBottomTransition, VFadeTransition, VScaleTransition, VScrollXTransition, VScrollXReverseTransition, VScrollYTransition, VScrollYReverseTransition, VSlideXTransition, VSlideXReverseTransition, VSlideYTransition, VSlideYReverseTransition, VExpandTransition, VExpandXTransition */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -83990,13 +83973,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _VCard__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./VCard */ "./node_modules/vuetify/lib/components/VCard/index.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCard", function() { return _VCard__WEBPACK_IMPORTED_MODULE_13__["VCard"]; });
 
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardTitle", function() { return _VCard__WEBPACK_IMPORTED_MODULE_13__["VCardTitle"]; });
+
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardActions", function() { return _VCard__WEBPACK_IMPORTED_MODULE_13__["VCardActions"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardSubtitle", function() { return _VCard__WEBPACK_IMPORTED_MODULE_13__["VCardSubtitle"]; });
-
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardText", function() { return _VCard__WEBPACK_IMPORTED_MODULE_13__["VCardText"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardTitle", function() { return _VCard__WEBPACK_IMPORTED_MODULE_13__["VCardTitle"]; });
 
 /* harmony import */ var _VCarousel__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./VCarousel */ "./node_modules/vuetify/lib/components/VCarousel/index.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCarousel", function() { return _VCarousel__WEBPACK_IMPORTED_MODULE_14__["VCarousel"]; });
@@ -85360,7 +85341,7 @@ class Vuetify {
 }
 Vuetify.install = _install__WEBPACK_IMPORTED_MODULE_0__["install"];
 Vuetify.installed = false;
-Vuetify.version = "2.1.5";
+Vuetify.version = "2.1.3";
 //# sourceMappingURL=framework.js.map
 
 /***/ }),
@@ -85369,7 +85350,7 @@ Vuetify.version = "2.1.5";
 /*!*******************************************!*\
   !*** ./node_modules/vuetify/lib/index.js ***!
   \*******************************************/
-/*! exports provided: ClickOutside, Intersect, Mutate, Resize, Ripple, Scroll, Touch, colors, default, VApp, VAppBar, VAppBarNavIcon, VAlert, VAutocomplete, VAvatar, VBadge, VBanner, VBottomNavigation, VBottomSheet, VBreadcrumbs, VBreadcrumbsItem, VBreadcrumbsDivider, VBtn, VBtnToggle, VCalendar, VCalendarDaily, VCalendarWeekly, VCalendarMonthly, VCard, VCardActions, VCardSubtitle, VCardText, VCardTitle, VCarousel, VCarouselItem, VCheckbox, VSimpleCheckbox, VChip, VChipGroup, VColorPicker, VColorPickerSwatches, VColorPickerCanvas, VContent, VCombobox, VCounter, VData, VDataIterator, VDataFooter, VDataTable, VEditDialog, VTableOverflow, VDataTableHeader, VSimpleTable, VVirtualTable, VDatePicker, VDatePickerTitle, VDatePickerHeader, VDatePickerDateTable, VDatePickerMonthTable, VDatePickerYears, VDialog, VDivider, VExpansionPanels, VExpansionPanel, VExpansionPanelHeader, VExpansionPanelContent, VFileInput, VFooter, VForm, VContainer, VCol, VRow, VSpacer, VLayout, VFlex, VHover, VIcon, VImg, VInput, VItem, VItemGroup, VLabel, VLazy, VListItemActionText, VListItemContent, VListItemTitle, VListItemSubtitle, VList, VListGroup, VListItem, VListItemAction, VListItemAvatar, VListItemIcon, VListItemGroup, VMenu, VMessages, VNavigationDrawer, VOverflowBtn, VOverlay, VPagination, VSheet, VParallax, VPicker, VProgressCircular, VProgressLinear, VRadioGroup, VRadio, VRangeSlider, VRating, VResponsive, VSelect, VSkeletonLoader, VSlider, VSlideGroup, VSlideItem, VSnackbar, VSparkline, VSpeedDial, VStepper, VStepperContent, VStepperStep, VStepperHeader, VStepperItems, VSubheader, VSwitch, VSystemBar, VTabs, VTab, VTabItem, VTabsItems, VTabsSlider, VTextarea, VTextField, VTimeline, VTimelineItem, VTimePicker, VTimePickerClock, VTimePickerTitle, VToolbar, VToolbarItems, VToolbarTitle, VTooltip, VTreeview, VTreeviewNode, VWindow, VWindowItem, VCarouselTransition, VCarouselReverseTransition, VTabTransition, VTabReverseTransition, VMenuTransition, VFabTransition, VDialogTransition, VDialogBottomTransition, VFadeTransition, VScaleTransition, VScrollXTransition, VScrollXReverseTransition, VScrollYTransition, VScrollYReverseTransition, VSlideXTransition, VSlideXReverseTransition, VSlideYTransition, VSlideYReverseTransition, VExpandTransition, VExpandXTransition */
+/*! exports provided: ClickOutside, Intersect, Mutate, Resize, Ripple, Scroll, Touch, colors, default, VApp, VAppBar, VAppBarNavIcon, VAlert, VAutocomplete, VAvatar, VBadge, VBanner, VBottomNavigation, VBottomSheet, VBreadcrumbs, VBreadcrumbsItem, VBreadcrumbsDivider, VBtn, VBtnToggle, VCalendar, VCalendarDaily, VCalendarWeekly, VCalendarMonthly, VCard, VCardTitle, VCardActions, VCardText, VCarousel, VCarouselItem, VCheckbox, VSimpleCheckbox, VChip, VChipGroup, VColorPicker, VColorPickerSwatches, VColorPickerCanvas, VContent, VCombobox, VCounter, VData, VDataIterator, VDataFooter, VDataTable, VEditDialog, VTableOverflow, VDataTableHeader, VSimpleTable, VVirtualTable, VDatePicker, VDatePickerTitle, VDatePickerHeader, VDatePickerDateTable, VDatePickerMonthTable, VDatePickerYears, VDialog, VDivider, VExpansionPanels, VExpansionPanel, VExpansionPanelHeader, VExpansionPanelContent, VFileInput, VFooter, VForm, VContainer, VCol, VRow, VSpacer, VLayout, VFlex, VHover, VIcon, VImg, VInput, VItem, VItemGroup, VLabel, VLazy, VListItemActionText, VListItemContent, VListItemTitle, VListItemSubtitle, VList, VListGroup, VListItem, VListItemAction, VListItemAvatar, VListItemIcon, VListItemGroup, VMenu, VMessages, VNavigationDrawer, VOverflowBtn, VOverlay, VPagination, VSheet, VParallax, VPicker, VProgressCircular, VProgressLinear, VRadioGroup, VRadio, VRangeSlider, VRating, VResponsive, VSelect, VSkeletonLoader, VSlider, VSlideGroup, VSlideItem, VSnackbar, VSparkline, VSpeedDial, VStepper, VStepperContent, VStepperStep, VStepperHeader, VStepperItems, VSubheader, VSwitch, VSystemBar, VTabs, VTab, VTabItem, VTabsItems, VTabsSlider, VTextarea, VTextField, VTimeline, VTimelineItem, VTimePicker, VTimePickerClock, VTimePickerTitle, VToolbar, VToolbarItems, VToolbarTitle, VTooltip, VTreeview, VTreeviewNode, VWindow, VWindowItem, VCarouselTransition, VCarouselReverseTransition, VTabTransition, VTabReverseTransition, VMenuTransition, VFabTransition, VDialogTransition, VDialogBottomTransition, VFadeTransition, VScaleTransition, VScrollXTransition, VScrollXReverseTransition, VScrollYTransition, VScrollYReverseTransition, VSlideXTransition, VSlideXReverseTransition, VSlideYTransition, VSlideYReverseTransition, VExpandTransition, VExpandXTransition */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -85415,13 +85396,11 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCard", function() { return _components__WEBPACK_IMPORTED_MODULE_0__["VCard"]; });
 
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardTitle", function() { return _components__WEBPACK_IMPORTED_MODULE_0__["VCardTitle"]; });
+
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardActions", function() { return _components__WEBPACK_IMPORTED_MODULE_0__["VCardActions"]; });
 
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardSubtitle", function() { return _components__WEBPACK_IMPORTED_MODULE_0__["VCardSubtitle"]; });
-
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardText", function() { return _components__WEBPACK_IMPORTED_MODULE_0__["VCardText"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCardTitle", function() { return _components__WEBPACK_IMPORTED_MODULE_0__["VCardTitle"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VCarousel", function() { return _components__WEBPACK_IMPORTED_MODULE_0__["VCarousel"]; });
 
@@ -85827,10 +85806,7 @@ __webpack_require__.r(__webpack_exports__);
   noDataText: 'No data available',
   carousel: {
     prev: 'Previous visual',
-    next: 'Next visual',
-    ariaLabel: {
-      delimiter: 'Carousel slide {0} of {1}'
-    }
+    next: 'Next visual'
   },
   calendar: {
     moreEvents: '{0} more'
@@ -87366,7 +87342,6 @@ __webpack_require__.r(__webpack_exports__);
 
   watch: {
     hideOverlay(value) {
-      if (!this.isActive) return;
       if (value) this.removeOverlay();else this.genOverlay();
     }
 
@@ -92642,17 +92617,6 @@ function rebuildFunctionalSlots(slots, h) {
 /*!**********************************************************************!*\
   !*** ./node_modules/vuetify/src/components/VSnackbar/VSnackbar.sass ***!
   \**********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
-
-/***/ }),
-
-/***/ "./node_modules/vuetify/src/components/VSparkline/VSparkline.sass":
-/*!************************************************************************!*\
-  !*** ./node_modules/vuetify/src/components/VSparkline/VSparkline.sass ***!
-  \************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 

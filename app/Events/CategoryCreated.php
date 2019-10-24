@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use App\Model\Category;
-class CategoryCreated implements ShouldBroadcast
+class CategoryCreated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -23,16 +23,5 @@ class CategoryCreated implements ShouldBroadcast
     public function __construct(Category $cat)
     {
         $this->cat = $cat;
-    }
-
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
-     */
-    public function broadcastOn()
-    {
-        //return new PrivateChannel('channel-name');
-        return new Channel('category');
     }
 }

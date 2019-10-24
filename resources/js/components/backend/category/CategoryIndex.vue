@@ -296,6 +296,9 @@
 					    }
 					}).then((response)=>{
 						this.waitDialog = false
+						this.importDialog = false
+						this.triggerSb({text:'Import Successful',color:'success'})
+						this.getDataFromApi()
 					}).catch((error)=>{
 						this.waitDialog = false
 						if(error.response.status == 422){

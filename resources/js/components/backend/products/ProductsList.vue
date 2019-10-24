@@ -367,14 +367,12 @@
 				}).catch((error)=>{
 					this.waitDialog = false
 					if(error.response.status == 422){
-						var str = '';
-						Object.keys(error.response.data.messages).forEach((key)=>{
-							str += '<p>Error in Line:'+(parseInt(key)+1)+'<br><ul>'
-							Object.keys(error.response.data.messages[key]).forEach((item)=>{
-								str+='<li>'+error.response.data.messages[key][item].message+'</li>'
-							})
-							str+='</ul></p>'
+						var str = '<ul>';
+						Object.keys(error.response.data.errors).forEach((key)=>{
+							var key_terms = key.split(".")
+							str+='<li>Error in Line'+parseInt(key_terms[0]+1)+', Column '+key_terms[1]+', Message:'+error.response.data.errors[key]+'</li>'
 						})
+						str+='</ul>'
 						this.importErrors = str;
 						this.importAlert = true
 					}

@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Validators\Failure;
+use App\Events\CategoryCreated;
 
 class CategoriesImport implements ToCollection, WithHeadingRow 
 {
@@ -71,6 +72,7 @@ class CategoriesImport implements ToCollection, WithHeadingRow
                 $obj = new Category;
                 $row['taxonomy_id'] = $this->taxonomy_id;
                 $obj->dbsave($row, $taxonomy);
+                event(new CategoryCreated($obj));
             }
         }
         if($this->method == 'update')

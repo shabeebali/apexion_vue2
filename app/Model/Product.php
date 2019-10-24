@@ -133,39 +133,46 @@ class Product extends Model
         $cat_ids = [];
         $code = [];
         foreach ($taxonomies as $taxonomy) {
-            $cat_ids[] = $row[$taxonomy->slug];
+            $cat_ids[] = $row['taxonomy_'.$taxonomy->slug];
         }
         $this->categories()->syncWithoutDetaching($cat_ids);
         $sku = $this->getSku($cat_ids);
         $this->sku = $sku;
         $pl_sync = [];
         foreach ($pricelists as $pricelist) {
-            $pl_sync[$pricelist->id] = ['margin' => $row[$pricelist->slug] ];
+            $pl_sync[$pricelist->id] = ['margin' => $row['pricelist_'.$pricelist->slug] ];
         }
         $this->pricelists()->syncWithoutDetaching($pl_sync);
         
         $wh_sync = [];
         $total_stock = 0;
         foreach ($warehouses as $warehouse) {
-            $wh_sync[$warehouse->id] = ['stock'=>$row[$warehouse->slug],'batch_id'=>0,'expiry_date'=>today()];
-            $total_stock+=$row[$warehouse->slug];
+            $wh_sync[$warehouse->id] = ['stock'=>$row['warehouse_'.$warehouse->slug],'batch_id'=>0,'expiry_date'=>today()];
+            $total_stock+=$row['warehouse_'.$warehouse->slug];
         }
         $this->total_stock = $total_stock;
         $this->warehouses()->syncWithoutDetaching($wh_sync);
-
-        $medias = explode(",", $row['medias']);
-        foreach ($medias as $url) {
-            $media = new ProductMedias;
-            $media->url = $url;
-            $media->product_id = $this->id;
-            $media->save();
+        if($row['medias']){
+            $medias = explode(",", $row['medias']);
+            foreach ($medias as $url) {
+                $media = new ProductMedias;
+                $media->url = $url;
+                $media->product_id = $this->id;
+                $media->save();
+            }
         }
-        $aliases = json_decode($row['aliases']);
-        foreach ($aliases as $name) {
-            $alias = new ProductAlias;
-            $alias->alias = $name;
-            $alias->product_id = $this->id;
-            $alias->save();
+        if($row['aliases']){
+            json_decode($row['aliases']);
+            $aliases = (json_last_error() == JSON_ERROR_NONE) ? json_decode($row['aliases']): explode(",",$row['aliases']);
+            foreach ($aliases as $name) {
+                $alias = new ProductAlias;
+                $alias->alias = $name;
+                $alias->product_id = $this->id;
+                $alias->save();
+            }
+        }
+        else{
+            $aliases = [];
         }
         $this->save();
         $tag_arr = [];

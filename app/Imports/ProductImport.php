@@ -3,9 +3,6 @@
 namespace App\Imports;
 
 use App\Model\Product;
-use App\Model\Taxonomy;
-use App\Model\Pricelist;
-use App\Model\Warehouse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -16,9 +13,15 @@ class ProductImport implements ToCollection, WithHeadingRow
 {
     use Importable;
     protected $method = '';
-    public function __construct($method)
+    public $taxonomies = NULL;
+    public $pricelists = NULL;
+    public $warehouses = NULL;
+    public function __construct($method, $taxonomies, $pricelists, $warehouses)
     {
         $this->method =  $method;
+        $this->taxonomies = $taxonomies;
+        $this->pricelists = $pricelists;
+        $this->warehouses = $warehouses;
     }
     public function collection(Collection $rows)
     {
@@ -33,19 +36,20 @@ class ProductImport implements ToCollection, WithHeadingRow
                 '*.weight' => 'numeric',
                 '*.gst' => 'required'
              ];
-            $taxonomies = Taxonomy::all();
-            $pricelists = Pricelist::all();
-            $warehouses = Warehouse::all();
-            foreach ($taxonomies as $taxonomy) {
+            foreach ($this->taxonomies as $taxonomy) {
                 if($taxonomy->in_pc)
                 {
-                    $val_arr['*.'.$taxonomy->slug] = 'required';
+                    $val_arr['*.taxonomy_'.$taxonomy->slug] = 'required';
                 }
             }
-            Validator::make($rows->toArray(),$val_arr)->validate();
+            Validator::make($rows->toArray(),$val_arr,[
+                'required' => 'The value is required',
+                '*.name.unique' => 'The name is already taken',
+                'numeric' => 'The value must be of numeric type',
+            ])->validate();
             foreach ($rows as $row) {
                 $product = new Product;
-                $product->dbsave($row->toArray(), $taxonomies, $pricelists, $warehouses);
+                $product->dbsave($row->toArray(), $this->taxonomies, $this->pricelists, $this->warehouses);
             }
         }
     }        

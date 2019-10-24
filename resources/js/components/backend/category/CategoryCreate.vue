@@ -54,7 +54,7 @@
 				</v-row>
 			</v-card-actions>
 	    </v-card>
-	    <v-snackbar bottom right v-model="snackbar" timeout=3000 :color="sbColor">{{sbText}} <v-btn text @click="snackbar = false">CLOSE</v-btn></v-snackbar>
+	    <v-snackbar bottom right v-model="snackbar" :timeout="sbTimeout" :color="sbColor">{{sbText}} <v-btn text @click="snackbar = false">CLOSE</v-btn></v-snackbar>
 	</v-dialog>
 </template>
 <script>
@@ -89,6 +89,7 @@
 				snackbar:false,
 				sbColor:'',
 				sbText:'',
+				sbTimeout:3000,
 				submitTxt:'',
 				formTitle:'',
 				btnloading:false,
