@@ -2690,38 +2690,147 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
     var _this = this;
 
-    axios.get('taxonomies?withcat=1').then(function (res) {
-      _this.taxonomies = res.data.data;
-    });
-    axios.get('pricelists').then(function (res) {
-      var data = res.data.data;
-      data.forEach(function (item, index) {
-        data[index].value = '0';
-      });
-      _this.pricelists = data;
-    });
-    axios.get('warehouses').then(function (res) {
-      var data = res.data.data;
-      data.forEach(function (item, index) {
-        data[index].value = '0';
-      });
-      _this.warehouses = data;
+    axios.get('places').then(function (res) {
+      _this.countries = res.data.countries;
+      _this.phone_countries = res.data.phone_countries;
     });
   },
   computed: {
     baseUrl: function baseUrl() {
       return window.base_url.content;
-    },
-    getTotalStock: function getTotalStock() {
-      var total = 0;
-      this.warehouses.forEach(function (item) {
-        total = total + parseInt(item.value);
-      });
-      return total;
     }
   },
   watch: {
@@ -2730,15 +2839,37 @@ __webpack_require__.r(__webpack_exports__);
 
       if (this.mode == 'create') {
         this.submitTxt = 'Save';
-        this.formTitle = 'Create Product';
+        this.formTitle = 'Create Customer';
         this.e1 = 1;
+        this.fd = {
+          name: {
+            value: '',
+            error: ''
+          },
+          addresses: [{
+            line1: '',
+            line2: '',
+            pin: '',
+            country_id: 0,
+            state_id: 0,
+            city_id: 0,
+            states: [],
+            cities: [],
+            init_bal: '',
+            init_bal_date: new Date().toISOString().substr(0, 10),
+            phones: [{
+              value: '',
+              country_id: 101
+            }]
+          }]
+        };
       }
 
       if (this.mode == 'edit') {
         this.submitTxt = 'Update';
-        this.formTitle = 'Edit Product';
+        this.formTitle = 'Edit Customer';
         this.passFormVal = true;
-        axios.get('products/' + this.pId).then(function (response) {
+        axios.get('customers/' + this.cId).then(function (response) {
           var dd = response.data.data;
         });
       }
@@ -2749,50 +2880,29 @@ __webpack_require__.r(__webpack_exports__);
       },
       deep: true
     },
-    plFormVal: {
+    addressFormVal: {
       handler: function handler() {
-        this.$refs.formPl.validate();
-      },
-      deep: true
-    },
-    categoryFormVal: {
-      handler: function handler() {
-        this.$refs.formCategory.validate();
-      },
-      deep: true
-    },
-    stockFormVal: {
-      handler: function handler() {
-        this.$refs.formStock.validate();
-      },
-      deep: true
-    },
-    mediaFormVal: {
-      handler: function handler() {
-        this.$refs.formMedia.validate();
+        this.$refs.formAddress.validate();
       },
       deep: true
     }
   },
-  props: ['mode', 'dialog', 'pId'],
+  props: ['mode', 'dialog', 'cId'],
   data: function data() {
     var _this2 = this;
 
     return {
+      stateLoading: false,
+      cityLoading: false,
       e1: 1,
-      imgFile: null,
+      date_menu: false,
       submitTxt: '',
       formTitle: '',
       closeConfirm: false,
       waitDialog: false,
-      imgDialog: false,
       btnloading: false,
       detailsFormVal: null,
-      categoryFormVal: null,
-      stockFormVal: null,
-      plFormVal: null,
-      mediaFormVal: null,
-      imgUrl: null,
+      addressFormVal: null,
       sbColor: '',
       sbText: '',
       sbTimeout: 3000,
@@ -2802,54 +2912,27 @@ __webpack_require__.r(__webpack_exports__);
           value: '',
           error: ''
         },
-        hsn: {
-          value: '',
-          error: ''
-        },
-        mrp: {
-          value: '',
-          error: ''
-        },
-        landing_price: {
-          value: '',
-          error: ''
-        },
-        gsp_customer: {
-          value: '',
-          error: ''
-        },
-        gsp_dealer: {
-          value: '',
-          error: ''
-        },
-        weight: {
-          value: '',
-          error: ''
-        },
-        gst: {
-          value: '',
-          error: '',
-          items: [{
-            text: '5%',
-            value: '5'
-          }, {
-            text: '12%',
-            value: '12'
-          }, {
-            text: '18%',
-            value: '18'
+        addresses: [{
+          line1: '',
+          line2: '',
+          pin: '',
+          country_id: 0,
+          state_id: 0,
+          city_id: 0,
+          states: [],
+          cities: [],
+          init_bal: '',
+          init_bal_date: new Date().toISOString().substr(0, 10),
+          phones: [{
+            value: '',
+            country_id: 101
           }]
-        }
+        }]
       },
-      aliases: [{
-        label: 'Alias 1',
-        value: '',
-        error: ''
-      }],
-      taxonomies: [],
-      pricelists: [],
-      warehouses: [],
-      medias: [],
+      countries: [],
+      states: [],
+      cities: [],
+      phone_countries: [],
       rules: {
         required: function required(value) {
           return !!value || 'Required.';
@@ -2858,39 +2941,43 @@ __webpack_require__.r(__webpack_exports__);
           var pattern = /^\d{0,8}(\.\d{1,2})?$/;
           return pattern.test(value) || 'Invalid value.';
         },
-        weight: function weight(value) {
-          var pattern = /^\d*[0-9](|.\d*[0-9]|,\d*[0-9])?$/;
-          return pattern.test(value) || 'Invalid value.';
-        },
-        whole: function whole(value) {
-          var pattern = /^\d+$/;
-          return pattern.test(value) || 'Invalid value.';
-        },
-        img: function img(value) {
-          return !value || value.size < 2000000 || 'Image size should be less than 2 MB!';
-        },
         detailsFormVal: function detailsFormVal(value) {
           return _this2.detailsFormVal || 'Error';
         },
-        categoryFormVal: function categoryFormVal(value) {
-          return _this2.categoryFormVal || 'Error';
-        },
-        stockFormVal: function stockFormVal(value) {
-          return _this2.stockFormVal || 'Error';
-        },
-        plFormVal: function plFormVal(value) {
-          return _this2.plFormVal || 'Error';
-        },
-        mediaFormVal: function mediaFormVal(value) {
-          return _this2.mediaFormVal || 'Error';
+        addressFormVal: function addressFormVal(value) {
+          return _this2.addressFormVal || 'Error';
         }
-      },
-      taxonomy: {
-        options: []
       }
     };
   },
   methods: {
+    updState: function updState(index) {
+      var _this3 = this;
+
+      this.stateLoading = true;
+      axios.get('places?country_id=' + this.fd.addresses[index].country_id).then(function (res) {
+        _this3.fd.addresses[index].states = res.data;
+        _this3.fd.addresses[index].state_id = 0;
+        _this3.stateLoading = false;
+
+        _this3.updCity(index);
+      });
+    },
+    updCity: function updCity(index) {
+      var _this4 = this;
+
+      if (this.fd.addresses[index].state_id != 0) {
+        this.cityLoading = true;
+        axios.get('places?state_id=' + this.fd.addresses[index].state_id).then(function (res) {
+          _this4.fd.addresses[index].cities = res.data;
+          _this4.fd.addresses[index].city_id = 0;
+          _this4.cityLoading = false;
+        });
+      } else {
+        this.fd.addresses[index].cities = [];
+        this.fd.addresses[index].city_id = 0;
+      }
+    },
     getCatName: function getCatName(item) {
       if (item.value) {
         var val = item.value;
@@ -2903,74 +2990,39 @@ __webpack_require__.r(__webpack_exports__);
 
       return '';
     },
-    addAlias: function addAlias() {
-      var newLabel = 'Alias ' + (this.aliases.length + 1);
-      this.aliases.push({
-        label: newLabel,
+    addPhone: function addPhone(index) {
+      this.fd.addresses[index].phones.push({
         value: '',
-        erroe: ''
+        country_id: 101
       });
     },
-    deleteAlias: function deleteAlias(index) {
-      var _this3 = this;
-
-      this.aliases.splice(index, 1);
-      Object.keys(this.aliases).forEach(function (key, index) {
-        _this3.aliases[key].label = 'Alias ' + (index + 1);
+    addAddress: function addAddress() {
+      this.fd.addresses.push({
+        line1: '',
+        line2: '',
+        pin: '',
+        country_id: 0,
+        state_id: 0,
+        city_id: 0,
+        states: [],
+        cities: [],
+        init_bal: '',
+        init_bal_date: new Date().toISOString().substr(0, 10),
+        phones: [{
+          value: '',
+          country_id: 101
+        }]
       });
     },
-    deleteMedia: function deleteMedia(url) {
-      var index = this.medias.indexOf(url);
-      if (index >= 0) this.medias.splice(index, 1);
+    deletePhone: function deletePhone(index, index2) {
+      this.fd.addresses[index].phones.splice(index2, 1);
     },
-    calculatePrice: function calculatePrice(el) {
-      var val = (parseFloat(this.fd.landing_price.value) * (1 + parseFloat(this.fd.gst.value) / 100) * (1 + parseFloat(el) / 100)).toFixed(2);
-      return isNaN(val) ? '-' : val.toString();
-    },
-    uploadImg: function uploadImg() {
-      var _this4 = this;
-
-      this.waitDialog = true;
-      var fD = new FormData();
-      fD.append('file', this.imgFile);
-      axios.post('/products/upload', fD, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }).then(function (response) {
-        _this4.$refs.formMedia.reset();
-
-        _this4.$refs.formMedia.resetValidation();
-
-        _this4.waitDialog = false;
-
-        _this4.medias.push(response.data);
-      })["catch"](function (error) {
-        _this4.$refs.formMedia.reset();
-
-        _this4.$refs.formMedia.resetValidation();
-
-        _this4.waitDialog = false;
-
-        _this4.emitSb('Something went wrong!', 'error');
-      });
-    },
-    imgModal: function imgModal(url) {
-      this.imgUrl = url;
-      this.imgDialog = true;
+    deleteAddress: function deleteAddress(index) {
+      this.fd.addresses.splice(index, 1);
     },
     closeDialog: function closeDialog() {
       this.$refs.formDetails.reset();
-      this.$refs.formCategory.reset();
-      this.$refs.formPl.reset();
-      this.$refs.formStock.reset();
-      this.$refs.formMedia.reset();
-      this.aliases = [{
-        label: 'Alias 1',
-        value: '',
-        error: ''
-      }];
-      this.medias = [];
+      this.$refs.formAddress.reset();
       this.$emit('close-dialog');
     },
     emitSb: function emitSb(text, color) {
@@ -2983,40 +3035,21 @@ __webpack_require__.r(__webpack_exports__);
 
       this.btnloading = true;
       this.$refs.formDetails.validate();
-      this.$refs.formCategory.validate();
-      this.$refs.formPl.validate();
-      this.$refs.formStock.validate();
-      this.$refs.formMedia.validate();
+      this.$refs.formAddress.validate();
 
-      if (this.detailsFormVal == false || this.categoryFormVal == false || this.plFormVal == false || this.stockFormVal == false) {
+      if (this.detailsFormVal == false || this.addressFormVal == false) {
         this.emitSb('There are errors in the form submitted. Please check!!', 'error');
         this.btnloading = false;
       } else {
         var fD = new FormData();
-        Object.keys(this.fd).forEach(function (key) {
-          fD.append(key, _this5.fd[key].value);
-        });
-        this.taxonomies.forEach(function (item) {
-          fD.append('taxonomy_' + item.slug, item.value);
-        });
-        this.pricelists.forEach(function (item) {
-          fD.append('pricelist_' + item.slug, item.value);
-        });
-        this.warehouses.forEach(function (item) {
-          fD.append('warehouse_' + item.slug, item.value);
-        });
-        fD.append('medias', this.medias);
-        var aliasArr = [];
-        this.aliases.forEach(function (item) {
-          aliasArr.push(item.value);
-        });
-        fD.append('aliases', JSON.stringify(aliasArr));
+        fD.append('name', this.fd.name.value);
+        fD.append('addresses', JSON.stringify(this.fd.addresses));
 
         if (this.mode == 'edit') {
           fD.append('_method', 'PUT');
-          var route = 'products/' + this.pId;
+          var route = 'customers/' + this.cId;
         } else {
-          var route = 'products';
+          var route = 'customers';
         }
 
         axios.post(route, fD).then(function (response) {
@@ -3040,10 +3073,6 @@ __webpack_require__.r(__webpack_exports__);
         })["catch"](function (error) {
           if (error.response.status == 422) {
             _this5.btnloading = false;
-            var errors = error.response.data.errors;
-            Object.keys(errors).forEach(function (key) {
-              _this5.fd[key].error = errors[key];
-            });
 
             _this5.emitSb('There are errors in the form submitted. Please check!!', 'error');
           }
@@ -37328,7 +37357,1055 @@ var render = function() {
             1
           ),
           _vm._v(" "),
-          _c("v-card-text")
+          _c(
+            "v-card-text",
+            [
+              _c(
+                "v-stepper",
+                {
+                  staticClass: "mt-4",
+                  model: {
+                    value: _vm.e1,
+                    callback: function($$v) {
+                      _vm.e1 = $$v
+                    },
+                    expression: "e1"
+                  }
+                },
+                [
+                  _c(
+                    "v-stepper-header",
+                    [
+                      _c(
+                        "v-stepper-step",
+                        {
+                          attrs: {
+                            complete: _vm.e1 > 1,
+                            step: "1",
+                            rules: [_vm.rules.detailsFormVal],
+                            editable: ""
+                          }
+                        },
+                        [_vm._v("Details")]
+                      ),
+                      _vm._v(" "),
+                      _c("v-divider"),
+                      _vm._v(" "),
+                      _c(
+                        "v-stepper-step",
+                        {
+                          attrs: {
+                            complete: _vm.e1 > 2,
+                            step: "2",
+                            rules: [_vm.rules.addressFormVal],
+                            editable: ""
+                          }
+                        },
+                        [_vm._v("Address")]
+                      ),
+                      _vm._v(" "),
+                      _c("v-divider"),
+                      _vm._v(" "),
+                      _c(
+                        "v-stepper-step",
+                        { attrs: { step: "3", editable: "" } },
+                        [_vm._v("Review")]
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-stepper-items",
+                    [
+                      _c(
+                        "v-stepper-content",
+                        { attrs: { step: "1" } },
+                        [
+                          _c(
+                            "v-card",
+                            { staticClass: "pt-4" },
+                            [
+                              _c(
+                                "v-card-text",
+                                [
+                                  _c(
+                                    "v-form",
+                                    {
+                                      ref: "formDetails",
+                                      model: {
+                                        value: _vm.detailsFormVal,
+                                        callback: function($$v) {
+                                          _vm.detailsFormVal = $$v
+                                        },
+                                        expression: "detailsFormVal"
+                                      }
+                                    },
+                                    [
+                                      _c("v-text-field", {
+                                        attrs: {
+                                          label: "Name",
+                                          "error-messages": _vm.fd.name.error,
+                                          rules: [_vm.rules.required]
+                                        },
+                                        on: {
+                                          keydown: function($event) {
+                                            _vm.fd.name.error = ""
+                                          }
+                                        },
+                                        model: {
+                                          value: _vm.fd.name.value,
+                                          callback: function($$v) {
+                                            _vm.$set(_vm.fd.name, "value", $$v)
+                                          },
+                                          expression: "fd.name.value"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "v-card-actions",
+                                [
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { color: "primary" },
+                                      on: {
+                                        click: function($event) {
+                                          $event.stopPropagation()
+                                          _vm.e1 = 2
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("Continue")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { text: "" },
+                                      on: {
+                                        click: function($event) {
+                                          $event.stopPropagation()
+                                          _vm.closeConfirm = true
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("Cancel")]
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-stepper-items",
+                    [
+                      _c(
+                        "v-stepper-content",
+                        { attrs: { step: "2" } },
+                        [
+                          _c(
+                            "v-card",
+                            { staticClass: "pt-4" },
+                            [
+                              _c(
+                                "v-card-text",
+                                [
+                                  _c(
+                                    "v-form",
+                                    {
+                                      ref: "formAddress",
+                                      model: {
+                                        value: _vm.addressFormVal,
+                                        callback: function($$v) {
+                                          _vm.addressFormVal = $$v
+                                        },
+                                        expression: "addressFormVal"
+                                      }
+                                    },
+                                    [
+                                      _vm._l(_vm.fd.addresses, function(
+                                        address,
+                                        index
+                                      ) {
+                                        return [
+                                          _c(
+                                            "v-card",
+                                            { staticClass: "ma-4" },
+                                            [
+                                              _c(
+                                                "v-toolbar",
+                                                { attrs: { flat: "" } },
+                                                [
+                                                  _c("v-toolbar-title", [
+                                                    _vm._v(
+                                                      "\n\t\t\t\t\t\t\t\t\t\t\t\t\tAddress " +
+                                                        _vm._s(index + 1) +
+                                                        "\n\t\t\t\t\t\t\t\t\t\t\t\t"
+                                                    )
+                                                  ]),
+                                                  _vm._v(" "),
+                                                  _c("div", {
+                                                    staticClass: "flex-grow-1"
+                                                  }),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "v-toolbar-items",
+                                                    [
+                                                      _vm.fd.addresses.length >
+                                                      1
+                                                        ? _c(
+                                                            "v-btn",
+                                                            {
+                                                              attrs: {
+                                                                text: ""
+                                                              },
+                                                              on: {
+                                                                click: function(
+                                                                  $event
+                                                                ) {
+                                                                  $event.stopPropagation()
+                                                                  return _vm.deleteAddress(
+                                                                    index
+                                                                  )
+                                                                }
+                                                              }
+                                                            },
+                                                            [_vm._v("Remove")]
+                                                          )
+                                                        : _vm._e()
+                                                    ],
+                                                    1
+                                                  )
+                                                ],
+                                                1
+                                              ),
+                                              _vm._v(" "),
+                                              _c(
+                                                "v-card-text",
+                                                [
+                                                  _c(
+                                                    "v-row",
+                                                    [
+                                                      _c(
+                                                        "v-col",
+                                                        {
+                                                          attrs: { cols: "12" }
+                                                        },
+                                                        [
+                                                          _c("v-text-field", {
+                                                            attrs: {
+                                                              label: "Tag Name",
+                                                              rules: [
+                                                                _vm.rules
+                                                                  .required
+                                                              ]
+                                                            },
+                                                            model: {
+                                                              value:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].tag_name,
+                                                              callback: function(
+                                                                $$v
+                                                              ) {
+                                                                _vm.$set(
+                                                                  _vm.fd
+                                                                    .addresses[
+                                                                    index
+                                                                  ],
+                                                                  "tag_name",
+                                                                  $$v
+                                                                )
+                                                              },
+                                                              expression:
+                                                                "fd.addresses[index].tag_name"
+                                                            }
+                                                          })
+                                                        ],
+                                                        1
+                                                      ),
+                                                      _vm._v(" "),
+                                                      _c(
+                                                        "v-col",
+                                                        {
+                                                          attrs: { cols: "12" }
+                                                        },
+                                                        [
+                                                          _c("v-text-field", {
+                                                            attrs: {
+                                                              label: "Line1",
+                                                              rules: [
+                                                                _vm.rules
+                                                                  .required
+                                                              ]
+                                                            },
+                                                            model: {
+                                                              value:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].line1,
+                                                              callback: function(
+                                                                $$v
+                                                              ) {
+                                                                _vm.$set(
+                                                                  _vm.fd
+                                                                    .addresses[
+                                                                    index
+                                                                  ],
+                                                                  "line1",
+                                                                  $$v
+                                                                )
+                                                              },
+                                                              expression:
+                                                                "fd.addresses[index].line1"
+                                                            }
+                                                          })
+                                                        ],
+                                                        1
+                                                      ),
+                                                      _vm._v(" "),
+                                                      _c(
+                                                        "v-col",
+                                                        {
+                                                          attrs: { cols: "12" }
+                                                        },
+                                                        [
+                                                          _c("v-text-field", {
+                                                            attrs: {
+                                                              label: "Line2"
+                                                            },
+                                                            model: {
+                                                              value:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].line2,
+                                                              callback: function(
+                                                                $$v
+                                                              ) {
+                                                                _vm.$set(
+                                                                  _vm.fd
+                                                                    .addresses[
+                                                                    index
+                                                                  ],
+                                                                  "line2",
+                                                                  $$v
+                                                                )
+                                                              },
+                                                              expression:
+                                                                "fd.addresses[index].line2"
+                                                            }
+                                                          })
+                                                        ],
+                                                        1
+                                                      ),
+                                                      _vm._v(" "),
+                                                      _c(
+                                                        "v-col",
+                                                        {
+                                                          attrs: {
+                                                            cols: "12",
+                                                            md: "3"
+                                                          }
+                                                        },
+                                                        [
+                                                          _c("v-text-field", {
+                                                            attrs: {
+                                                              label: "PIN"
+                                                            },
+                                                            model: {
+                                                              value:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].pin,
+                                                              callback: function(
+                                                                $$v
+                                                              ) {
+                                                                _vm.$set(
+                                                                  _vm.fd
+                                                                    .addresses[
+                                                                    index
+                                                                  ],
+                                                                  "pin",
+                                                                  $$v
+                                                                )
+                                                              },
+                                                              expression:
+                                                                "fd.addresses[index].pin"
+                                                            }
+                                                          })
+                                                        ],
+                                                        1
+                                                      ),
+                                                      _vm._v(" "),
+                                                      _c(
+                                                        "v-col",
+                                                        {
+                                                          attrs: {
+                                                            cols: "12",
+                                                            md: "3"
+                                                          }
+                                                        },
+                                                        [
+                                                          _c("v-autocomplete", {
+                                                            attrs: {
+                                                              label: "Country",
+                                                              items:
+                                                                _vm.countries,
+                                                              "item-text":
+                                                                "name",
+                                                              "item-value": "id"
+                                                            },
+                                                            on: {
+                                                              change: function(
+                                                                $event
+                                                              ) {
+                                                                return _vm.updState(
+                                                                  index
+                                                                )
+                                                              }
+                                                            },
+                                                            model: {
+                                                              value:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].country_id,
+                                                              callback: function(
+                                                                $$v
+                                                              ) {
+                                                                _vm.$set(
+                                                                  _vm.fd
+                                                                    .addresses[
+                                                                    index
+                                                                  ],
+                                                                  "country_id",
+                                                                  $$v
+                                                                )
+                                                              },
+                                                              expression:
+                                                                "fd.addresses[index].country_id"
+                                                            }
+                                                          })
+                                                        ],
+                                                        1
+                                                      ),
+                                                      _vm._v(" "),
+                                                      _c(
+                                                        "v-col",
+                                                        {
+                                                          attrs: {
+                                                            cols: "12",
+                                                            md: "3"
+                                                          }
+                                                        },
+                                                        [
+                                                          _c("v-autocomplete", {
+                                                            attrs: {
+                                                              disabled:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].country_id ==
+                                                                0,
+                                                              label: "State",
+                                                              items:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].states,
+                                                              "item-text":
+                                                                "name",
+                                                              "item-value":
+                                                                "id",
+                                                              loading:
+                                                                _vm.stateLoading
+                                                            },
+                                                            on: {
+                                                              change: function(
+                                                                $event
+                                                              ) {
+                                                                return _vm.updCity(
+                                                                  index
+                                                                )
+                                                              }
+                                                            },
+                                                            model: {
+                                                              value:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].state_id,
+                                                              callback: function(
+                                                                $$v
+                                                              ) {
+                                                                _vm.$set(
+                                                                  _vm.fd
+                                                                    .addresses[
+                                                                    index
+                                                                  ],
+                                                                  "state_id",
+                                                                  $$v
+                                                                )
+                                                              },
+                                                              expression:
+                                                                "fd.addresses[index].state_id"
+                                                            }
+                                                          })
+                                                        ],
+                                                        1
+                                                      ),
+                                                      _vm._v(" "),
+                                                      _c(
+                                                        "v-col",
+                                                        {
+                                                          attrs: {
+                                                            cols: "12",
+                                                            md: "3"
+                                                          }
+                                                        },
+                                                        [
+                                                          _c("v-autocomplete", {
+                                                            attrs: {
+                                                              disabled:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].state_id == 0,
+                                                              label: "City",
+                                                              items:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].cities,
+                                                              "item-text":
+                                                                "name",
+                                                              "item-value":
+                                                                "id",
+                                                              loading:
+                                                                _vm.cityLoading
+                                                            },
+                                                            model: {
+                                                              value:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].city_id,
+                                                              callback: function(
+                                                                $$v
+                                                              ) {
+                                                                _vm.$set(
+                                                                  _vm.fd
+                                                                    .addresses[
+                                                                    index
+                                                                  ],
+                                                                  "city_id",
+                                                                  $$v
+                                                                )
+                                                              },
+                                                              expression:
+                                                                "fd.addresses[index].city_id"
+                                                            }
+                                                          })
+                                                        ],
+                                                        1
+                                                      )
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "v-row",
+                                                    [
+                                                      _c(
+                                                        "v-col",
+                                                        {
+                                                          attrs: {
+                                                            cols: "6",
+                                                            md: "3"
+                                                          }
+                                                        },
+                                                        [
+                                                          _c("v-text-field", {
+                                                            attrs: {
+                                                              label:
+                                                                "Initial Balance",
+                                                              "prepend-icon":
+                                                                "mdi-currency-inr",
+                                                              rules: [
+                                                                _vm.rules.price
+                                                              ]
+                                                            },
+                                                            model: {
+                                                              value:
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].init_bal,
+                                                              callback: function(
+                                                                $$v
+                                                              ) {
+                                                                _vm.$set(
+                                                                  _vm.fd
+                                                                    .addresses[
+                                                                    index
+                                                                  ],
+                                                                  "init_bal",
+                                                                  $$v
+                                                                )
+                                                              },
+                                                              expression:
+                                                                "fd.addresses[index].init_bal"
+                                                            }
+                                                          })
+                                                        ],
+                                                        1
+                                                      ),
+                                                      _vm._v(" "),
+                                                      _c(
+                                                        "v-col",
+                                                        {
+                                                          attrs: {
+                                                            cols: "6",
+                                                            md: "4"
+                                                          }
+                                                        },
+                                                        [
+                                                          _c(
+                                                            "v-menu",
+                                                            {
+                                                              attrs: {
+                                                                "close-on-content-click": false,
+                                                                "nudge-right": 40,
+                                                                transition:
+                                                                  "scale-transition",
+                                                                "offset-y": "",
+                                                                "min-width":
+                                                                  "290px"
+                                                              },
+                                                              scopedSlots: _vm._u(
+                                                                [
+                                                                  {
+                                                                    key:
+                                                                      "activator",
+                                                                    fn: function(
+                                                                      ref
+                                                                    ) {
+                                                                      var on =
+                                                                        ref.on
+                                                                      return [
+                                                                        _c(
+                                                                          "v-text-field",
+                                                                          _vm._g(
+                                                                            {
+                                                                              attrs: {
+                                                                                label:
+                                                                                  "Due Date",
+                                                                                "prepend-icon":
+                                                                                  "mdi-calendar",
+                                                                                readonly:
+                                                                                  ""
+                                                                              },
+                                                                              model: {
+                                                                                value:
+                                                                                  _vm
+                                                                                    .fd
+                                                                                    .addresses[
+                                                                                    index
+                                                                                  ]
+                                                                                    .init_bal_date,
+                                                                                callback: function(
+                                                                                  $$v
+                                                                                ) {
+                                                                                  _vm.$set(
+                                                                                    _vm
+                                                                                      .fd
+                                                                                      .addresses[
+                                                                                      index
+                                                                                    ],
+                                                                                    "init_bal_date",
+                                                                                    $$v
+                                                                                  )
+                                                                                },
+                                                                                expression:
+                                                                                  "fd.addresses[index].init_bal_date"
+                                                                              }
+                                                                            },
+                                                                            on
+                                                                          )
+                                                                        )
+                                                                      ]
+                                                                    }
+                                                                  }
+                                                                ],
+                                                                null,
+                                                                true
+                                                              ),
+                                                              model: {
+                                                                value:
+                                                                  _vm.date_menu,
+                                                                callback: function(
+                                                                  $$v
+                                                                ) {
+                                                                  _vm.date_menu = $$v
+                                                                },
+                                                                expression:
+                                                                  "date_menu"
+                                                              }
+                                                            },
+                                                            [
+                                                              _vm._v(" "),
+                                                              _c(
+                                                                "v-date-picker",
+                                                                {
+                                                                  on: {
+                                                                    input: function(
+                                                                      $event
+                                                                    ) {
+                                                                      _vm.date_menu = false
+                                                                    }
+                                                                  },
+                                                                  model: {
+                                                                    value:
+                                                                      _vm.fd
+                                                                        .addresses[
+                                                                        index
+                                                                      ]
+                                                                        .init_bal_date,
+                                                                    callback: function(
+                                                                      $$v
+                                                                    ) {
+                                                                      _vm.$set(
+                                                                        _vm.fd
+                                                                          .addresses[
+                                                                          index
+                                                                        ],
+                                                                        "init_bal_date",
+                                                                        $$v
+                                                                      )
+                                                                    },
+                                                                    expression:
+                                                                      "fd.addresses[index].init_bal_date"
+                                                                  }
+                                                                }
+                                                              )
+                                                            ],
+                                                            1
+                                                          )
+                                                        ],
+                                                        1
+                                                      )
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _vm._l(
+                                                    _vm.fd.addresses[index]
+                                                      .phones,
+                                                    function(phone, index2) {
+                                                      return [
+                                                        _c(
+                                                          "v-row",
+                                                          [
+                                                            _c(
+                                                              "v-col",
+                                                              {
+                                                                attrs: {
+                                                                  cols: "4",
+                                                                  md: "3"
+                                                                }
+                                                              },
+                                                              [
+                                                                _c("v-select", {
+                                                                  attrs: {
+                                                                    items:
+                                                                      _vm.phone_countries,
+                                                                    "item-text":
+                                                                      "name",
+                                                                    "item-value":
+                                                                      "id",
+                                                                    "persistent-hint":
+                                                                      "",
+                                                                    hint:
+                                                                      "Country Code"
+                                                                  },
+                                                                  model: {
+                                                                    value:
+                                                                      _vm.fd
+                                                                        .addresses[
+                                                                        index
+                                                                      ].phones[
+                                                                        index2
+                                                                      ]
+                                                                        .country_id,
+                                                                    callback: function(
+                                                                      $$v
+                                                                    ) {
+                                                                      _vm.$set(
+                                                                        _vm.fd
+                                                                          .addresses[
+                                                                          index
+                                                                        ]
+                                                                          .phones[
+                                                                          index2
+                                                                        ],
+                                                                        "country_id",
+                                                                        $$v
+                                                                      )
+                                                                    },
+                                                                    expression:
+                                                                      "fd.addresses[index].phones[index2].country_id"
+                                                                  }
+                                                                })
+                                                              ],
+                                                              1
+                                                            ),
+                                                            _vm._v(" "),
+                                                            _c(
+                                                              "v-col",
+                                                              {
+                                                                attrs: {
+                                                                  cols: "8",
+                                                                  md: "4"
+                                                                }
+                                                              },
+                                                              [
+                                                                _c(
+                                                                  "v-text-field",
+                                                                  {
+                                                                    attrs: {
+                                                                      label:
+                                                                        "Phone " +
+                                                                        (index2 +
+                                                                          1),
+                                                                      "append-outer-icon":
+                                                                        _vm.fd
+                                                                          .addresses[
+                                                                          index
+                                                                        ].phones
+                                                                          .length >
+                                                                        1
+                                                                          ? "mdi-minus-circle"
+                                                                          : ""
+                                                                    },
+                                                                    on: {
+                                                                      "click:append-outer": function(
+                                                                        $event
+                                                                      ) {
+                                                                        return _vm.deletePhone(
+                                                                          index,
+                                                                          index2
+                                                                        )
+                                                                      }
+                                                                    },
+                                                                    model: {
+                                                                      value:
+                                                                        _vm.fd
+                                                                          .addresses[
+                                                                          index
+                                                                        ]
+                                                                          .phones[
+                                                                          index2
+                                                                        ].value,
+                                                                      callback: function(
+                                                                        $$v
+                                                                      ) {
+                                                                        _vm.$set(
+                                                                          _vm.fd
+                                                                            .addresses[
+                                                                            index
+                                                                          ]
+                                                                            .phones[
+                                                                            index2
+                                                                          ],
+                                                                          "value",
+                                                                          $$v
+                                                                        )
+                                                                      },
+                                                                      expression:
+                                                                        "fd.addresses[index].phones[index2].value"
+                                                                    }
+                                                                  }
+                                                                )
+                                                              ],
+                                                              1
+                                                            ),
+                                                            _vm._v(" "),
+                                                            _c("v-col", {
+                                                              attrs: {
+                                                                cols: "12",
+                                                                md: "5"
+                                                              }
+                                                            })
+                                                          ],
+                                                          1
+                                                        )
+                                                      ]
+                                                    }
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "v-btn",
+                                                    {
+                                                      attrs: { text: "" },
+                                                      on: {
+                                                        click: function(
+                                                          $event
+                                                        ) {
+                                                          return _vm.addPhone(
+                                                            index
+                                                          )
+                                                        }
+                                                      }
+                                                    },
+                                                    [_vm._v("Add Phone")]
+                                                  )
+                                                ],
+                                                2
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ]
+                                      }),
+                                      _vm._v(" "),
+                                      _c(
+                                        "v-btn",
+                                        {
+                                          attrs: { text: "" },
+                                          on: { click: _vm.addAddress }
+                                        },
+                                        [_vm._v("Add Address")]
+                                      )
+                                    ],
+                                    2
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "v-card-actions",
+                                [
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { color: "primary" },
+                                      on: {
+                                        click: function($event) {
+                                          $event.stopPropagation()
+                                          _vm.e1 = 3
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("Continue")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { text: "" },
+                                      on: {
+                                        click: function($event) {
+                                          $event.stopPropagation()
+                                          _vm.closeConfirm = true
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("Cancel")]
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-stepper-items",
+                    [
+                      _c(
+                        "v-stepper-content",
+                        { attrs: { step: "3" } },
+                        [
+                          _c(
+                            "v-card",
+                            { staticClass: "pt-4" },
+                            [
+                              _c("v-card-text"),
+                              _vm._v(" "),
+                              _c(
+                                "v-card-actions",
+                                [
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { color: "primary" },
+                                      on: {
+                                        click: function($event) {
+                                          $event.stopPropagation()
+                                          return _vm.save($event)
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("Save")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "v-btn",
+                                    {
+                                      attrs: { text: "" },
+                                      on: {
+                                        click: function($event) {
+                                          $event.stopPropagation()
+                                          _vm.closeConfirm = true
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("Cancel")]
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  )
+                ],
+                1
+              )
+            ],
+            1
+          )
         ],
         1
       ),
@@ -37395,32 +38472,6 @@ var render = function() {
                 ],
                 1
               )
-            ],
-            1
-          )
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "v-dialog",
-        {
-          attrs: { width: "700" },
-          model: {
-            value: _vm.imgDialog,
-            callback: function($$v) {
-              _vm.imgDialog = $$v
-            },
-            expression: "imgDialog"
-          }
-        },
-        [
-          _c(
-            "v-card",
-            [
-              _c("v-img", {
-                attrs: { src: _vm.imgUrl, "lazy-src": _vm.imgUrl }
-              })
             ],
             1
           )
@@ -98301,7 +99352,8 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuetify_lib__WEBPACK_IMPORTED_MOD
     VAutocomplete: vuetify_lib__WEBPACK_IMPORTED_MODULE_3__["VAutocomplete"],
     VSimpleTable: vuetify_lib__WEBPACK_IMPORTED_MODULE_3__["VSimpleTable"],
     VCarousel: vuetify_lib__WEBPACK_IMPORTED_MODULE_3__["VCarousel"],
-    VCarouselItem: vuetify_lib__WEBPACK_IMPORTED_MODULE_3__["VCarouselItem"]
+    VCarouselItem: vuetify_lib__WEBPACK_IMPORTED_MODULE_3__["VCarouselItem"],
+    VDatePicker: vuetify_lib__WEBPACK_IMPORTED_MODULE_3__["VDatePicker"]
   }
 });
 var opts = {

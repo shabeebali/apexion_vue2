@@ -10,6 +10,13 @@ class CustomerPolicy
 {
     use HandlesAuthorization;
 
+    public function before(User $user){
+        if($user->hasRole('Super Admin'))
+        {
+            return true;
+        }
+    }
+
     /**
      * Determine whether the user can view any customers.
      *
@@ -18,19 +25,21 @@ class CustomerPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        
     }
 
     /**
      * Determine whether the user can view the customer.
      *
      * @param  \App\User  $user
-     * @param  \AppModel\Customer  $customer
+     * @param  \App\Model\Customer  $customer
      * @return mixed
      */
-    public function view(User $user, Customer $customer)
+    public function view(User $user)
     {
-        //
+        if($user->can('view_customer')){
+            return true;
+        }
     }
 
     /**
@@ -41,7 +50,9 @@ class CustomerPolicy
      */
     public function create(User $user)
     {
-        //
+        if($user->can('create_customer')){
+            return true;
+        }
     }
 
     /**
@@ -51,9 +62,11 @@ class CustomerPolicy
      * @param  \AppModel\Customer  $customer
      * @return mixed
      */
-    public function update(User $user, Customer $customer)
+    public function update(User $user)
     {
-        //
+        if($user->can('edit_customer')){
+            return true;
+        }
     }
 
     /**
@@ -63,9 +76,11 @@ class CustomerPolicy
      * @param  \AppModel\Customer  $customer
      * @return mixed
      */
-    public function delete(User $user, Customer $customer)
+    public function delete(User $user)
     {
-        //
+        if($user->can('delete_customer')){
+            return true;
+        }
     }
 
     /**

@@ -64,6 +64,7 @@ import Vuetify, {
     VSimpleTable,
     VCarousel,
 	VCarouselItem,
+	VDatePicker,
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -129,6 +130,7 @@ Vue.use(Vuetify, {
     	VSimpleTable,
     	VCarousel,
     	VCarouselItem,
+    	VDatePicker,
 	},
 })
 const opts = {

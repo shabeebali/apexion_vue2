@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Http\Request;
-
+use App\Model\Country;
+use App\Model\State;
+use App\Model\City;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,6 +20,28 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $user->toArray();
 });
 Route::middleware('auth:api')->group(function(){
+    Route::get('places',function(Request $request){
+        if($request->country_id){
+            $states = State::where('country_id',$request->country_id)->get();
+            $states->prepend(['id'=>0,'name'=>'--']);
+            return $states;
+        }
+        if($request->state_id){
+            $cities = City::where('state_id',$request->state_id)->get();
+            return $cities->prepend(['id'=>0,'name'=>'--']);
+        }
+        $countries = Country::all();
+        $phone_countries = $countries->map(function($item){
+            return [
+                'id' => $item->id,
+                'name'=>$item->name.'('.$item->phonecode.')',
+            ];
+        });
+        return [
+            'countries' => $countries,
+            'phone_countries' => $phone_countries
+        ];
+    });
     Route::get('products/notif_test','Backend\ProductController@notif_test');
     Route::post('products/import','Backend\ProductController@import');
     Route::get('menu','Backend\MenuController');

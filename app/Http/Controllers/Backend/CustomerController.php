@@ -14,7 +14,7 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
-        //AUthorize code here
+        $this->authorize('view',Customer::class);
         $user = \Auth::user();
         $data = Customer::getIndex($request);
         $model = $data['model'];
@@ -38,7 +38,8 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->authorize('create',Customer::class);
+        dd(json_decode($request->addresses),true);
     }
 
     /**

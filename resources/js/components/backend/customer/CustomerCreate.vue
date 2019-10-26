@@ -9,7 +9,141 @@
 				</v-toolbar-items>
 	        </v-toolbar>
 	        <v-card-text>
-	        	
+	        	<v-stepper class="mt-4" v-model="e1">
+					<v-stepper-header>
+						<v-stepper-step :complete="e1 > 1" step="1" :rules="[rules.detailsFormVal]" editable>Details</v-stepper-step>
+
+						<v-divider></v-divider>
+
+						<v-stepper-step :complete="e1 > 2" step="2" :rules="[rules.addressFormVal]" editable>Address</v-stepper-step>
+
+						<v-divider></v-divider>
+
+						<v-stepper-step step="3" editable>Review</v-stepper-step>
+					</v-stepper-header>
+					<v-stepper-items>
+						<v-stepper-content step="1">
+							<v-card class="pt-4">
+								<v-card-text>
+									<v-form ref="formDetails" v-model="detailsFormVal">
+										<v-text-field label="Name" v-model="fd.name.value" :error-messages="fd.name.error" @keydown="fd.name.error=''" :rules="[rules.required]"></v-text-field>
+									</v-form>
+								</v-card-text>
+								<v-card-actions>
+									<v-btn color="primary" @click.stop="e1=2">Continue</v-btn>
+									<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
+								</v-card-actions>
+							</v-card>
+						</v-stepper-content>
+					</v-stepper-items>
+					<v-stepper-items>
+						<v-stepper-content step="2">
+							<v-card class="pt-4">
+								<v-card-text>
+									<v-form ref="formAddress" v-model="addressFormVal">
+										<template v-for="(address,index) in fd.addresses">
+											<v-card class="ma-4">
+												<v-toolbar flat>
+													<v-toolbar-title>
+														Address {{index+1}}
+													</v-toolbar-title>
+													<div class="flex-grow-1"></div>
+													<v-toolbar-items>
+														<v-btn v-if="fd.addresses.length > 1" text @click.stop="deleteAddress(index)">Remove</v-btn>
+													</v-toolbar-items>
+												</v-toolbar>
+												<v-card-text>
+													<v-row>
+														<v-col cols="12">
+															<v-text-field label="Tag Name" :rules="[rules.required]" v-model="fd.addresses[index].tag_name"></v-text-field>
+														</v-col>
+														<v-col cols="12">
+															<v-text-field label="Line1" :rules="[rules.required]" v-model="fd.addresses[index].line1"></v-text-field>
+														</v-col>
+														<v-col cols="12">
+															<v-text-field label="Line2" v-model="fd.addresses[index].line2"></v-text-field>
+														</v-col>
+														<v-col cols="12" md="3">
+															<v-text-field label="PIN" v-model="fd.addresses[index].pin"></v-text-field>
+														</v-col>
+														<v-col cols="12" md="3">
+															<v-autocomplete label="Country" v-model="fd.addresses[index].country_id" :items="countries" item-text="name" item-value="id" v-on:change="updState(index)"></v-autocomplete>
+														</v-col>
+														<v-col cols="12" md="3">
+															<v-autocomplete :disabled="fd.addresses[index].country_id == 0" label="State" v-model="fd.addresses[index].state_id" :items="fd.addresses[index].states" item-text="name" item-value="id" v-on:change="updCity(index)" :loading="stateLoading"></v-autocomplete>
+														</v-col>
+														<v-col cols="12" md="3">
+															<v-autocomplete :disabled="fd.addresses[index].state_id == 0" label="City" v-model="fd.addresses[index].city_id" :items="fd.addresses[index].cities" item-text="name" item-value="id" :loading="cityLoading"></v-autocomplete>
+														</v-col>
+													</v-row>
+													<v-row>
+														<v-col cols="6" md="3">
+															<v-text-field label="Initial Balance" prepend-icon="mdi-currency-inr" :rules="[rules.price]" v-model="fd.addresses[index].init_bal"></v-text-field>
+														</v-col>
+														<v-col cols="6" md="4">
+															<v-menu
+																v-model="date_menu"
+																:close-on-content-click="false"
+																:nudge-right="40"
+														        transition="scale-transition"
+														        offset-y
+														        min-width="290px"
+																>
+																<template v-slot:activator="{ on }">
+																	<v-text-field
+																		v-model="fd.addresses[index].init_bal_date"
+																		label="Due Date"
+																		prepend-icon="mdi-calendar"
+																		readonly
+																		v-on="on"
+																		></v-text-field>
+																</template>
+																<v-date-picker v-model="fd.addresses[index].init_bal_date"  @input="date_menu = false">
+																</v-date-picker>
+															</v-menu>
+														</v-col>
+													</v-row>
+													<template v-for="(phone,index2) in fd.addresses[index].phones">
+														<v-row>
+															<v-col cols="4" md="3">
+																<v-select :items="phone_countries" item-text="name" item-value="id"
+																v-model="fd.addresses[index].phones[index2].country_id" persistent-hint hint="Country Code">
+																</v-select>
+															</v-col>
+															<v-col cols="8" md="4">
+																<v-text-field :label="'Phone '+(index2+1)" v-model="fd.addresses[index].phones[index2].value" :append-outer-icon="fd.addresses[index].phones.length > 1 ? 'mdi-minus-circle':''" v-on:click:append-outer="deletePhone(index,index2)">
+																</v-text-field>
+															</v-col>
+															<v-col cols="12" md="5"></v-col>
+														</v-row>
+													</template>
+													<v-btn text @click="addPhone(index)">Add Phone</v-btn>
+												</v-card-text>
+											</v-card>
+										</template>
+										<v-btn text @click="addAddress">Add Address</v-btn>
+									</v-form>
+								</v-card-text>
+								<v-card-actions>
+									<v-btn color="primary" @click.stop="e1=3">Continue</v-btn>
+									<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
+								</v-card-actions>
+							</v-card>
+						</v-stepper-content>
+					</v-stepper-items>
+					<v-stepper-items>
+						<v-stepper-content step="3">
+							<v-card class="pt-4">
+								<v-card-text>
+								</v-card-text>
+								<v-card-actions>
+									<v-btn color="primary" @click.stop="save">Save</v-btn>
+									<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
+								</v-card-actions>
+							</v-card>
+						</v-stepper-content>
+					</v-stepper-items>
+				</v-stepper>
 			</v-card-text>
 	    </v-card>
 	    <v-dialog v-model ="closeConfirm" persistent width="500">
@@ -23,11 +157,6 @@
 	    			<v-btn text color="error" @click.stop="closeDialog">Yes</v-btn>
 	    			<v-btn text color="success" @click.stop="closeConfirm = false">NO</v-btn>
 	    		</v-card-actions>
-	    	</v-card>
-	    </v-dialog>
-	    <v-dialog v-model ="imgDialog" width="700">
-	    	<v-card>
-	    		<v-img :src="imgUrl" :lazy-src="imgUrl"></v-img>
 	    	</v-card>
 	    </v-dialog>
 	    <v-dialog v-model="waitDialog" persistent width="300">
@@ -47,49 +176,55 @@
 <script>
 	export default{
 		mounted(){
-			axios.get('taxonomies?withcat=1').then((res)=>{
-				this.taxonomies = res.data.data
-			})
-			axios.get('pricelists').then((res)=>{
-				var data = res.data.data
-				data.forEach((item,index)=>{
-					data[index].value = '0'
-				})
-				this.pricelists = data
-			})
-			axios.get('warehouses').then((res)=>{
-				var data = res.data.data
-				data.forEach((item,index)=>{
-					data[index].value = '0'
-				})
-				this.warehouses = data
+			axios.get('places').then((res)=>{
+				this.countries = res.data.countries
+				this.phone_countries = res.data.phone_countries
 			})
 		},
 		computed:{
 			baseUrl(){
 				return window.base_url.content
 			},
-			getTotalStock(){
-				var total = 0
-				this.warehouses.forEach((item)=>{
-					total = total + parseInt(item.value)
-				})
-				return total
-			}
 		},
 		watch:{
 			dialog:function(){
 				this.$vuetify.goTo(0)
 				if(this.mode == 'create'){
 					this.submitTxt = 'Save'
-					this.formTitle = 'Create Product'
+					this.formTitle = 'Create Customer'
 					this.e1=1
+					this.fd = {
+						name:{
+							value:'',
+							error:'',
+						},
+						addresses:[
+							{
+								line1:'',
+								line2:'',
+								pin:'',
+								country_id:0,
+								state_id:0,
+								city_id:0,
+								states:[],
+								cities:[],
+								init_bal:'',
+								init_bal_date: new Date().toISOString().substr(0, 10),
+								phones:[
+									{
+										value:'',
+										country_id:101
+									}
+								]
+							}
+						]
+					}
 				}
 				if(this.mode == 'edit'){
 					this.submitTxt = 'Update'
-					this.formTitle = 'Edit Product'
+					this.formTitle = 'Edit Customer'
 					this.passFormVal = true
-					axios.get('products/'+this.pId).then((response)=>{
+					axios.get('customers/'+this.cId).then((response)=>{
 						var dd = response.data.data
 					})
 				}
@@ -100,48 +235,28 @@
 				},
 				deep:true
 			},
-			plFormVal:{
+			addressFormVal:{
 				handler(){
-					this.$refs.formPl.validate()
+					this.$refs.formAddress.validate()
 				},
 				deep:true
 			},
-			categoryFormVal:{
-				handler(){
-					this.$refs.formCategory.validate()
-				},
-				deep:true
-			},
-			stockFormVal:{
-				handler(){
-					this.$refs.formStock.validate()
-				},
-				deep:true
-			},
-			mediaFormVal:{
-				handler(){
-					this.$refs.formMedia.validate()
-				},
-				deep:true
-			},
+
 		},
-		props:['mode','dialog','pId'],
+		props:['mode','dialog','cId'],
 		data(){
 			return{
+				stateLoading:false,
+				cityLoading:false,
 				e1:1,
-				imgFile:null,
+				date_menu:false,
 				submitTxt:'',
 				formTitle:'',
 				closeConfirm:false,
 				waitDialog:false,
-				imgDialog:false,
 				btnloading:false,
 				detailsFormVal:null,
-				categoryFormVal:null,
-				stockFormVal:null,
-				plFormVal:null,
-				mediaFormVal:null,
-				imgUrl:null,
+				addressFormVal:null,
 				sbColor:'',
 				sbText:'',
 				sbTimeout:3000,
@@ -151,74 +266,66 @@
 						value:'',
 						error:'',
 					},
-					hsn:{
-						value:'',
-						error:'',
-					},
-					mrp:{
-						value:'',
-						error:'',
-					},
-					landing_price:{
-						value:'',
-						error:'',
-					},
-					gsp_customer:{
-						value:'',
-						error:'',
-					},	
-					gsp_dealer:{
-						value:'',
-						error:'',
-					},
-					weight:{
-						value:'',
-						error:'',
-					},
-					gst:{
-						value:'',
-						error:'',
-						items:[
-							{text:'5%', value:'5'},
-							{text:'12%', value:'12'},
-							{text:'18%', value:'18'},
-						],
-					},
+					addresses:[
+						{
+							line1:'',
+							line2:'',
+							pin:'',
+							country_id:0,
+							state_id:0,
+							city_id:0,
+							states:[],
+							cities:[],
+							init_bal:'',
+							init_bal_date: new Date().toISOString().substr(0, 10),
+							phones:[
+								{
+									value:'',
+									country_id:101
+								}
+							]
+						}
+					]
 				},
-				aliases:[
-					{label:'Alias 1',value:'',error:''}
-				],
-				taxonomies:[],
-				pricelists:[],
-				warehouses:[],
-				medias:[],
+				countries:[],
+				states:[],
+				cities:[],
+				phone_countries:[],
 				rules:{
 					required: value=> !!value||'Required.',
 					price: value => {
 			            const pattern = /^\d{0,8}(\.\d{1,2})?$/
 			            return pattern.test(value) || 'Invalid value.'
 			        	},
-			        weight: value => {
-			            const pattern = /^\d*[0-9](|.\d*[0-9]|,\d*[0-9])?$/
-			            return pattern.test(value) || 'Invalid value.'
-			        	},
-			        whole: value => {
-			            const pattern = /^\d+$/
-			            return pattern.test(value) || 'Invalid value.'
-			        	},
-			        img: value => !value || value.size < 2000000 || 'Image size should be less than 2 MB!',
 			        detailsFormVal: value=> this.detailsFormVal || 'Error',
-			        categoryFormVal: value=> this.categoryFormVal || 'Error',
-			        stockFormVal: value=> this.stockFormVal || 'Error',
-			        plFormVal: value=> this.plFormVal || 'Error',
-			        mediaFormVal: value=> this.mediaFormVal || 'Error',
+			        addressFormVal: value=> this.addressFormVal || 'Error',
 				},
-				taxonomy:{
-					options:[],
-				}
 			}
 		},
 		methods:{
+			updState(index){
+				this.stateLoading = true
+				axios.get('places?country_id='+this.fd.addresses[index].country_id).then((res)=>{
+					this.fd.addresses[index].states = res.data
+					this.fd.addresses[index].state_id = 0
+					this.stateLoading = false
+					this.updCity(index)
+				})
+			},
+			updCity(index){
+				if(this.fd.addresses[index].state_id != 0){
+					this.cityLoading = true
+					axios.get('places?state_id='+this.fd.addresses[index].state_id).then((res)=>{
+						this.fd.addresses[index].cities = res.data
+						this.fd.addresses[index].city_id = 0
+						this.cityLoading = false
+					})
+				}
+				else{
+					this.fd.addresses[index].cities = []
+					this.fd.addresses[index].city_id = 0
+				}
+			},
 			getCatName(item){
 				if(item.value){
 					const val = item.value
@@ -228,58 +335,42 @@
 				}
 				return ''
 			},
-			addAlias(){
-				var newLabel = 'Alias '+(this.aliases.length + 1)
-				this.aliases.push({label:newLabel,value:'',erroe:''})
+			addPhone(index){
+				this.fd.addresses[index].phones.push(
+					{
+						value:'',
+						country_id:101
+					})
 			},
-			deleteAlias(index){
-				this.aliases.splice(index,1)
-				Object.keys(this.aliases).forEach((key,index)=>{
-					this.aliases[key].label = 'Alias '+(index+1)
+			addAddress(){
+				this.fd.addresses.push({
+					line1:'',
+					line2:'',
+					pin:'',
+					country_id:0,
+					state_id:0,
+					city_id:0,
+					states:[],
+					cities:[],
+					init_bal:'',
+					init_bal_date: new Date().toISOString().substr(0, 10),
+					phones:[
+						{
+							value:'',
+							country_id:101
+						}
+					]
 				})
 			},
-			deleteMedia(url){
-				const index = this.medias.indexOf(url)
-				if (index >= 0) this.medias.splice(index, 1)
+			deletePhone(index,index2){
+				this.fd.addresses[index].phones.splice(index2,1)
 			},
-			calculatePrice(el){
-				const val = ((parseFloat(this.fd.landing_price.value) * (1+(parseFloat(this.fd.gst.value)/100)))*(1+(parseFloat(el)/100))).toFixed(2)
-				return isNaN(val) ? '-': val.toString()
-			},
-			uploadImg(){
-				this.waitDialog = true
-				var fD = new FormData()
-				fD.append('file',this.imgFile)
-				axios.post('/products/upload',fD,{
-					headers: {
-				        'Content-Type': 'multipart/form-data'
-				    }
-				}).then((response)=>{
-					this.$refs.formMedia.reset()
-					this.$refs.formMedia.resetValidation()
-					this.waitDialog = false
-					this.medias.push(response.data)
-				}).catch((error)=>{
-					this.$refs.formMedia.reset()
-					this.$refs.formMedia.resetValidation()
-					this.waitDialog = false
-					this.emitSb('Something went wrong!','error')
-				})
-			},
-			imgModal(url){
-				this.imgUrl = url
-				this.imgDialog = true
+			deleteAddress(index){
+				this.fd.addresses.splice(index,1)
 			},
 			closeDialog(){
 				this.$refs.formDetails.reset()
-				this.$refs.formCategory.reset()
-				this.$refs.formPl.reset()
-				this.$refs.formStock.reset()
-				this.$refs.formMedia.reset()
-				this.aliases = [
-					{label:'Alias 1',value:'',error:''}
-				]
-				this.medias = []
+				this.$refs.formAddress.reset()
 				this.$emit('close-dialog')
 			},
 			emitSb(text,color){
@@ -290,40 +381,21 @@
 			save(){
 				this.btnloading = true
 				this.$refs.formDetails.validate();
-				this.$refs.formCategory.validate();
-				this.$refs.formPl.validate();
-				this.$refs.formStock.validate();
-				this.$refs.formMedia.validate();
-				if(this.detailsFormVal == false || this.categoryFormVal == false || this.plFormVal == false || this.stockFormVal  == false){
+				this.$refs.formAddress.validate();
+				if(this.detailsFormVal == false || this.addressFormVal == false ){
 					this.emitSb('There are errors in the form submitted. Please check!!','error')
 					this.btnloading = false
 				}
 				else{
 					var fD = new FormData()
-					Object.keys(this.fd).forEach((key)=>{
-						fD.append(key,this.fd[key].value)
-					})
-					this.taxonomies.forEach((item)=>{
-						fD.append('taxonomy_'+item.slug,item.value)
-					})
-					this.pricelists.forEach((item)=>{
-						fD.append('pricelist_'+item.slug,item.value)
-					})
-					this.warehouses.forEach((item)=>{
-						fD.append('warehouse_'+item.slug,item.value)
-					})
-					fD.append('medias',this.medias)
-					var aliasArr = []
-					this.aliases.forEach((item)=>{
-						aliasArr.push(item.value)
-					})
-					fD.append('aliases',JSON.stringify(aliasArr))
+					fD.append('name',this.fd.name.value)
+					fD.append('addresses',JSON.stringify(this.fd.addresses))
 					if(this.mode == 'edit'){
 						fD.append('_method','PUT')
-						var route = 'products/'+this.pId
+						var route = 'customers/'+this.cId
 					}
 					else{
-						var route = 'products'
+						var route = 'customers'
 					}
 					axios.post(route,fD).then((response)=>{
 						this.btnloading = false
@@ -338,10 +410,6 @@
 					}).catch((error)=> {
 						if(error.response.status == 422){
 							this.btnloading = false
-							var errors = error.response.data.errors
-							Object.keys(errors).forEach((key)=>{
-								this.fd[key].error = errors[key]
-							})
 							this.emitSb('There are errors in the form submitted. Please check!!','error')
 						}
 						if(error.response.status == 403){
