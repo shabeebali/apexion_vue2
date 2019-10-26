@@ -39,7 +39,7 @@ class Product extends Model
     {
         return $this->morphToMany('App\Model\Tag', 'taggable');
     }
-    public function getIndex($request)
+    public static function getIndex($request)
     {
         $model = Product::with('categories');
         $filtered = [];
@@ -59,9 +59,11 @@ class Product extends Model
                 $tags = $tags->orWhere('name','like','%'.$term.'%');
             }
             $tags = $tags->get();
+            $p_ids =[];
             foreach ($tags as $tag) {
-                $p_ids = $tag->products->groupBy('id')->keys();
+                $p_ids = array_merge($p_ids,$tag->products->groupBy('id')->keys()->all());
             }
+            $p_ids = array_unique($p_ids);
             $model->whereIn('id',$p_ids);
         }
         if($request->sortby){
@@ -76,7 +78,7 @@ class Product extends Model
         if($request->categories){
             $cat_ids = explode("-",$request->categories);
             $model = $model->filter(function($item,$key) use ($cat_ids){
-                $categories = $item->categories()->get();
+                $categories = $item->categories;
                 if($categories->count() > 0){
                    foreach ($categories as $category) {
                         if(in_array($category->id, $cat_ids)){
@@ -113,7 +115,7 @@ class Product extends Model
                 ];
             }
         }
-        return ['model' => $model, 'filtered' => $filtered];
+        return ['model' => $model->values(), 'filtered' => $filtered];
     }
 
     public function dbsave($row, $taxonomies, $pricelists, $warehouses)

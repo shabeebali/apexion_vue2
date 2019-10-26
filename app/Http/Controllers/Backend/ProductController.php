@@ -23,8 +23,7 @@ class ProductController extends Controller
     {
         $this->authorize('view',Product::class);
         $user = \Auth::user();
-        $product = new Product;
-        $data =  $product->getIndex($request);
+        $data =  Product::getIndex($request);
         $model = $data['model'];
         return response()->json([
             'data' => $model ? $model->toArray() : '',

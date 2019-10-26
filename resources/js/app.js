@@ -62,19 +62,20 @@ new Vue({
       ],
   	}
   },
-  beforeMount(){
+  mounted(){
     if(this.$router.currentRoute.path != '/login'){
       axios.get('menu').then((res)=>{
         this.sidebar_left_items = res.data
       })
-    }
-    axios.get('user').then((res)=>{
+      axios.get('user').then((res)=>{
         this.$store.commit('setUser',res.data)
         Echo.private('App.User.'+this.$store.state.user)
-        .notification((notification) => {
-            this.notify_message = notification.message
-            this.notify = true
-        });
-    })
+          .notification((notification) => {
+              this.notify_message = notification.message
+              this.notify = true
+          });
+      })
+    }
+    
   }
 }).$mount('#app')

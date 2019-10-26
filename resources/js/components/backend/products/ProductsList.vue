@@ -230,7 +230,7 @@
 	      	},
 			search: {
 				handler () {
-				    this.deboucedSearch();
+					if(this.search.length != 1) this.deboucedSearch();
 				},
 				deep: true
 			},

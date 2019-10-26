@@ -14,8 +14,8 @@ class AddressSalepersonTable extends Migration
     public function up()
     {
         Schema::create('address_saleperson', function (Blueprint $table) {
-            $table->bigIncrements('address_id');
-            $table->bigIncrements('saleperson_id');
+            $table->bigInteger('address_id');
+            $table->bigInteger('saleperson_id');
             $table->timestamps();
         });
     }

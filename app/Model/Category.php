@@ -13,7 +13,7 @@ class Category extends Model
 	public function taxonomy(){
 		return $this->belongsTo('App\Model\Taxonomy');
 	}
-
+	
 	public function dbsave($row, $taxonomy)
 	{
 		$this->name = $row['name'];

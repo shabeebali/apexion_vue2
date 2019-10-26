@@ -53,7 +53,7 @@
 									<v-row>
 										<v-col cols="12" md="6">
 											<v-autocomplete
-												label="Category"
+												label="Saleperson"
 												multiple
 												v-model="filterdata.salepersons"
 												:items="filterables.salepersons"
@@ -216,21 +216,21 @@
 	      	},
 			search: {
 				handler () {
-				    this.deboucedSearch();
+				    if(this.search.length != 1) this.deboucedSearch();
 				},
 				deep: true
 			},
 			$route() {
 				this.pending = this.$route.params.status == undefined ? false : this.$route.params.status == 'pending' ? true : false
 				this.tally = this.$route.params.status == undefined ? false : this.$route.params.status == 'tally' ? true : false
-				this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Customers to be synced with Tally' : 'Customers pending approval'
+				this.pageTitle = this.$route.params.status == undefined ? 'Customers' : this.$route.params.status == 'tally' ? 'Customers to be synced with Tally' : 'Customers pending approval'
 				this.getDataFromApi()
 		    }
 		},
 		mounted(){
 			this.pending = this.$route.params.status == undefined ? false : this.$route.params.status == 'pending' ? true : false
 			this.tally = this.$route.params.status == undefined ? false : this.$route.params.status == 'tally' ? true : false
-			this.pageTitle = this.$route.params.status == undefined ? 'Products' : this.$route.params.status == 'tally' ? 'Customers to be synced with Tally' : 'Customers pending approval'
+			this.pageTitle = this.$route.params.status == undefined ? 'Customers' : this.$route.params.status == 'tally' ? 'Customers to be synced with Tally' : 'Customers pending approval'
 			this.options.page=1
 			axios.get('users?role="sale"').then((res)=>{
 				this.filterables.salepersons = res.data.data
