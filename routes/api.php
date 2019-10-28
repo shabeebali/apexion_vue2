@@ -47,6 +47,7 @@ Route::middleware('auth:api')->group(function(){
             'phone_countries' => $phone_countries
         ];
     });
+    Route::post('customers/check/{id?}','Backend\CustomerController@check');
     Route::get('products/notif_test','Backend\ProductController@notif_test');
     Route::post('products/import','Backend\ProductController@import');
     Route::get('menu','Backend\MenuController');

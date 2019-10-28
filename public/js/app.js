@@ -2829,6 +2829,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
     var _this = this;
@@ -2921,7 +2932,7 @@ __webpack_require__.r(__webpack_exports__);
       addressFormVal: null,
       sbColor: '',
       sbText: '',
-      sbTimeout: 3000,
+      sbTimeout: 10000,
       snackbar: false,
       fd: {
         name: {
@@ -2969,7 +2980,12 @@ __webpack_require__.r(__webpack_exports__);
         addressFormVal: function addressFormVal(value) {
           return _this2.addressFormVal || 'Error';
         }
-      }
+      },
+      fD: null,
+      route: '',
+      checkRoute: '',
+      duplicateConfirm: false,
+      duplicateMessage: ''
     };
   },
   methods: {
@@ -3058,8 +3074,52 @@ __webpack_require__.r(__webpack_exports__);
       this.sbColor = color;
       this.snackbar = true;
     },
-    save: function save() {
+    submitData: function submitData() {
       var _this5 = this;
+
+      axios.post(this.route, this.fD).then(function (response) {
+        _this5.btnloading = false;
+
+        if (_this5.mode == 'edit') {
+          _this5.$emit('trigger-sb', {
+            text: 'Category Updated Successfully',
+            color: 'success'
+          });
+        } else {
+          _this5.$emit('trigger-sb', {
+            text: 'Category Created Successfully',
+            color: 'success'
+          });
+        }
+
+        _this5.closeDialog();
+
+        _this5.$emit('update-list');
+      })["catch"](function (error) {
+        if (error.response.status == 422) {
+          _this5.btnloading = false;
+          var errors = error.response.data.errors;
+          _this5.fd.name.error = errors.name;
+          Object.keys(errors).forEach(function (key) {
+            var keys = key.split(".");
+
+            if (keys[1] in _this5.fd.addresses[0]) {
+              _this5.fd.addresses[keys[0]][keys[1]].error = errors[key];
+            }
+          });
+
+          _this5.emitSb('There are errors in the form submitted. Please check!!', 'error');
+        }
+
+        if (error.response.status == 403) {
+          _this5.btnloading = false;
+
+          _this5.emitSb('You are not authorised to do this action', 'error');
+        }
+      });
+    },
+    save: function save() {
+      var _this6 = this;
 
       this.btnloading = true;
       this.$refs.formDetails.validate();
@@ -3069,55 +3129,25 @@ __webpack_require__.r(__webpack_exports__);
         this.emitSb('There are errors in the form submitted. Please check!!', 'error');
         this.btnloading = false;
       } else {
-        var fD = new FormData();
-        fD.append('name', this.fd.name.value);
-        fD.append('addresses', JSON.stringify(this.fd.addresses));
+        this.fD = new FormData();
+        this.fD.append('name', this.fd.name.value);
+        this.fD.append('addresses', JSON.stringify(this.fd.addresses));
 
         if (this.mode == 'edit') {
-          fD.append('_method', 'PUT');
-          var route = 'customers/' + this.cId;
+          this.fD.append('_method', 'PUT');
+          this.route = 'customers/' + this.cId;
+          this.checkRoute = 'customers/check/' + this.cId;
         } else {
-          var route = 'customers';
+          this.route = 'customers';
+          this.checkRoute = 'customers/check/';
         }
 
-        axios.post(route, fD).then(function (response) {
-          _this5.btnloading = false;
-
-          if (_this5.mode == 'edit') {
-            _this5.$emit('trigger-sb', {
-              text: 'Category Updated Successfully',
-              color: 'success'
-            });
+        axios.post(this.checkRoute, this.fD).then(function (res) {
+          if (res.data.message == 'warning') {
+            _this6.duplicateMessage = res.data.warning;
+            _this6.duplicateConfirm = true;
           } else {
-            _this5.$emit('trigger-sb', {
-              text: 'Category Created Successfully',
-              color: 'success'
-            });
-          }
-
-          _this5.closeDialog();
-
-          _this5.$emit('update-list');
-        })["catch"](function (error) {
-          if (error.response.status == 422) {
-            _this5.btnloading = false;
-            var errors = error.response.data.errors;
-            _this5.fd.name.error = errors.name;
-            Object.keys(errors).forEach(function (key) {
-              var keys = key.split(".");
-
-              if (keys[1] in _this5.fd.addresses[0]) {
-                _this5.fd.addresses[keys[0]][keys[1]].error = errors[key];
-              }
-            });
-
-            _this5.emitSb('There are errors in the form submitted. Please check!!', 'error');
-          }
-
-          if (error.response.status == 403) {
-            _this5.btnloading = false;
-
-            _this5.emitSb('You are not authorised to do this action', 'error');
+            _this6.submitData();
           }
         });
       }
@@ -38631,6 +38661,68 @@ var render = function() {
                         click: function($event) {
                           $event.stopPropagation()
                           _vm.closeConfirm = false
+                        }
+                      }
+                    },
+                    [_vm._v("NO")]
+                  )
+                ],
+                1
+              )
+            ],
+            1
+          )
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "v-dialog",
+        {
+          attrs: { persistent: "", width: "600" },
+          model: {
+            value: _vm.duplicateConfirm,
+            callback: function($$v) {
+              _vm.duplicateConfirm = $$v
+            },
+            expression: "duplicateConfirm"
+          }
+        },
+        [
+          _c(
+            "v-card",
+            [
+              _c("v-card-text", { staticClass: "pt-4" }, [
+                _c("div", {
+                  domProps: { innerHTML: _vm._s(_vm.duplicateMessage) }
+                })
+              ]),
+              _vm._v(" "),
+              _c(
+                "v-card-actions",
+                [
+                  _c(
+                    "v-btn",
+                    {
+                      attrs: { text: "", color: "error" },
+                      on: {
+                        click: function($event) {
+                          $event.stopPropagation()
+                          return _vm.submitData($event)
+                        }
+                      }
+                    },
+                    [_vm._v("Yes")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "v-btn",
+                    {
+                      attrs: { text: "", color: "success" },
+                      on: {
+                        click: function($event) {
+                          $event.stopPropagation()
+                          _vm.duplicateConfirm = false
                         }
                       }
                     },
@@ -98100,14 +98192,15 @@ __webpack_require__.r(__webpack_exports__);
 /*!*********************************************************************!*\
   !*** ./resources/js/components/backend/customer/CustomerCreate.vue ***!
   \*********************************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _CustomerCreate_vue_vue_type_template_id_69465cf5___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./CustomerCreate.vue?vue&type=template&id=69465cf5& */ "./resources/js/components/backend/customer/CustomerCreate.vue?vue&type=template&id=69465cf5&");
 /* harmony import */ var _CustomerCreate_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CustomerCreate.vue?vue&type=script&lang=js& */ "./resources/js/components/backend/customer/CustomerCreate.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _CustomerCreate_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _CustomerCreate_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -98137,7 +98230,7 @@ component.options.__file = "resources/js/components/backend/customer/CustomerCre
 /*!**********************************************************************************************!*\
   !*** ./resources/js/components/backend/customer/CustomerCreate.vue?vue&type=script&lang=js& ***!
   \**********************************************************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

@@ -105,6 +105,36 @@ class CustomerController extends Controller
         $obj->tags()->syncWithoutDetaching($tag_ids);
     }
 
+    public function check(Request $request,$id = NULL)
+    {
+        $add_arr = json_decode($request->addresses,true);
+        if($id){
+
+        }
+        else{
+            $addresses = Address::all();
+            $str = '';
+            foreach ($addresses as $address) {
+                $address_consolidated = $address->tag_name.$address->line_1.$address->line_2.$address->pin;
+                foreach ($add_arr as $req_address) {
+                    $req_address_consolidated = $req_address['tag_name']['value'].$req_address['line_1'].$req_address['line_2'].$req_address['pin'];
+                    similar_text($address_consolidated, $req_address_consolidated, $percent);
+                    if($percent > 80){
+                        $customer = Customer::find($address->id);
+                        $str = '<p>'.$str.'Customer: '.$customer->name.' Address tag: '.$address->tag_name.' PIN: '.$address->pin.'</p></br>';
+                    }
+                }
+            }
+            if($str != ''){
+                $str = 'Similar data in '.$str.' Do you want to continue creating?';
+                return response()->json([
+                    'message' => 'warning',
+                    'warning' => $str,
+                ]);
+            }
+        }
+    }
+
     /**
      * Display the specified resource.
      *

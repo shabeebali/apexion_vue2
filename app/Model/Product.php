@@ -56,7 +56,7 @@ class Product extends Model
             $search_terms = explode(" ",$request->search);
             $tags = Tag::with('products');
             foreach ($search_terms as $term) {
-                $tags = $tags->orWhere('name','like','%'.$term.'%');
+                $tags = $tags->where('name','like','%'.$term.'%');
             }
             $tags = $tags->get();
             $p_ids =[];

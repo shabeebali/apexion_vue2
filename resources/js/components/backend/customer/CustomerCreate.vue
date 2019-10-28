@@ -169,6 +169,17 @@
 	    		</v-card-actions>
 	    	</v-card>
 	    </v-dialog>
+	    <v-dialog v-model ="duplicateConfirm" persistent width="600">
+	    	<v-card>
+	    		<v-card-text class="pt-4">
+	    			<div v-html="duplicateMessage"></div>
+	    		</v-card-text>
+	    		<v-card-actions>
+	    			<v-btn text color="error" @click.stop="submitData">Yes</v-btn>
+	    			<v-btn text color="success" @click.stop="duplicateConfirm = false">NO</v-btn>
+	    		</v-card-actions>
+	    	</v-card>
+	    </v-dialog>
 	    <v-dialog v-model="waitDialog" persistent width="300">
 			<v-card color="primary" dark>
 				<v-card-text>
@@ -274,7 +285,7 @@
 				addressFormVal:null,
 				sbColor:'',
 				sbText:'',
-				sbTimeout:3000,
+				sbTimeout:10000,
 				snackbar:false,
 				fd:{
 					name:{
@@ -320,6 +331,11 @@
 			        detailsFormVal: value=> this.detailsFormVal || 'Error',
 			        addressFormVal: value=> this.addressFormVal || 'Error',
 				},
+				fD:null,
+				route:'',
+				checkRoute:'',
+				duplicateConfirm:false,
+				duplicateMessage:'',
 			}
 		},
 		methods:{
@@ -403,6 +419,36 @@
 				this.sbColor = color
 				this.snackbar = true
 			},
+			submitData(){
+				axios.post(this.route,this.fD).then((response)=>{
+					this.btnloading = false
+					if(this.mode == 'edit'){
+						this.$emit('trigger-sb',{text:'Category Updated Successfully',color:'success'})
+					}
+					else{
+						this.$emit('trigger-sb',{text:'Category Created Successfully',color:'success'})
+					}
+					this.closeDialog()
+					this.$emit('update-list')
+				}).catch((error)=> {
+					if(error.response.status == 422){
+						this.btnloading = false
+						var errors = error.response.data.errors
+						this.fd.name.error = errors.name
+						Object.keys(errors).forEach((key)=>{
+							var keys = key.split(".")
+							if(keys[1] in this.fd.addresses[0]){
+								this.fd.addresses[keys[0]][keys[1]].error = errors[key]
+							}
+						})
+						this.emitSb('There are errors in the form submitted. Please check!!','error')
+					}
+					if(error.response.status == 403){
+						this.btnloading = false
+						this.emitSb('You are not authorised to do this action','error')
+					}
+				})
+			},
 			save(){
 				this.btnloading = true
 				this.$refs.formDetails.validate();
@@ -412,42 +458,25 @@
 					this.btnloading = false
 				}
 				else{
-					var fD = new FormData()
-					fD.append('name',this.fd.name.value)
-					fD.append('addresses',JSON.stringify(this.fd.addresses))
+					this.fD = new FormData()
+					this.fD.append('name',this.fd.name.value)
+					this.fD.append('addresses',JSON.stringify(this.fd.addresses))
 					if(this.mode == 'edit'){
-						fD.append('_method','PUT')
-						var route = 'customers/'+this.cId
+						this.fD.append('_method','PUT')
+						this.route = 'customers/'+this.cId
+						this.checkRoute = 'customers/check/'+this.cId
 					}
 					else{
-						var route = 'customers'
+						this.route = 'customers'
+						this.checkRoute = 'customers/check/'
 					}
-					axios.post(route,fD).then((response)=>{
-						this.btnloading = false
-						if(this.mode == 'edit'){
-							this.$emit('trigger-sb',{text:'Category Updated Successfully',color:'success'})
+					axios.post(this.checkRoute,this.fD).then((res)=>{
+						if(res.data.message == 'warning'){
+							this.duplicateMessage = res.data.warning
+							this.duplicateConfirm = true
 						}
 						else{
-							this.$emit('trigger-sb',{text:'Category Created Successfully',color:'success'})
-						}
-						this.closeDialog()
-						this.$emit('update-list')
-					}).catch((error)=> {
-						if(error.response.status == 422){
-							this.btnloading = false
-							var errors = error.response.data.errors
-							this.fd.name.error = errors.name
-							Object.keys(errors).forEach((key)=>{
-								var keys = key.split(".")
-								if(keys[1] in this.fd.addresses[0]){
-									this.fd.addresses[keys[0]][keys[1]].error = errors[key]
-								}
-							})
-							this.emitSb('There are errors in the form submitted. Please check!!','error')
-						}
-						if(error.response.status == 403){
-							this.btnloading = false
-							this.emitSb('You are not authorised to do this action','error')
+							this.submitData()
 						}
 					})
 				}
