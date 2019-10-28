@@ -52,6 +52,9 @@
 								<template  v-slot:item.approve="{item}">
 									<v-checkbox v-if="item.approve" v-model="fd.permissions" :value="item.approve"></v-checkbox>
 								</template>
+								<template  v-slot:item.tally="{item}">
+									<v-checkbox v-if="item.tally" v-model="fd.permissions" :value="item.tally"></v-checkbox>
+								</template>
 							</v-data-table>
 						</v-col>
 					</v-row>
@@ -136,6 +139,10 @@
 					{
 						text:'Approve',
 						value:'approve'
+					},
+					{
+						text:'Update to Tally',
+						value:'tally'
 					},
 				],
 				formItems:[],

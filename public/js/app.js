@@ -2819,6 +2819,16 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
     var _this = this;
@@ -2847,8 +2857,12 @@ __webpack_require__.r(__webpack_exports__);
             error: ''
           },
           addresses: [{
-            line1: '',
-            line2: '',
+            tag_name: {
+              value: '',
+              error: ''
+            },
+            line_1: '',
+            line_2: '',
             pin: '',
             country_id: 0,
             state_id: 0,
@@ -2860,7 +2874,9 @@ __webpack_require__.r(__webpack_exports__);
             phones: [{
               value: '',
               country_id: 101
-            }]
+            }],
+            approved: 0,
+            tally: 0
           }]
         };
       }
@@ -2913,8 +2929,12 @@ __webpack_require__.r(__webpack_exports__);
           error: ''
         },
         addresses: [{
-          line1: '',
-          line2: '',
+          tag_name: {
+            value: '',
+            error: ''
+          },
+          line_1: '',
+          line_2: '',
           pin: '',
           country_id: 0,
           state_id: 0,
@@ -2926,7 +2946,9 @@ __webpack_require__.r(__webpack_exports__);
           phones: [{
             value: '',
             country_id: 101
-          }]
+          }],
+          approved: 0,
+          tally: 0
         }]
       },
       countries: [],
@@ -2998,8 +3020,12 @@ __webpack_require__.r(__webpack_exports__);
     },
     addAddress: function addAddress() {
       this.fd.addresses.push({
-        line1: '',
-        line2: '',
+        tag_name: {
+          value: '',
+          error: ''
+        },
+        line_1: '',
+        line_2: '',
         pin: '',
         country_id: 0,
         state_id: 0,
@@ -3011,7 +3037,9 @@ __webpack_require__.r(__webpack_exports__);
         phones: [{
           value: '',
           country_id: 101
-        }]
+        }],
+        approved: 0,
+        tally: 0
       });
     },
     deletePhone: function deletePhone(index, index2) {
@@ -3073,6 +3101,15 @@ __webpack_require__.r(__webpack_exports__);
         })["catch"](function (error) {
           if (error.response.status == 422) {
             _this5.btnloading = false;
+            var errors = error.response.data.errors;
+            _this5.fd.name.error = errors.name;
+            Object.keys(errors).forEach(function (key) {
+              var keys = key.split(".");
+
+              if (keys[1] in _this5.fd.addresses[0]) {
+                _this5.fd.addresses[keys[0]][keys[1]].error = errors[key];
+              }
+            });
 
             _this5.emitSb('There are errors in the form submitted. Please check!!', 'error');
           }
@@ -5944,6 +5981,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   watch: {
     dialog: function dialog() {
@@ -6007,6 +6047,9 @@ __webpack_require__.r(__webpack_exports__);
       }, {
         text: 'Approve',
         value: 'approve'
+      }, {
+        text: 'Update to Tally',
+        value: 'tally'
       }],
       formItems: [],
       btnloading: false,
@@ -37545,7 +37588,13 @@ var render = function() {
                                         return [
                                           _c(
                                             "v-card",
-                                            { staticClass: "ma-4" },
+                                            {
+                                              staticClass: "ma-4",
+                                              attrs: {
+                                                color: "grey lighten-4",
+                                                elevation: "4"
+                                              }
+                                            },
                                             [
                                               _c(
                                                 "v-toolbar",
@@ -37613,14 +37662,30 @@ var render = function() {
                                                               rules: [
                                                                 _vm.rules
                                                                   .required
-                                                              ]
+                                                              ],
+                                                              "error-messages":
+                                                                _vm.fd
+                                                                  .addresses[
+                                                                  index
+                                                                ].tag_name.error
+                                                            },
+                                                            on: {
+                                                              keydown: function(
+                                                                $event
+                                                              ) {
+                                                                _vm.fd.addresses[
+                                                                  index
+                                                                ].tag_name.error =
+                                                                  ""
+                                                              }
                                                             },
                                                             model: {
                                                               value:
                                                                 _vm.fd
                                                                   .addresses[
                                                                   index
-                                                                ].tag_name,
+                                                                ].tag_name
+                                                                  .value,
                                                               callback: function(
                                                                 $$v
                                                               ) {
@@ -37628,13 +37693,13 @@ var render = function() {
                                                                   _vm.fd
                                                                     .addresses[
                                                                     index
-                                                                  ],
-                                                                  "tag_name",
+                                                                  ].tag_name,
+                                                                  "value",
                                                                   $$v
                                                                 )
                                                               },
                                                               expression:
-                                                                "fd.addresses[index].tag_name"
+                                                                "fd.addresses[index].tag_name.value"
                                                             }
                                                           })
                                                         ],
@@ -37660,7 +37725,7 @@ var render = function() {
                                                                 _vm.fd
                                                                   .addresses[
                                                                   index
-                                                                ].line1,
+                                                                ].line_1,
                                                               callback: function(
                                                                 $$v
                                                               ) {
@@ -37669,12 +37734,12 @@ var render = function() {
                                                                     .addresses[
                                                                     index
                                                                   ],
-                                                                  "line1",
+                                                                  "line_1",
                                                                   $$v
                                                                 )
                                                               },
                                                               expression:
-                                                                "fd.addresses[index].line1"
+                                                                "fd.addresses[index].line_1"
                                                             }
                                                           })
                                                         ],
@@ -37696,7 +37761,7 @@ var render = function() {
                                                                 _vm.fd
                                                                   .addresses[
                                                                   index
-                                                                ].line2,
+                                                                ].line_2,
                                                               callback: function(
                                                                 $$v
                                                               ) {
@@ -37705,12 +37770,12 @@ var render = function() {
                                                                     .addresses[
                                                                     index
                                                                   ],
-                                                                  "line2",
+                                                                  "line_2",
                                                                   $$v
                                                                 )
                                                               },
                                                               expression:
-                                                                "fd.addresses[index].line2"
+                                                                "fd.addresses[index].line_2"
                                                             }
                                                           })
                                                         ],
@@ -38277,6 +38342,108 @@ var render = function() {
                                                       }
                                                     },
                                                     [_vm._v("Add Phone")]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "v-row",
+                                                    [
+                                                      _vm.$store.getters.hasPermission(
+                                                        "approve_customer"
+                                                      )
+                                                        ? _c(
+                                                            "v-col",
+                                                            {
+                                                              attrs: {
+                                                                cols: "12",
+                                                                md: "3"
+                                                              }
+                                                            },
+                                                            [
+                                                              _c("v-switch", {
+                                                                attrs: {
+                                                                  label:
+                                                                    "Approved?",
+                                                                  "true-value":
+                                                                    "1",
+                                                                  "false-value":
+                                                                    "0"
+                                                                },
+                                                                model: {
+                                                                  value:
+                                                                    _vm.fd
+                                                                      .addresses[
+                                                                      index
+                                                                    ].approved,
+                                                                  callback: function(
+                                                                    $$v
+                                                                  ) {
+                                                                    _vm.$set(
+                                                                      _vm.fd
+                                                                        .addresses[
+                                                                        index
+                                                                      ],
+                                                                      "approved",
+                                                                      $$v
+                                                                    )
+                                                                  },
+                                                                  expression:
+                                                                    "fd.addresses[index].approved"
+                                                                }
+                                                              })
+                                                            ],
+                                                            1
+                                                          )
+                                                        : _vm._e(),
+                                                      _vm._v(" "),
+                                                      _vm.$store.getters.hasPermission(
+                                                        "tally_customer"
+                                                      )
+                                                        ? _c(
+                                                            "v-col",
+                                                            {
+                                                              attrs: {
+                                                                cols: "12",
+                                                                md: "3"
+                                                              }
+                                                            },
+                                                            [
+                                                              _c("v-switch", {
+                                                                attrs: {
+                                                                  label:
+                                                                    "Tally updated?",
+                                                                  "true-value":
+                                                                    "1",
+                                                                  "false-value":
+                                                                    "0"
+                                                                },
+                                                                model: {
+                                                                  value:
+                                                                    _vm.fd
+                                                                      .addresses[
+                                                                      index
+                                                                    ].tally,
+                                                                  callback: function(
+                                                                    $$v
+                                                                  ) {
+                                                                    _vm.$set(
+                                                                      _vm.fd
+                                                                        .addresses[
+                                                                        index
+                                                                      ],
+                                                                      "tally",
+                                                                      $$v
+                                                                    )
+                                                                  },
+                                                                  expression:
+                                                                    "fd.addresses[index].tally"
+                                                                }
+                                                              })
+                                                            ],
+                                                            1
+                                                          )
+                                                        : _vm._e()
+                                                    ],
+                                                    1
                                                   )
                                                 ],
                                                 2
@@ -44461,6 +44628,30 @@ var render = function() {
                                     item.approve
                                       ? _c("v-checkbox", {
                                           attrs: { value: item.approve },
+                                          model: {
+                                            value: _vm.fd.permissions,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                _vm.fd,
+                                                "permissions",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "fd.permissions"
+                                          }
+                                        })
+                                      : _vm._e()
+                                  ]
+                                }
+                              },
+                              {
+                                key: "item.tally",
+                                fn: function(ref) {
+                                  var item = ref.item
+                                  return [
+                                    item.tally
+                                      ? _c("v-checkbox", {
+                                          attrs: { value: item.tally },
                                           model: {
                                             value: _vm.fd.permissions,
                                             callback: function($$v) {
@@ -97502,11 +97693,29 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_2__["default"].Store({
   state: {
     user: {
       id: 0
+    },
+    permissions: []
+  },
+  getters: {
+    hasPermission: function hasPermission(state) {
+      return function (q) {
+        var index = state.permissions.findIndex(function (p) {
+          if (p.name == q) return true;
+        });
+        return index == -1 ? false : true;
+      };
     }
   },
   mutations: {
     setUser: function setUser(state, user) {
       state.user = user;
+      var permissions = [];
+      user.roles.forEach(function (role) {
+        role.permissions.forEach(function (permission) {
+          permissions.push(permission);
+        });
+      });
+      state.permissions = permissions;
     }
   }
 });
@@ -97529,7 +97738,7 @@ new Vue({
       axios.get('menu').then(function (res) {
         _this.sidebar_left_items = res.data;
       });
-      axios.get('user').then(function (res) {
+      axios.get('user?with_permissions=1').then(function (res) {
         _this.$store.commit('setUser', res.data);
 
         Echo["private"]('App.User.' + _this.$store.state.user).notification(function (notification) {

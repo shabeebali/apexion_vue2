@@ -21,12 +21,14 @@ class PermissionTableSeeder extends Seeder
         Permission::create(['name'=>'delete_product','guard_name'=>'api','model'=>'Product','model_slug'=>'product']);
         Permission::create(['name'=>'view_product','guard_name'=>'api','model'=>'Product','model_slug'=>'product']);
         Permission::create(['name'=>'approve_product','guard_name'=>'api','model'=>'Product','model_slug'=>'product']);
+        Permission::create(['name'=>'tally_product','guard_name'=>'api','model'=>'Product','model_slug'=>'product']);
 
         Permission::create(['name'=>'create_customer','guard_name'=>'api','model'=>'Customer','model_slug'=>'customer']);
         Permission::create(['name'=>'edit_customer','guard_name'=>'api','model'=>'Customer','model_slug'=>'customer']);
         Permission::create(['name'=>'delete_customer','guard_name'=>'api','model'=>'Customer','model_slug'=>'customer']);
         Permission::create(['name'=>'view_customer','guard_name'=>'api','model'=>'Customer','model_slug'=>'customer']);
         Permission::create(['name'=>'approve_customer','guard_name'=>'api','model'=>'Customer','model_slug'=>'customer']);
+        Permission::create(['name'=>'tally_customer','guard_name'=>'api','model'=>'Customer','model_slug'=>'customer']);
 
         Permission::create(['name'=>'create_taxonomy','guard_name'=>'api','model'=>'Taxonomy','model_slug'=>'taxonomy']);
         Permission::create(['name'=>'edit_taxonomy','guard_name'=>'api','model'=>'Taxonomy','model_slug'=>'taxonomy']);
@@ -52,7 +54,7 @@ class PermissionTableSeeder extends Seeder
         Permission::create(['name'=>'edit_sale','guard_name'=>'api','model'=>'Sale Order','model_slug'=>'sale']);
         Permission::create(['name'=>'delete_sale','guard_name'=>'api','model'=>'Sale Order','model_slug'=>'sale']);
         Permission::create(['name'=>'view_sale','guard_name'=>'api','model'=>'Sale Order','model_slug'=>'sale']);
-        Permission::create(['name'=>'approve_sale','guard_name'=>'api','model'=>'Sale Order','model_slug'=>'sale']);
+        Permission::create(['name'=>'tally_sale','guard_name'=>'api','model'=>'Sale Order','model_slug'=>'sale']);
 
         Permission::create(['name'=>'create_user_role','guard_name'=>'api','model'=>'User Role','model_slug'=>'user_role']);
         Permission::create(['name'=>'edit_user_role','guard_name'=>'api','model'=>'User Role','model_slug'=>'user_role']);

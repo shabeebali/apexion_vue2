@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use App\Model\Country;
 use App\Model\State;
 use App\Model\City;
+use App\User;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,6 +18,10 @@ use App\Model\City;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     $user = $request->user();
+    if($request->with_permissions){
+        $model = User::with('roles.permissions')->find($user->id);
+        return $model->toArray();
+    }
     return $user->toArray();
 });
 Route::middleware('auth:api')->group(function(){

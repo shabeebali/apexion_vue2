@@ -40,11 +40,27 @@ const store = new Vuex.Store({
   state: {
     user: {
       id:0
+    },
+    permissions:[],
+  },
+  getters:{
+    hasPermission:(state)=>(q)=>{
+      const index = state.permissions.findIndex((p)=>{
+        if(p.name == q) return true
+      })
+      return index == -1 ? false : true
     }
   },
   mutations: {
     setUser (state,user) {
       state.user = user
+      var permissions = []
+      user.roles.forEach((role)=>{
+        role.permissions.forEach((permission)=>{
+          permissions.push(permission)
+        })
+      })
+      state.permissions = permissions
     }
   }
 })
@@ -67,7 +83,7 @@ new Vue({
       axios.get('menu').then((res)=>{
         this.sidebar_left_items = res.data
       })
-      axios.get('user').then((res)=>{
+      axios.get('user?with_permissions=1').then((res)=>{
         this.$store.commit('setUser',res.data)
         Echo.private('App.User.'+this.$store.state.user)
           .notification((notification) => {

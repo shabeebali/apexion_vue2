@@ -23,6 +23,10 @@ class CreateAddressesTable extends Migration
             $table->bigInteger('country_id');
             $table->string('pin');
             $table->bigInteger('customer_id');
+            $table->decimal('init_bal',8,2);
+            $table->date('init_bal_date');
+            $table->boolean('publish');
+            $table->boolean('tally');
             $table->timestamps();
         });
     }

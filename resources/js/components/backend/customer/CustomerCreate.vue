@@ -42,7 +42,7 @@
 								<v-card-text>
 									<v-form ref="formAddress" v-model="addressFormVal">
 										<template v-for="(address,index) in fd.addresses">
-											<v-card class="ma-4">
+											<v-card class="ma-4" color="grey lighten-4" elevation="4">
 												<v-toolbar flat>
 													<v-toolbar-title>
 														Address {{index+1}}
@@ -55,13 +55,13 @@
 												<v-card-text>
 													<v-row>
 														<v-col cols="12">
-															<v-text-field label="Tag Name" :rules="[rules.required]" v-model="fd.addresses[index].tag_name"></v-text-field>
+															<v-text-field label="Tag Name" :rules="[rules.required]" v-model="fd.addresses[index].tag_name.value" :error-messages="fd.addresses[index].tag_name.error" @keydown="fd.addresses[index].tag_name.error = ''"></v-text-field>
 														</v-col>
 														<v-col cols="12">
-															<v-text-field label="Line1" :rules="[rules.required]" v-model="fd.addresses[index].line1"></v-text-field>
+															<v-text-field label="Line1" :rules="[rules.required]" v-model="fd.addresses[index].line_1"></v-text-field>
 														</v-col>
 														<v-col cols="12">
-															<v-text-field label="Line2" v-model="fd.addresses[index].line2"></v-text-field>
+															<v-text-field label="Line2" v-model="fd.addresses[index].line_2"></v-text-field>
 														</v-col>
 														<v-col cols="12" md="3">
 															<v-text-field label="PIN" v-model="fd.addresses[index].pin"></v-text-field>
@@ -118,6 +118,16 @@
 														</v-row>
 													</template>
 													<v-btn text @click="addPhone(index)">Add Phone</v-btn>
+													<v-row>
+														<v-col cols="12" md="3" v-if="$store.getters.hasPermission('approve_customer')">
+															<v-switch v-model="fd.addresses[index].approved" label="Approved?" true-value=1 false-value=0>
+															</v-switch>
+														</v-col>
+														<v-col cols="12" md="3" v-if="$store.getters.hasPermission('tally_customer')">
+															<v-switch v-model="fd.addresses[index].tally" label="Tally updated?" true-value=1 false-value=0>
+															</v-switch>
+														</v-col>
+													</v-row>
 												</v-card-text>
 											</v-card>
 										</template>
@@ -200,8 +210,11 @@
 						},
 						addresses:[
 							{
-								line1:'',
-								line2:'',
+								tag_name:{
+									value:'',error:'',
+								},
+								line_1:'',
+								line_2:'',
 								pin:'',
 								country_id:0,
 								state_id:0,
@@ -215,7 +228,9 @@
 										value:'',
 										country_id:101
 									}
-								]
+								],
+								approved:0,
+								tally:0,
 							}
 						]
 					}
@@ -268,8 +283,11 @@
 					},
 					addresses:[
 						{
-							line1:'',
-							line2:'',
+							tag_name:{
+								value:'',error:'',
+							},
+							line_1:'',
+							line_2:'',
 							pin:'',
 							country_id:0,
 							state_id:0,
@@ -283,7 +301,9 @@
 									value:'',
 									country_id:101
 								}
-							]
+							],
+							approved:0,
+							tally:0,
 						}
 					]
 				},
@@ -344,8 +364,11 @@
 			},
 			addAddress(){
 				this.fd.addresses.push({
-					line1:'',
-					line2:'',
+					tag_name:{
+						value:'',error:'',
+					},
+					line_1:'',
+					line_2:'',
 					pin:'',
 					country_id:0,
 					state_id:0,
@@ -359,7 +382,9 @@
 							value:'',
 							country_id:101
 						}
-					]
+					],
+					approved:0,
+					tally:0,
 				})
 			},
 			deletePhone(index,index2){
@@ -410,6 +435,14 @@
 					}).catch((error)=> {
 						if(error.response.status == 422){
 							this.btnloading = false
+							var errors = error.response.data.errors
+							this.fd.name.error = errors.name
+							Object.keys(errors).forEach((key)=>{
+								var keys = key.split(".")
+								if(keys[1] in this.fd.addresses[0]){
+									this.fd.addresses[keys[0]][keys[1]].error = errors[key]
+								}
+							})
 							this.emitSb('There are errors in the form submitted. Please check!!','error')
 						}
 						if(error.response.status == 403){

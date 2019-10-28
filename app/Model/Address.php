@@ -17,6 +17,6 @@ class Address extends Model
     }
 
     public function saleperons(){
-    	return $this->belongsToMany('App\User','address_saleperson','address_id','saleperson_id')
+    	return $this->belongsToMany('App\User','address_saleperson','address_id','saleperson_id');
     }
 }
