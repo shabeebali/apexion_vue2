@@ -21,6 +21,10 @@ class TaxonomyController extends Controller
         $model = Taxonomy::all();
         if($request->withcat){
             $model = Taxonomy::with('categories')->get();
+            $model->transform(function($item,$key){
+                $item->value = '';
+                return $item;
+            });
         }
         else{
             $model = Taxonomy::all();

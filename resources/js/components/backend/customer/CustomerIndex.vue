@@ -126,6 +126,9 @@
 						<template v-slot:item.name="{item}">
 							<a @click.stop="showCustomer(item.id)">{{item.name}}</a>
 						</template>
+						<template v-slot:item.tag_name="{item}">
+							<div v-html="item.tag_name"></div>
+						</template>
 					</v-data-table>
 				</v-card-text>
 			</v-card>
@@ -232,8 +235,8 @@
 			this.tally = this.$route.params.status == undefined ? false : this.$route.params.status == 'tally' ? true : false
 			this.pageTitle = this.$route.params.status == undefined ? 'Customers' : this.$route.params.status == 'tally' ? 'Customers to be synced with Tally' : 'Customers pending approval'
 			this.options.page=1
-			axios.get('users?role="sale"').then((res)=>{
-				this.filterables.salepersons = res.data.data
+			axios.get('users?role=Sale').then((res)=>{
+				this.filterables.salepersons = res.data
 			})
 			this.deboucedSearch = _.debounce(()=>{
 	            this.getDataFromApi()
@@ -273,6 +276,12 @@
 					{
 						text:'Name',
 						value:'name'
+					},
+					{
+						text:'Address Tag',
+						value:'tag_name',
+						sortable:false,
+						width:500,
 					},
 					{
 						text:'Action',
@@ -404,7 +413,7 @@
 				})
 			},
 			edit(id){
-				this.pId = id
+				this.cId = id
 				this.mode = 'edit'
 				this.dialog = true
 			},

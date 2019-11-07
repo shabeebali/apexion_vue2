@@ -20,6 +20,8 @@ use App\Model\Product;
 use App\Policies\ProductPolicy;
 use App\Model\Customer;
 use App\Policies\CustomerPolicy;
+use App\Model\Sale;
+use App\Policies\SalePolicy;
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -35,6 +37,7 @@ class AuthServiceProvider extends ServiceProvider
         Category::class => CategoryPolicy::class,
         Product::class => ProductPolicy::class,
         Customer::class => CustomerPolicy::class,
+        Sale::class => SalePolicy::class,
     ];
 
     /**

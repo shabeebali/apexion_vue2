@@ -19,4 +19,16 @@ class Address extends Model
     public function salepersons(){
     	return $this->belongsToMany('App\User','address_saleperson','address_id','saleperson_id');
     }
+
+    public function city(){
+        return $this->belongsTo('App\Model\City','city_id');
+    }
+
+    public function state(){
+        return $this->belongsTo('App\Model\State','state_id');
+    }
+
+    public function country(){
+        return $this->belongsTo('App\Model\Country','country_id');
+    }
 }

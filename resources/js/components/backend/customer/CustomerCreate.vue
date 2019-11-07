@@ -80,9 +80,9 @@
 														<v-col cols="6" md="3">
 															<v-text-field label="Initial Balance" prepend-icon="mdi-currency-inr" :rules="[rules.price]" v-model="fd.addresses[index].init_bal"></v-text-field>
 														</v-col>
-														<v-col cols="6" md="4">
+														<v-col cols="6" md="3">
 															<v-menu
-																v-model="date_menu"
+																v-model="fd.addresses[index].date_menu"
 																:close-on-content-click="false"
 																:nudge-right="40"
 														        transition="scale-transition"
@@ -98,9 +98,12 @@
 																		v-on="on"
 																		></v-text-field>
 																</template>
-																<v-date-picker v-model="fd.addresses[index].init_bal_date"  @input="date_menu = false">
+																<v-date-picker v-model="fd.addresses[index].init_bal_date"  @input="fd.addresses[index].date_menu = false">
 																</v-date-picker>
 															</v-menu>
+														</v-col>
+														<v-col cols="12" md="6">
+															<v-select multiple label="Salepersons" v-model="fd.addresses[index].salepersons" :items="$parent.filterables.salepersons" item-text="name" item-value="id" :rules="[rules.arr]"></v-select>
 														</v-col>
 													</v-row>
 													<template v-for="(phone,index2) in fd.addresses[index].phones">
@@ -221,6 +224,7 @@
 						},
 						addresses:[
 							{
+								date_menu:false,
 								tag_name:{
 									value:'',error:'',
 								},
@@ -251,7 +255,7 @@
 					this.formTitle = 'Edit Customer'
 					this.passFormVal = true
 					axios.get('customers/'+this.cId).then((response)=>{
-						var dd = response.data.data
+						this.fd = response.data
 					})
 				}
 			},
@@ -275,7 +279,6 @@
 				stateLoading:false,
 				cityLoading:false,
 				e1:1,
-				date_menu:false,
 				submitTxt:'',
 				formTitle:'',
 				closeConfirm:false,
@@ -294,6 +297,7 @@
 					},
 					addresses:[
 						{
+							date_menu:false,
 							tag_name:{
 								value:'',error:'',
 							},
@@ -315,6 +319,7 @@
 							],
 							approved:0,
 							tally:0,
+							salepersons:[],
 						}
 					]
 				},
@@ -330,6 +335,7 @@
 			        	},
 			        detailsFormVal: value=> this.detailsFormVal || 'Error',
 			        addressFormVal: value=> this.addressFormVal || 'Error',
+			        arr: value => value.length > 0 || 'Must not empty',
 				},
 				fD:null,
 				route:'',
@@ -380,6 +386,7 @@
 			},
 			addAddress(){
 				this.fd.addresses.push({
+					date_menu:false,
 					tag_name:{
 						value:'',error:'',
 					},
@@ -407,6 +414,12 @@
 				this.fd.addresses[index].phones.splice(index2,1)
 			},
 			deleteAddress(index){
+				this.waitDialog = true
+				if("id" in this.fd.addresses[index]){
+					axios.get('customers/delete_address/'+this.fd.addresses[index].id).then((res)=>{
+						this.waitDialog = false
+					})
+				}
 				this.fd.addresses.splice(index,1)
 			},
 			closeDialog(){

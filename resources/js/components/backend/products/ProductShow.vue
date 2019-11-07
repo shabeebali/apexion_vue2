@@ -145,6 +145,27 @@
 		    						</template>
 		    					</v-simple-table>
 		    				</v-col>
+		    				<v-col cols="12">
+		    					<v-card flat>
+		    						<v-card-title>Comments</v-card-title>
+		    						<v-card-text>
+		    							<p v-if="data.comments.length == 0">No Comments</p>
+		    							<div v-else>
+		    								<v-list>
+		    									<v-list-item v-for="(item,index) in data.comments" :key="index" three-line>
+		    										<v-list-item-content>
+		    											<v-list-item-title>{{item.body}}</v-list-item-title>
+		    											<v-list-item-subtitle>{{item.user.name}}</v-list-item-subtitle>
+		    											<v-list-item-subtitle>{{new Date(item.created_at).toDateString()}}</v-list-item-subtitle>
+		    										</v-list-item-content>
+		    									</v-list-item>
+		    								</v-list>
+		    							</div>
+		    							<v-textarea v-model="comment" label="New Comment" rows="2"></v-textarea>
+		    							<v-btn text @click="addComment">Add Comment</v-btn>
+		    						</v-card-text>
+		    					</v-card>
+		    				</v-col>
 		    			</v-row>
     				</v-col>
     			</v-row>
@@ -168,14 +189,17 @@
 		props:['pId','dialog'],
 		data(){
 			return{
+				comment:'',
 				sbText:'',
 				sbTimeout:3000,
 				sbColor:'',
 				data:{
 					medias:[],
 					alias:[],
+					comments:[],
 				},
 				snackbar:false,
+				loading:false,
 			}
 		},
 		computed:{
@@ -187,6 +211,16 @@
 			
 		},
 		methods:{
+			addComment(){
+				this.loading = true
+				var fD = new FormData()
+				fD.append('body',this.comment)
+				axios.post('products/add_comment/'+this.pId,fD).then((res)=>{
+					this.loading=false
+					this.data.comments.push(res.data)
+					this.comment = ''
+				})
+			},
 			closeDialog(){
 				this.$emit('close-dialog');
 			},

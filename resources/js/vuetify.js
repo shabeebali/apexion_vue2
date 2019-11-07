@@ -65,6 +65,12 @@ import Vuetify, {
     VCarousel,
 	VCarouselItem,
 	VDatePicker,
+	VTabs,
+	VTab,
+	VTabItem,
+	VTabsItems,
+	VTabsSlider,
+	VTextarea,
 } from 'vuetify/lib'
 
 Vue.use(Vuetify, {
@@ -131,6 +137,12 @@ Vue.use(Vuetify, {
     	VCarousel,
     	VCarouselItem,
     	VDatePicker,
+    	VTabs,
+		VTab,
+		VTabItem,
+		VTabsItems,
+		VTabsSlider,
+		VTextarea,
 	},
 })
 const opts = {

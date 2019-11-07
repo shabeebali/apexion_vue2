@@ -46,12 +46,13 @@ class CategoryController extends Controller
         if($request->sortby){
             $model = $request->descending? $model->orderBy($request->sortby,'desc') : $model->orderBy($request->sortby,'asc');
         }
+        $model = $model->get();
+        $total = $model->count();
         if($request->page){
             $offset = ($request->page -1)*($request->rpp);
             $limit  = $request->rpp;
-            $model = $model->offset($offset)->limit($limit);
+            $model = $model->slice($offset,$limit)->values();
         }
-        $model = $model->get();
         return response()->json([
             'data' => $model ? $model->toArray() : '',
             'meta' => [
@@ -60,7 +61,7 @@ class CategoryController extends Controller
                 'filtered' => $filtered,
                 'create' => $user->can('create',Category::class)? 'true': 'false',
             ],
-            'total' => $model->count(),
+            'total' => $total,
         ]);
     }
 

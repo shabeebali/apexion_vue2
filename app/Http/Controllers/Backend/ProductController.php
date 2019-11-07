@@ -26,14 +26,14 @@ class ProductController extends Controller
         $data =  Product::getIndex($request);
         $model = $data['model'];
         return response()->json([
-            'data' => $model ? $model->toArray() : '',
+            'data' => $model ? $model : [],
             'meta' => [
                 'edit' => $user->can('update',Product::class)? 'true': 'false',
                 'delete' => $user->can('delete',Product::class)? 'true': 'false',
                 'filtered' => $data['filtered'],
                 'create' => $user->can('create',Product::class) ? 'true': 'false',
             ],
-            'total' => $model->count(),
+            'total' => $data['total'],
         ]);
     }
 
@@ -98,7 +98,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with(['categories.taxonomy','pricelists','warehouses','alias','medias'])->find($id);
+        $product = Product::with(['categories.taxonomy','pricelists','stocks','alias','medias','comments.user'])->find($id);
         return $product;
 
     }
@@ -121,9 +121,30 @@ class ProductController extends Controller
      * @param  \App\Model\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
-        //
+        $val_arr = [
+            'name' => 'required|unique:products,name,'.$id,
+            'mrp' => 'numeric',
+            'landing_price' => 'numeric',
+            'gsp_customer' => 'numeric',
+            'gsp_dealer' => 'numeric',
+            'weight' => 'numeric',
+            'gst' => 'required'
+        ];
+        $taxonomies = Taxonomy::all();
+        $pricelists = Pricelist::all();
+        $warehouses = Warehouse::all();
+        foreach ($taxonomies as $taxonomy) {
+            if($taxonomy->in_pc)
+            {
+                $val_arr['taxonomy_'.$taxonomy->slug] = 'required';
+            }
+        }
+        $request->validate($val_arr);
+
+        $product = Product::find($id);
+        $product->dbupdate($request->toArray(), $taxonomies, $pricelists, $warehouses);
     }
 
     /**
@@ -195,5 +216,20 @@ class ProductController extends Controller
             $import = new ProductImport($method, $taxonomies, $pricelists, $warehouses);
             $import->import($request->file('file'));
         }
+    }
+
+    public function add_comment(Request $request, $id){
+        $product = Product::find($id);
+        $comment = new \App\Model\Comment([
+                'body' => $request->body,
+                'created_by' => \Auth::user()->id,
+            ]);
+        $product->comments()->save($comment);
+        return response()->json([
+            'body' => $request->body,
+            'created_by' => \Auth::user()->id,
+            'created_at' => today(),
+            'user' => \Auth::user(),
+        ]);
     }
 }

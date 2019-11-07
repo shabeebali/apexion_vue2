@@ -133,6 +133,18 @@
 												</v-text-field>
 												<v-btn text @click.stop="addAlias">Add Alias</v-btn>
 											</v-col>
+											<v-col cols="12" md="8">
+												<v-row>
+													<v-col cols="12" md="3" v-if="$store.getters.hasPermission('approve_product')">
+														<v-switch v-model="fd.approved.value" label="Approved?" true-value=1 false-value=0>
+														</v-switch>
+													</v-col>
+													<v-col cols="12" md="3" v-if="$store.getters.hasPermission('tally_product')">
+														<v-switch v-model="fd.tally.value" label="Tally updated?" true-value=1 false-value=0>
+														</v-switch>
+													</v-col>
+												</v-row>
+											</v-col>
 										</v-row>
 									</v-form>
 								</v-card-text>
@@ -150,13 +162,13 @@
 											<v-col cols="12" md="4"></v-col>
 											<v-col cols="12" md="4">
 												<template v-for="(item,index) in taxonomies">
-													<v-select 
+													<v-autocomplete 
 														:label="taxonomies[index].name"
 														:items="taxonomies[index].categories"
 														item-text="name"
 														item-value="id"
 														v-model="taxonomies[index].value"
-														:rules="[rules.required]"></v-select>
+														:rules="[rules.required]"></v-autocomplete>
 												</template>
 											</v-col>
 											<v-col cols="12" md="4"></v-col>
@@ -213,18 +225,66 @@
 							<v-card class="pt-4">
 								<v-card-text>
 									<v-form ref="formStock" v-model="stockFormVal">
-										<v-row>
-											<v-col cols="12" md="4"></v-col>
-											<v-col cols="12" md="4">
-												<template v-for="(item,index) in warehouses">
-													<v-text-field 
-														:label="'Warehouse: ' + warehouses[index].name"
-														v-model="warehouses[index].value"
-														:rules="[rules.whole,rules.required]"></v-text-field>
-												</template>
-											</v-col>
-											<v-col cols="12" md="4"></v-col>
-										</v-row>
+										<v-switch v-model="batchMode" label="Batch Mode"></v-switch>
+										<v-tabs v-model="stockTab" background-color="teal darken-4" class="elevation-2" dark centered icons-and-text>
+											<v-tabs-slider></v-tabs-slider>
+											<v-tab v-for="(item,index) in warehouses" :key="index"> Warehouse {{warehouses[index].name}}
+												<v-icon>mdi-warehouse</v-icon>
+											</v-tab>
+											<v-tabs-items v-model="stockTab">
+												<v-tab-item v-for="(item,index) in warehouses" :key="index">
+													<v-card flat>
+														<v-card-text>
+															<v-row v-for="(it,index2) in warehouses[index].items" :key="index2">
+																<v-col cols="12" md="3">
+																	<v-text-field 
+																		label="Quantity"
+																		v-model="warehouses[index].items[index2].value"
+																		:rules="[rules.whole,rules.required]">
+																	</v-text-field>
+																</v-col>
+																<v-col cols="12" md="3">
+																	<v-text-field v-if="batchMode"
+																		label="Batch"
+																		v-model="warehouses[index].items[index2].batch">
+																	</v-text-field>
+																</v-col>
+																<v-col cols="12" md="3">
+																	<v-menu v-if="batchMode"
+																		v-model="warehouses[index].items[index2].date_menu"
+																		:close-on-content-click="false"
+																		:nudge-right="40"
+																        transition="scale-transition"
+																        offset-y
+																        min-width="290px"
+																		>
+																		<template v-slot:activator="{ on }">
+																			<v-text-field
+																				v-model="warehouses[index].items[index2].expiry_date"
+																				label="Expiry Date"
+																				prepend-icon="mdi-calendar"
+																				readonly
+																				v-on="on"
+																				></v-text-field>
+																		</template>
+																		<v-date-picker v-model="warehouses[index].items[index2].expiry_date"  @input="warehouses[index].items[index2].date_menu = false">
+																		</v-date-picker>
+																	</v-menu>
+																</v-col>
+																<v-col cols="12" md="3">
+																	<v-btn v-if="batchMode && warehouses[index].items.length > 1" depressed @click.stop="deleteStockLine(index,index2)">Remove</v-btn>
+																</v-col>
+															</v-row>
+															<v-row>
+																<v-col>
+																	<v-btn v-if="batchMode" text @click.stop="addStockLine(index)">Add</v-btn>
+																</v-col>
+															</v-row>
+														</v-card-text>
+													</v-card>
+												</v-tab-item>
+											</v-tabs-items>
+										</v-tabs>
 									</v-form>
 								</v-card-text>
 								<v-card-actions>
@@ -398,6 +458,9 @@
 							    						</template>
 							    					</v-simple-table>
 							    				</v-col>
+							    				<v-col cols="12">
+												<v-textarea v-model="comment" label="Comment" rows="2"></v-textarea>
+											</v-col>
 							    			</v-row>
 					    				</v-col>
 					    			</v-row>
@@ -461,7 +524,14 @@
 			axios.get('warehouses').then((res)=>{
 				var data = res.data.data
 				data.forEach((item,index)=>{
-					data[index].value = '0'
+					data[index].items = [
+						{
+							date_menu:false,
+							value : '0',
+							batch:'',
+							expiry_date:new Date().toISOString().substr(0, 10),
+						}
+					]
 				})
 				this.warehouses = data
 			})
@@ -485,13 +555,60 @@
 					this.submitTxt = 'Save'
 					this.formTitle = 'Create Product'
 					this.e1=1
+					
 				}
 				if(this.mode == 'edit'){
 					this.submitTxt = 'Update'
 					this.formTitle = 'Edit Product'
-					this.passFormVal = true
 					axios.get('products/'+this.pId).then((response)=>{
-						var dd = response.data.data
+						Object.keys(this.fd).forEach((key)=>{
+							if(key == 'gst'){
+								this.fd[key].value = parseInt(response.data[key]).toString()
+							}
+							else if(key == 'approved'){
+								this.fd.approved.value = response.data.publish.toString()
+							}
+							else if(key == 'tally'){
+								this.fd.tally.value = response.data.tally.toString()
+							}
+							else{
+								this.fd[key].value = response.data[key]
+							}
+						})
+						response.data.categories.forEach((item,i1)=>{
+							this.taxonomies.forEach((tax,i2)=>{
+								if(item.taxonomy_id == tax.id){
+									this.taxonomies[i2].value = item.id
+								}
+							})
+						})
+						response.data.pricelists.forEach((item,i1)=>{
+							this.pricelists.forEach((pl,i2)=>{
+								if(item.id == pl.id){
+									this.pricelists[i2].value = item.pivot.margin.toString()
+								}
+							})
+						})
+						this.aliases = []
+						response.data.alias.forEach((item,ind)=>{
+							this.aliases.push({id:item.id,label:'Alias '+(ind+1).toString(),value:item.alias,error:''})
+						})
+						this.warehouses.forEach((wh,i2)=>{
+							this.warehouses[i2].items = []
+						})
+						response.data.stocks.forEach((item,i1)=>{
+							this.warehouses.forEach((wh,i2)=>{
+								if(item.warehouse_id == wh.id){
+									this.warehouses[i2].items.push({
+										value : item.qty.toString(),
+										expiry_date:item.expiry_date,
+										date_menu:false,
+										batch:item.batch
+									})
+								}
+							})
+						})
+						this.batchMode = response.data.expirable == 1 ? true : false
 					})
 				}
 			},
@@ -525,6 +642,26 @@
 				},
 				deep:true
 			},
+			batchMode:{
+				handler(){
+					if(this.batchMode == false){
+						this.warehouses.forEach((warehouse,index)=>{
+							var total = 0
+							warehouse.items.forEach((item)=>{
+								total += parseInt(item.value)
+							})
+							this.warehouses[index].items = [
+								{
+									value : total.toString(),
+									expiry_date:'',
+									date_menu:false,
+									batch:''
+								}
+							]
+						})
+					}
+				}
+			}
 		},
 		props:['mode','dialog','pId'],
 		data(){
@@ -542,6 +679,7 @@
 				stockFormVal:null,
 				plFormVal:null,
 				mediaFormVal:null,
+				stockTab:null,
 				imgUrl:null,
 				sbColor:'',
 				sbText:'',
@@ -585,6 +723,12 @@
 							{text:'18%', value:'18'},
 						],
 					},
+					tally:{
+						value:0
+					},
+					approved:{
+						value:0
+					},
 				},
 				aliases:[
 					{label:'Alias 1',value:'',error:''}
@@ -592,7 +736,9 @@
 				taxonomies:[],
 				pricelists:[],
 				warehouses:[],
+				batchMode: false,
 				medias:[],
+				comment:'',
 				rules:{
 					required: value=> !!value||'Required.',
 					price: value => {
@@ -629,9 +775,15 @@
 				}
 				return ''
 			},
+			addStockLine(index){
+				this.warehouses[index].items.push({value:'0',batch:'',expiry_date:new Date().toISOString().substr(0, 10),date_menu:false,})
+			},
 			addAlias(){
 				var newLabel = 'Alias '+(this.aliases.length + 1)
-				this.aliases.push({label:newLabel,value:'',erroe:''})
+				this.aliases.push({label:newLabel,value:'',error:''})
+			},
+			deleteStockLine(index,index2){
+				this.warehouses[index].items.splice(index2,1)
 			},
 			deleteAlias(index){
 				this.aliases.splice(index,1)
@@ -681,6 +833,7 @@
 					{label:'Alias 1',value:'',error:''}
 				]
 				this.medias = []
+				this.comment = ''
 				this.$emit('close-dialog')
 			},
 			emitSb(text,color){
@@ -711,14 +864,12 @@
 						fD.append('pricelist_'+item.slug,item.value)
 					})
 					this.warehouses.forEach((item)=>{
-						fD.append('warehouse_'+item.slug,item.value)
+						fD.append('warehouse_'+item.slug,JSON.stringify(item.items))
 					})
 					fD.append('medias',this.medias)
-					var aliasArr = []
-					this.aliases.forEach((item)=>{
-						aliasArr.push(item.value)
-					})
-					fD.append('aliases',JSON.stringify(aliasArr))
+					fD.append('aliases',JSON.stringify(this.aliases))
+					fD.append('expirable',this.batchMode ? 1 : 0)
+					fD.append('comment',this.comment ? this.comment : '')
 					if(this.mode == 'edit'){
 						fD.append('_method','PUT')
 						var route = 'products/'+this.pId

@@ -107,7 +107,7 @@
 				fD.append('name',this.fd.name.value)
 				if(this.mode == 'edit'){
 					fD.append('_method','PUT')
-					var route = 'warehouses/'+this.plId
+					var route = 'warehouses/'+this.whId
 				}
 				else{
 					var route = 'warehouses'

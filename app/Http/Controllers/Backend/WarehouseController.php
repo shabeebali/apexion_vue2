@@ -95,7 +95,7 @@ class WarehouseController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->authorize('edit',Warehouse::class);
+        $this->authorize('update',Warehouse::class);
         $request->validate([
             'name' => 'required|unique:warehouses,name,'.$id
         ]);

@@ -30,7 +30,7 @@ class ProductImport implements ToCollection, WithHeadingRow
             $val_arr = [
                 '*.name' => 'required|unique:products',
                 '*.mrp' => 'numeric',
-                '*>landing_price' => 'numeric',
+                '*.landing_price' => 'numeric',
                 '*.gsp_customer' => 'numeric',
                 '*.gsp_dealer' => 'numeric',
                 '*.weight' => 'numeric',
@@ -47,6 +47,7 @@ class ProductImport implements ToCollection, WithHeadingRow
                 '*.name.unique' => 'The name is already taken',
                 'numeric' => 'The value must be of numeric type',
             ])->validate();
+            ini_set('max_execution_time', 300);
             foreach ($rows as $row) {
                 $product = new Product;
                 $product->dbsave($row->toArray(), $this->taxonomies, $this->pricelists, $this->warehouses);

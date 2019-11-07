@@ -85,13 +85,17 @@ new Vue({
       })
       axios.get('user?with_permissions=1').then((res)=>{
         this.$store.commit('setUser',res.data)
-        Echo.private('App.User.'+this.$store.state.user)
+        Echo.private('App.User.'+this.$store.state.user.id)
           .notification((notification) => {
               this.notify_message = notification.message
               this.notify = true
           });
       })
     }
-    
+  },
+  computed:{
+    baseUrl(){
+      return window.base_url.content
+    },
   }
 }).$mount('#app')

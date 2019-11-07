@@ -10,6 +10,7 @@ import WarehouseIndex from './components/backend/warehouse/WarehouseIndex.vue'
 import TaxonomyIndex from './components/backend/taxonomy/TaxonomyIndex.vue'
 import CategoryIndex from './components/backend/category/CategoryIndex.vue'
 import CustomerIndex from './components/backend/customer/CustomerIndex.vue'
+import SaleIndex from './components/backend/sale/SaleIndex.vue'
 export const routes=[
     {path: '/products/:status?',component:ProductsList},
     {
@@ -37,6 +38,9 @@ export const routes=[
     },
     {
       path:'/categories', component:CategoryIndex
+    },
+    {
+      path:'/sales', component:SaleIndex
     },
     {
       path:'/customers/:status?', component:CustomerIndex

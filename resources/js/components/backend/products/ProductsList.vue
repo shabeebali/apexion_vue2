@@ -45,7 +45,7 @@
 								<div class="flex-grow-1"></div>
 								<v-toolbar-items>
 									<v-btn text @click.stop="$refs.filterForm.reset(); getDataFromApi()">Reset</v-btn>
-									<v-btn text color="primary" @click.stop="getDataFromApi">Apply</v-btn>
+									<v-btn text color="primary" @click.stop="applyFilter">Apply</v-btn>
 								</v-toolbar-items>
 					        </v-toolbar>
 							<v-card-text>
@@ -253,7 +253,7 @@
 				this.filterables.taxonomies = _.groupBy(res.data.data,'id')
 			})
 			this.deboucedSearch = _.debounce(()=>{
-	            this.getDataFromApi()
+				this.applyFilter()
 	        },300);
 		},
 		data(){
@@ -394,7 +394,7 @@
 						}
 					}
 				})
-				this.getDataFromApi()
+				this.applyFilter()
 			},
 			filterToggle(){
 				this.filterPanel = (this.filterPanel == -1) ? 0: -1
@@ -477,6 +477,9 @@
 			showProduct(id){
 				this.pId = id
 				this.showDialog = true
+			},
+			applyFilter(){
+				this.options.page == 1 ? this.getDataFromApi() : this.options.page = 1
 			}
 		}
 	}

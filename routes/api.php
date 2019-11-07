@@ -47,7 +47,11 @@ Route::middleware('auth:api')->group(function(){
             'phone_countries' => $phone_countries
         ];
     });
-    Route::post('customers/check/{id?}','Backend\CustomerController@check');
+    Route::post('products/add_comment/{id}','Backend\ProductController@add_comment');
+    Route::post('customers/check/','Backend\CustomerController@check');
+    Route::put('customers/check/{id}','Backend\CustomerController@check');
+    Route::get('customers/add_search','Backend\CustomerController@addSearch');
+    Route::get('customers/delete_address/{id}','Backend\CustomerController@deleteAddress');
     Route::get('products/notif_test','Backend\ProductController@notif_test');
     Route::post('products/import','Backend\ProductController@import');
     Route::get('menu','Backend\MenuController');
@@ -65,6 +69,7 @@ Route::middleware('auth:api')->group(function(){
         'categories' =>'Backend\CategoryController',
         'products' =>'Backend\ProductController',
         'customers'=>'Backend\CustomerController',
+        'sales'=>'Backend\SaleController',
     ]);
     
 });
