@@ -9,471 +9,228 @@
 				</v-toolbar-items>
 	        </v-toolbar>
 	        <v-card-text>
-	        	<v-stepper class="mt-4" v-model="e1">
-					<v-stepper-header>
-						<v-stepper-step :complete="e1 > 1" step="1" :rules="[rules.detailsFormVal]" editable>Details</v-stepper-step>
-
-						<v-divider></v-divider>
-
-						<v-stepper-step :complete="e1 > 2" step="2" :rules="[rules.categoryFormVal]" editable>Category</v-stepper-step>
-
-						<v-divider></v-divider>
-
-						<v-stepper-step :complete="e1 > 3" step="3" :rules="[rules.plFormVal]" editable>Pricelist</v-stepper-step>
-
-						<v-divider></v-divider>
-
-						<v-stepper-step :complete="e1 > 4" step="4" :rules="[rules.stockFormVal]" editable>Stock</v-stepper-step>
-
-						<v-divider></v-divider>
-
-						<v-stepper-step :complete="e1 > 5" step="5" :rules="[rules.mediaFormVal]" editable>Media</v-stepper-step>
-
-						<v-divider></v-divider>
-
-						<v-stepper-step step="6" editable>Review</v-stepper-step>
-					</v-stepper-header>
-
-					<v-stepper-items>
-						<v-stepper-content step="1">
-							<v-card class="pt-4">
-								<v-card-text>
-									<v-form ref="formDetails" v-model="detailsFormVal">
+				<v-form ref="form" v-model="detailsFormVal">
+					<v-text-field
+						autofocus
+						v-if="dialog2"
+						label="Name"
+						v-model="fd.name.value"
+						:rules="[rules.required]"
+						:error-messages="fd.name.error"
+						@keydown="fd.name.error = ''">
+					</v-text-field>
+					<v-row>
+						<v-col cols="12" md="3">
+							<v-text-field 
+								label="HSN Code"
+								v-model="fd.hsn.value">
+							</v-text-field>
+						</v-col>
+						<v-col cols="12" md="3">
+							<v-text-field 
+								label="MRP"
+								v-model.number="fd.mrp.value"
+								:rules="[rules.price,rules.required]"
+								:error-messages="fd.mrp.error"
+								@keydown="fd.mrp.error = ''"
+								prepend-inner-icon="mdi-currency-inr">
+							</v-text-field>
+						</v-col>
+						<v-col cols="12" md="3">
+							<v-text-field 
+								label="GSP Customer"
+								v-model.number="fd.gsp_customer.value"
+								:rules="[rules.price,rules.required]"
+								:error-messages="fd.gsp_customer.error"
+								@keydown="fd.gsp_customer.error = ''"
+								hint="General Selling Price Customer"
+								persistent-hint
+								prepend-inner-icon="mdi-currency-inr">
+							</v-text-field>
+						</v-col>
+						<v-col cols="12" md="3">
+							<v-text-field 
+								label="GSP Dealer"
+								v-model.number="fd.gsp_dealer.value"
+								:rules="[rules.price,rules.required]"
+								:error-messages="fd.gsp_dealer.error"
+								@keydown="fd.gsp_dealer.error = ''"
+								hint="General Selling Price Dealer"
+								persistent-hint
+								prepend-inner-icon="mdi-currency-inr">
+							</v-text-field>
+						</v-col>
+					</v-row>
+					<v-row>
+						<v-col cols="12" md="3">
+							<v-text-field 
+								label="Weight"
+								v-model.number="fd.weight.value"
+								:rules="[rules.weight,rules.required]"
+								:error-messages="fd.weight.error"
+								@keydown="fd.weight.error = ''"
+								hint="weight in grams"
+								persistent-hint
+								suffix="grams">
+							</v-text-field>
+						</v-col>
+						<v-col cols="12" md="3">
+							<v-text-field 
+								label="Landing Price"
+								v-model.number="fd.landing_price.value"
+								:rules="[rules.price,rules.required]"
+								:error-messages="fd.landing_price.error"
+								@keydown="fd.landing_price.error = ''"
+								prepend-inner-icon="mdi-currency-inr">
+							</v-text-field>
+						</v-col>
+						<v-col cols="12" md="3">
+							<v-select
+								label="GST"
+								v-model="fd.gst.value"
+								suffix="%"
+								:items="fd.gst.items"
+								:rules="[rules.required]">
+							</v-select>
+						</v-col>
+						<v-col cols="12" md="3"></v-col>
+					</v-row>
+					<v-row>
+						<v-col cols="12" md="4">
+							<v-text-field v-for="(item,index) in aliases" :key="index" :label="aliases[index].label" v-model="aliases[index].value" :error-messages="aliases[index].error"
+							@keydown="aliases[index].error = ''" :append-outer-icon="aliases.length > 1 ? 'mdi-minus-circle':''" v-on:click:append-outer="deleteAlias(index)">
+							</v-text-field>
+							<v-btn text @click.stop="addAlias">Add Alias</v-btn>
+						</v-col>
+						<v-col cols="12" md="8">
+							<v-row>
+								<v-col cols="12" md="3" v-if="$store.getters.hasPermission('approve_product')">
+									<v-switch v-model="fd.approved.value" label="Approved?" true-value=1 false-value=0>
+									</v-switch>
+								</v-col>
+								<v-col cols="12" md="3" v-if="$store.getters.hasPermission('tally_product')">
+									<v-switch v-model="fd.tally.value" label="Tally updated?" true-value=1 false-value=0>
+									</v-switch>
+								</v-col>
+							</v-row>
+						</v-col>
+					</v-row>
+					<v-row>
+						<v-col cols="12" md="6">
+							<h4>Category</h4>
+							<template v-for="(item,index) in taxonomies">
+								<v-autocomplete 
+									:label="taxonomies[index].name"
+									:items="taxonomies[index].categories"
+									item-text="name"
+									item-value="id"
+									v-model="taxonomies[index].value"
+									:rules="[rules.required]"></v-autocomplete>
+							</template>
+						</v-col>
+						<v-col cols="12" md="6">
+							<h4>Pricelist</h4>
+							<template v-for="(item,index) in pricelists">
+								<v-row>
+									<v-col cols="6">
+										<v-text-field
+											v-model.number="pricelists[index].value"
+											:label="pricelists[index].name"
+											:rules="[rules.price,rules.required]"
+											hint="Margin"
+											persistent-hint
+											suffix="%">
+										</v-text-field>
+									</v-col>
+									<v-col cols="6">
+										<v-text-field
+											:value="calculatePrice(pricelists[index].value)"
+											readonly
+											hint="Estimated Selling Price"
+											persistent-hint>
+										</v-text-field>
+									</v-col>
+								</v-row>
+							</template>
+						</v-col>
+					</v-row>
+					<h4>Stock</h4>
+					<v-switch v-model="batchMode" label="Batch Mode"></v-switch>
+					<v-tabs v-model="stockTab" background-color="teal darken-4" class="elevation-2" dark centered icons-and-text>
+						<v-tabs-slider></v-tabs-slider>
+						<v-tab v-for="(item,index) in warehouses" :key="index"> Warehouse {{warehouses[index].name}}
+							<v-icon>mdi-warehouse</v-icon>
+						</v-tab>
+						<v-tabs-items v-model="stockTab">
+							<v-tab-item v-for="(item,index) in warehouses" :key="index">
+								<v-card flat>
+									<v-card-text>
+										<v-row v-for="(it,index2) in warehouses[index].items" :key="index2">
+											<v-col cols="12" md="3">
+												<v-text-field 
+													label="Quantity"
+													v-model="warehouses[index].items[index2].value"
+													:rules="[rules.whole,rules.required]">
+												</v-text-field>
+											</v-col>
+											<v-col cols="12" md="3">
+												<v-text-field v-if="batchMode"
+													label="Batch"
+													v-model="warehouses[index].items[index2].batch">
+												</v-text-field>
+											</v-col>
+											<v-col cols="12" md="3">
+												<v-menu v-if="batchMode"
+													v-model="warehouses[index].items[index2].date_menu"
+													:close-on-content-click="false"
+													:nudge-right="40"
+											        transition="scale-transition"
+											        offset-y
+											        min-width="290px"
+													>
+													<template v-slot:activator="{ on }">
+														<v-text-field
+															v-model="warehouses[index].items[index2].expiry_date"
+															label="Expiry Date"
+															prepend-icon="mdi-calendar"
+															readonly
+															v-on="on"
+															></v-text-field>
+													</template>
+													<v-date-picker v-model="warehouses[index].items[index2].expiry_date"  @input="warehouses[index].items[index2].date_menu = false">
+													</v-date-picker>
+												</v-menu>
+											</v-col>
+											<v-col cols="12" md="3">
+												<v-btn v-if="batchMode && warehouses[index].items.length > 1" depressed @click.stop="deleteStockLine(index,index2)">Remove</v-btn>
+											</v-col>
+										</v-row>
 										<v-row>
 											<v-col>
-												<v-text-field
-													label="Name"
-													v-model="fd.name.value"
-													:rules="[rules.required]"
-													:error-messages="fd.name.error"
-													@keydown="fd.name.error = ''">
-												</v-text-field>
+												<v-btn v-if="batchMode" text @click.stop="addStockLine(index)">Add</v-btn>
 											</v-col>
 										</v-row>
-										<v-row>
-											<v-col cols="12" md="3">
-												<v-text-field 
-													label="HSN Code"
-													v-model="fd.hsn.value">
-												</v-text-field>
-											</v-col>
-											<v-col cols="12" md="3">
-												<v-text-field 
-													label="MRP"
-													v-model.number="fd.mrp.value"
-													:rules="[rules.price,rules.required]"
-													:error-messages="fd.mrp.error"
-													@keydown="fd.mrp.error = ''"
-													prepend-inner-icon="mdi-currency-inr">
-												</v-text-field>
-											</v-col>
-											<v-col cols="12" md="3">
-												<v-text-field 
-													label="GSP Customer"
-													v-model.number="fd.gsp_customer.value"
-													:rules="[rules.price,rules.required]"
-													:error-messages="fd.gsp_customer.error"
-													@keydown="fd.gsp_customer.error = ''"
-													hint="General Selling Price Customer"
-													persistent-hint
-													prepend-inner-icon="mdi-currency-inr">
-												</v-text-field>
-											</v-col>
-											<v-col cols="12" md="3">
-												<v-text-field 
-													label="GSP Dealer"
-													v-model.number="fd.gsp_dealer.value"
-													:rules="[rules.price,rules.required]"
-													:error-messages="fd.gsp_dealer.error"
-													@keydown="fd.gsp_dealer.error = ''"
-													hint="General Selling Price Dealer"
-													persistent-hint
-													prepend-inner-icon="mdi-currency-inr">
-												</v-text-field>
-											</v-col>
-										</v-row>
-										<v-row>
-											<v-col cols="12" md="3">
-												<v-text-field 
-													label="Weight"
-													v-model.number="fd.weight.value"
-													:rules="[rules.weight,rules.required]"
-													:error-messages="fd.weight.error"
-													@keydown="fd.weight.error = ''"
-													hint="weight in grams"
-													persistent-hint
-													suffix="grams">
-												</v-text-field>
-											</v-col>
-											<v-col cols="12" md="3">
-												<v-text-field 
-													label="Landing Price"
-													v-model.number="fd.landing_price.value"
-													:rules="[rules.price,rules.required]"
-													:error-messages="fd.landing_price.error"
-													@keydown="fd.landing_price.error = ''"
-													prepend-inner-icon="mdi-currency-inr">
-												</v-text-field>
-											</v-col>
-											<v-col cols="12" md="3">
-												<v-select
-													label="GST"
-													v-model="fd.gst.value"
-													suffix="%"
-													:items="fd.gst.items"
-													:rules="[rules.required]">
-												</v-select>
-											</v-col>
-											<v-col cols="12" md="3"></v-col>
-										</v-row>
-										<v-row>
-											<v-col cols="12" md="4">
-												<v-text-field v-for="(item,index) in aliases" :key="index" :label="aliases[index].label" v-model="aliases[index].value" :error-messages="aliases[index].error"
-												@keydown="aliases[index].error = ''" :append-outer-icon="aliases.length > 1 ? 'mdi-minus-circle':''" v-on:click:append-outer="deleteAlias(index)">
-												</v-text-field>
-												<v-btn text @click.stop="addAlias">Add Alias</v-btn>
-											</v-col>
-											<v-col cols="12" md="8">
-												<v-row>
-													<v-col cols="12" md="3" v-if="$store.getters.hasPermission('approve_product')">
-														<v-switch v-model="fd.approved.value" label="Approved?" true-value=1 false-value=0>
-														</v-switch>
-													</v-col>
-													<v-col cols="12" md="3" v-if="$store.getters.hasPermission('tally_product')">
-														<v-switch v-model="fd.tally.value" label="Tally updated?" true-value=1 false-value=0>
-														</v-switch>
-													</v-col>
-												</v-row>
-											</v-col>
-										</v-row>
-									</v-form>
-								</v-card-text>
-								<v-card-actions>
-									<v-btn color="primary" @click.stop="e1=2">Continue</v-btn>
-									<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-stepper-content>
-						<v-stepper-content step="2">
-							<v-card class="pt-4">
-								<v-card-text>
-									<v-form ref="formCategory" v-model="categoryFormVal">
-										<v-row>
-											<v-col cols="12" md="4"></v-col>
-											<v-col cols="12" md="4">
-												<template v-for="(item,index) in taxonomies">
-													<v-autocomplete 
-														:label="taxonomies[index].name"
-														:items="taxonomies[index].categories"
-														item-text="name"
-														item-value="id"
-														v-model="taxonomies[index].value"
-														:rules="[rules.required]"></v-autocomplete>
-												</template>
-											</v-col>
-											<v-col cols="12" md="4"></v-col>
-										</v-row>
-									</v-form>
-								</v-card-text>
-								<v-card-actions>
-									<v-btn color="primary" @click.stop="e1=3">Continue</v-btn>
-									<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-stepper-content>
-						<v-stepper-content step="3">
-							<v-card class="pt-4">
-								<v-card-text>
-									<v-form ref="formPl" v-model="plFormVal">
-										<v-row>
-											<v-col cols="12" md="4"></v-col>
-											<v-col cols="12" md="4">
-												<template v-for="(item,index) in pricelists">
-													<v-row>
-														<v-col cols="6">
-															<v-text-field
-																v-model.number="pricelists[index].value"
-																:label="pricelists[index].name"
-																:rules="[rules.price,rules.required]"
-																hint="Margin"
-																persistent-hint
-																suffix="%">
-															</v-text-field>
-														</v-col>
-														<v-col cols="6">
-															<v-text-field
-																:value="calculatePrice(pricelists[index].value)"
-																readonly
-																hint="Estimated Selling Price"
-																persistent-hint>
-															</v-text-field>
-														</v-col>
-													</v-row>
-												</template>
-											</v-col>
-											<v-col cols="12" md="4"></v-col>
-										</v-row>
-									</v-form>
-								</v-card-text>
-								<v-card-actions>
-									<v-btn color="primary" @click.stop="e1=4">Continue</v-btn>
-									<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-stepper-content>
-						<v-stepper-content step="4">
-							<v-card class="pt-4">
-								<v-card-text>
-									<v-form ref="formStock" v-model="stockFormVal">
-										<v-switch v-model="batchMode" label="Batch Mode"></v-switch>
-										<v-tabs v-model="stockTab" background-color="teal darken-4" class="elevation-2" dark centered icons-and-text>
-											<v-tabs-slider></v-tabs-slider>
-											<v-tab v-for="(item,index) in warehouses" :key="index"> Warehouse {{warehouses[index].name}}
-												<v-icon>mdi-warehouse</v-icon>
-											</v-tab>
-											<v-tabs-items v-model="stockTab">
-												<v-tab-item v-for="(item,index) in warehouses" :key="index">
-													<v-card flat>
-														<v-card-text>
-															<v-row v-for="(it,index2) in warehouses[index].items" :key="index2">
-																<v-col cols="12" md="3">
-																	<v-text-field 
-																		label="Quantity"
-																		v-model="warehouses[index].items[index2].value"
-																		:rules="[rules.whole,rules.required]">
-																	</v-text-field>
-																</v-col>
-																<v-col cols="12" md="3">
-																	<v-text-field v-if="batchMode"
-																		label="Batch"
-																		v-model="warehouses[index].items[index2].batch">
-																	</v-text-field>
-																</v-col>
-																<v-col cols="12" md="3">
-																	<v-menu v-if="batchMode"
-																		v-model="warehouses[index].items[index2].date_menu"
-																		:close-on-content-click="false"
-																		:nudge-right="40"
-																        transition="scale-transition"
-																        offset-y
-																        min-width="290px"
-																		>
-																		<template v-slot:activator="{ on }">
-																			<v-text-field
-																				v-model="warehouses[index].items[index2].expiry_date"
-																				label="Expiry Date"
-																				prepend-icon="mdi-calendar"
-																				readonly
-																				v-on="on"
-																				></v-text-field>
-																		</template>
-																		<v-date-picker v-model="warehouses[index].items[index2].expiry_date"  @input="warehouses[index].items[index2].date_menu = false">
-																		</v-date-picker>
-																	</v-menu>
-																</v-col>
-																<v-col cols="12" md="3">
-																	<v-btn v-if="batchMode && warehouses[index].items.length > 1" depressed @click.stop="deleteStockLine(index,index2)">Remove</v-btn>
-																</v-col>
-															</v-row>
-															<v-row>
-																<v-col>
-																	<v-btn v-if="batchMode" text @click.stop="addStockLine(index)">Add</v-btn>
-																</v-col>
-															</v-row>
-														</v-card-text>
-													</v-card>
-												</v-tab-item>
-											</v-tabs-items>
-										</v-tabs>
-									</v-form>
-								</v-card-text>
-								<v-card-actions>
-									<v-btn color="primary" @click.stop="e1=5">Continue</v-btn>
-									<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-stepper-content>
-						<v-stepper-content step="5">
-							<v-card class="pt-4">
-								<v-card-text>
-									<v-row>
-										<v-col cols="12" md="4">
-											<v-form v-model="mediaFormVal" ref="formMedia">
-												<v-file-input 
-													prepend-icon="mdi-camera" 
-													v-model="imgFile"
-			    									accept="image/png, image/jpeg, image/bmp"
-			    									placeholder="Select an image to upload"
-			    									hint="Supported formats: png, jpg, bmp"
-			    									persistent-hint
-			    									append-outer-icon="mdi-cloud-upload"
-			    									@click:append-outer="uploadImg"></v-file-input>
-		    								</v-form>
-										</v-col>
-										<v-col cols="12" md="4"></v-col>
-										<v-col cols="12" md="4"></v-col>
-									</v-row>
-									<v-row>
-										<v-col cols="6" md="2" v-for="(url,index) in medias" :key="index">
-											<v-img max-height="250" max-width="250" :src="baseUrl+'/'+url" @click.stop="imgModal(baseUrl+'/'+url)" style="cursor:pointer"></v-img>
-											<v-btn text color="info" @click="deleteMedia(url)">Delete</v-btn>
-										</v-col>
-									</v-row>
-								</v-card-text>
-								<v-card-actions>
-									<v-btn color="primary" @click.stop="e1=6">Continue</v-btn>
-									<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-stepper-content>
-						<v-stepper-content step="6">
-							<v-card class="pt-4">
-								<v-card-text>
-									<v-row>
-						        		<v-col cols="12" md="6">
-						        			<v-row>
-						        				
-						        				<v-col cols="12">
-								        			<v-simple-table>
-							    						<template v-slot:default>
-							    							 <thead>
-																<tr>
-																	<th class="text-left">Details</th>
-																	<th class="text-left"></th>
-																</tr>
-															</thead>
-															<tbody>
-																<tr>
-																	<td>Name</td>
-																	<td>{{fd.name.value}}</td>
-																</tr>
-																<tr>
-																	<td>HSN Code</td>
-																	<td>{{fd.hsn.value}}</td>
-																</tr>
-																<tr>
-																	<td>MRP</td>
-																	<td><v-icon>mdi-currency-inr</v-icon> {{fd.mrp.value}}</td>
-																</tr>
-																<tr>
-																	<td>Landing Price</td>
-																	<td><v-icon>mdi-currency-inr</v-icon> {{fd.landing_price.value}}</td>
-																</tr>
-																<tr>
-																	<td>GSP Customer</td>
-																	<td><v-icon>mdi-currency-inr</v-icon> {{fd.gsp_customer.value}}</td>
-																</tr>
-																<tr>
-																	<td>GSP Dealer</td>
-																	<td><v-icon>mdi-currency-inr</v-icon> {{fd.gsp_dealer.value}}</td>
-																</tr>
-																<tr>
-																	<td>GST</td>
-																	<td>{{fd.gst.value}} %</td>
-																</tr>
-																<template v-if="aliases.length > 0">
-																	<tr v-for="(item,index) in aliases" :key="index">
-																		<td>Alias {{index+1}}</td>
-																		<td>{{aliases[index].value}}</td>
-																	</tr>
-																</template>
-																</tr>
-															</tbody>
-							    						</template>
-							    					</v-simple-table>
-							    				</v-col>
-							    				<v-col cols="12">
-								        			<v-simple-table>
-							    						<template v-slot:default>
-							    							<thead>
-																<tr>
-																	<th class="text-left">Pricelist</th>
-																	<th class="text-left">Margin(%)</th>
-																	<th class="text-left">Price</th>
-																</tr>
-															</thead>
-															<tbody>
-																<tr v-for="item in pricelists">
-																	<td>{{item.name}}</td>
-																	<td>{{item.value}} %</td>
-																	<td><v-icon>mdi-currency-inr</v-icon>{{calculatePrice(item.value)}}</td>
-																</tr>
-															</tbody>
-							    						</template>
-							    					</v-simple-table>
-							    				</v-col>
-							    			</v-row>
-					    				</v-col>
-					    				<v-col cols="12" md="6">
-					    					<v-row>
-					    						<v-col cols="12">
-						        					<v-carousel v-if="medias.length > 0">
-														<v-carousel-item
-														v-for="(item,i) in medias"
-														:key="i"
-														:src="baseUrl+'/'+item"
-														reverse-transition="fade-transition"
-														transition="fade-transition"
-														></v-carousel-item>
-													</v-carousel>
-												</v-col>
-					    						
-							    				<v-col cols="12">
-								        			<v-simple-table>
-							    						<template v-slot:default>
-							    							<thead>
-																<tr>
-																	<th class="text-left">Categories</th>
-																	<th class="text-left"></th>
-																</tr>
-															</thead>
-															<tbody>
-																<tr v-for="item in taxonomies">
-																	<td>{{item.name}}</td>
-																	<td>{{getCatName(item)}}</td>
-																</tr>
-															</tbody>
-							    						</template>
-							    					</v-simple-table>
-							    				</v-col>
-							    				<v-col cols="12">
-								        			<v-simple-table>
-							    						<template v-slot:default>
-							    							<thead>
-																<tr>
-																	<th class="text-left">Warehouses</th>
-																	<th class="text-left">Stock</th>
-																</tr>
-															</thead>
-															<tbody>
-																<tr v-for="item in warehouses">
-																	<td>{{item.name}}</td>
-																	<td>{{item.value}}</td>
-																</tr>
-																<tr>
-																	<td>Total</td>
-																	<td>{{getTotalStock}}</td>
-																</tr>
-															</tbody>
-							    						</template>
-							    					</v-simple-table>
-							    				</v-col>
-							    				<v-col cols="12">
-												<v-textarea v-model="comment" label="Comment" rows="2"></v-textarea>
-											</v-col>
-							    			</v-row>
-					    				</v-col>
-					    			</v-row>
-								</v-card-text>
-								<v-card-actions>
-									<v-btn color="primary" :loading="btnloading" @click.stop="save"
-										>{{submitTxt}}</v-btn>
-									<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-stepper-content>
-					</v-stepper-items>
-				</v-stepper>
+									</v-card-text>
+								</v-card>
+							</v-tab-item>
+						</v-tabs-items>
+					</v-tabs>
+					<v-file-input 
+						prepend-icon="mdi-camera" 
+						v-model="imgFile"
+						accept="image/png, image/jpeg, image/bmp"
+						placeholder="Select an image to upload"
+						hint="Supported formats: png, jpg, bmp"
+						persistent-hint
+						append-outer-icon="mdi-cloud-upload"
+						@click:append-outer="uploadImg"></v-file-input>
+					<v-row>
+						<v-col cols="6" md="2" v-for="(url,index) in medias" :key="index">
+							<v-img max-height="250" max-width="250" :src="baseUrl+'/'+url" @click.stop="imgModal(baseUrl+'/'+url)" style="cursor:pointer"></v-img>
+							<v-btn text color="info" @click="deleteMedia(url)">Delete</v-btn>
+						</v-col>
+					</v-row>
+				</v-form>
 			</v-card-text>
 	    </v-card>
 	    <v-dialog v-model ="closeConfirm" persistent width="500">
@@ -550,7 +307,6 @@
 		},
 		watch:{
 			dialog:function(){
-				this.e1=1
 				if(this.mode == 'create'){
 					this.submitTxt = 'Save'
 					this.formTitle = 'Create Product'
@@ -613,36 +369,6 @@
 						this.dialog2 = true
 					})
 				}
-			},
-			detailsFormVal:{
-				handler(){
-					this.$refs.formDetails.validate()
-				},
-				deep:true
-			},
-			plFormVal:{
-				handler(){
-					this.$refs.formPl.validate()
-				},
-				deep:true
-			},
-			categoryFormVal:{
-				handler(){
-					this.$refs.formCategory.validate()
-				},
-				deep:true
-			},
-			stockFormVal:{
-				handler(){
-					this.$refs.formStock.validate()
-				},
-				deep:true
-			},
-			mediaFormVal:{
-				handler(){
-					this.$refs.formMedia.validate()
-				},
-				deep:true
 			},
 			batchMode:{
 				handler(){
@@ -757,11 +483,6 @@
 			            return pattern.test(value) || 'Invalid value.'
 			        	},
 			        img: value => !value || value.size < 2000000 || 'Image size should be less than 2 MB!',
-			        detailsFormVal: value=> this.detailsFormVal || 'Error',
-			        categoryFormVal: value=> this.categoryFormVal || 'Error',
-			        stockFormVal: value=> this.stockFormVal || 'Error',
-			        plFormVal: value=> this.plFormVal || 'Error',
-			        mediaFormVal: value=> this.mediaFormVal || 'Error',
 				},
 				taxonomy:{
 					options:[],
@@ -811,13 +532,9 @@
 				        'Content-Type': 'multipart/form-data'
 				    }
 				}).then((response)=>{
-					this.$refs.formMedia.reset()
-					this.$refs.formMedia.resetValidation()
 					this.waitDialog = false
 					this.medias.push(response.data)
 				}).catch((error)=>{
-					this.$refs.formMedia.reset()
-					this.$refs.formMedia.resetValidation()
 					this.waitDialog = false
 					this.emitSb('Something went wrong!','error')
 				})
@@ -827,11 +544,7 @@
 				this.imgDialog = true
 			},
 			closeDialog(){
-				this.$refs.formDetails.reset()
-				this.$refs.formCategory.reset()
-				this.$refs.formPl.reset()
-				this.$refs.formStock.reset()
-				this.$refs.formMedia.reset()
+				this.$refs.form.reset()
 				this.aliases = [
 					{label:'Alias 1',value:'',error:''}
 				]
@@ -847,12 +560,8 @@
 			},
 			save(){
 				this.btnloading = true
-				this.$refs.formDetails.validate();
-				this.$refs.formCategory.validate();
-				this.$refs.formPl.validate();
-				this.$refs.formStock.validate();
-				this.$refs.formMedia.validate();
-				if(this.detailsFormVal == false || this.categoryFormVal == false || this.plFormVal == false || this.stockFormVal  == false){
+				this.$refs.form.validate();
+				if(!this.$refs.form.validate() ){
 					this.emitSb('There are errors in the form submitted. Please check!!','error')
 					this.btnloading = false
 				}
