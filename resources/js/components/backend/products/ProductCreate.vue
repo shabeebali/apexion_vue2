@@ -1,5 +1,5 @@
 <template>
-	<v-dialog v-model="dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+	<v-dialog v-model="dialog2" fullscreen hide-overlay transition="dialog-bottom-transition">
 		<v-card>
 	        <v-toolbar id="top" dark color="primary">
 				<v-toolbar-title>{{formTitle}}</v-toolbar-title>
@@ -550,14 +550,14 @@
 		},
 		watch:{
 			dialog:function(){
-				this.$vuetify.goTo(0)
+				this.e1=1
 				if(this.mode == 'create'){
 					this.submitTxt = 'Save'
 					this.formTitle = 'Create Product'
-					this.e1=1
-					
+					this.dialog2 = true
 				}
 				if(this.mode == 'edit'){
+					this.waitDialog = true
 					this.submitTxt = 'Update'
 					this.formTitle = 'Edit Product'
 					axios.get('products/'+this.pId).then((response)=>{
@@ -609,6 +609,8 @@
 							})
 						})
 						this.batchMode = response.data.expirable == 1 ? true : false
+						this.waitDialog = false
+						this.dialog2 = true
 					})
 				}
 			},
@@ -666,6 +668,7 @@
 		props:['mode','dialog','pId'],
 		data(){
 			return{
+				dialog2:false,
 				e1:1,
 				imgFile:null,
 				submitTxt:'',
@@ -834,6 +837,7 @@
 				]
 				this.medias = []
 				this.comment = ''
+				this.dialog2 = false
 				this.$emit('close-dialog')
 			},
 			emitSb(text,color){

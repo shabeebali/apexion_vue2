@@ -111,12 +111,20 @@
 	                                                  hide-no-data
 	                                                  item-text="name"
 	                                                  item-value="id"
-	                                                ></v-autocomplete>
+	                                                  :filter="prodFilter"
+	                                                >
+	                                                	<template v-slot:item="{ item }">
+															<v-list-item-content>
+																<v-list-item-title v-text="item.name"></v-list-item-title>
+																<v-list-item-subtitle v-text="item.sku"></v-list-item-subtitle>
+															</v-list-item-content>
+														</template>
+	                                            	</v-autocomplete>
 	                                            </td>
-	                                            <td><v-text-field class="text-right" style="direction:rtl;" v-model="qty"></v-text-field></td>
-	                                            <td><v-text-field class="text-right" style="direction:rtl;" :loading="rateLoading" v-model="rate"></v-text-field></td>
-	                                            <td><v-text-field class="text-right" style="direction:rtl;" readonly :value="gst+'%'"></v-text-field></td>
-	                                            <td><v-text-field class="text-right" style="direction:rtl;" readonly :rules="[rules.decimal]" :value="(parseInt(qty)*parseFloat(rate)).toFixed(2)"></v-text-field></td>
+	                                            <td><v-text-field class="text-right" style="direction:rtl;" v-model="qty" @click.native="$event.target.select()"></v-text-field></td>
+	                                            <td><v-text-field class="text-right" style="direction:rtl;" :loading="rateLoading" v-model="rate" @click.native="$event.target.select()"></v-text-field></td>
+	                                            <td><v-text-field class="text-right" style="direction:rtl;" readonly :value="gst+'%'"></v-text-field @click.native="$event.target.select()"></td>
+	                                            <td><v-text-field class="text-right" style="direction:rtl;" readonly :rules="[rules.decimal]" :value="(parseInt(qty)*parseFloat(rate)).toFixed(2)" @click.native="$event.target.select()"></v-text-field></td>
 
 	                                            <td><v-btn icon rounded small :disabled="productSelect == null || isNaN(parseInt(qty)*parseFloat(rate))" @click.stop="addLine"><v-icon>mdi-plus-circle</v-icon></v-btn></td>
 	                                        </tr>
@@ -182,6 +190,15 @@
 </template>
 <script>
 	export default{
+		mounted(){
+			this.deboucedProdSearch = _.debounce((val)=>{
+				this.productLoading = true
+	            axios.get('products?search='+val).then((response)=>{
+                    this.productItems = response.data.data
+                    this.productLoading = false
+	            })
+	        },500)
+		},
 		props:['dialog','saleId','mode'],
 		watch:{
 			dialog:function(){
@@ -210,12 +227,13 @@
 				},
 				deep:true
 			},
-			searchProduct (val) {
-	            this.productLoading = true
-	            axios.get('products?search='+val).then((response)=>{
-                    this.productItems = response.data.data
-                    this.productLoading = false
-	            })
+			searchProduct: {
+				handler (val) {
+					if( val != undefined || val != null){
+						if(val.length != 1) this.deboucedProdSearch(val);
+					}
+				},
+				deep: true
 	        },
 	        productSelect:{
 	            handler(){
@@ -288,6 +306,17 @@
 			}
 		},
 		methods:{
+			prodFilter(item, queryText, itemText){
+				const textOne = item.name.toLowerCase()
+		        const textTwo = item.sku.toLowerCase()
+		        const searchText = queryText.toLowerCase()
+		        const searchArr = searchText.split(" ")
+		        var flag = false
+		        searchArr.forEach((term)=>{
+		        	flag = textOne.indexOf(term) > -1 ? true : false
+		        })
+		        return flag || textTwo.indexOf(searchText) > -1
+			},
 			updAdd(){
 				if(this.fd.address_id == '' || this.fd.address_id == undefined){
 					this.selectedAdd={city:{},state:{},country:{},phones:[]}

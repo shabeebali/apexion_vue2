@@ -126,15 +126,7 @@ class Product extends Model
                 ];
             }
         }
-        
-        
-        if($request->page){
-            $offset = ($request->page -1)*($request->rpp);
-            $limit  = $request->rpp;
-            //$model = $model->slice($offset,$limit)->values();
-            $model = $model->offset($offset)->limit($limit);
-        }
-        $model = $model->paginate();
+        $model = $model->paginate($request->rpp);
         return ['model' => $model->items(), 'filtered' => $filtered,'total' => $model->total()];
     }
 
