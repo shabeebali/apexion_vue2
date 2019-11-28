@@ -24,7 +24,7 @@
 					</v-tooltip>
 					<v-tooltip bottom>
 						<template v-slot:activator="{ on }">
-							<v-btn v-on="on" color="transparent" dense depressed @click.stop="exportData">
+							<v-btn v-on="on" color="transparent" dense depressed @click.stop="exportDialog = true">
 								<v-icon>mdi-download</v-icon>
 							</v-btn>
 						</template>
@@ -200,6 +200,23 @@
 				</v-row>
 			</v-card>
 		</v-dialog>
+		<v-dialog v-model="exportDialog" width="360">
+			<v-card>
+				<v-card-title>
+					<v-toolbar flat>
+						<v-toolbar-title>Export Customer</v-toolbar-title>
+					</v-toolbar>
+				</v-card-title>
+				<v-card-text>
+					<v-select label="Export Type" v-model="exportType" :items="exportTypeItems"></v-select>
+				</v-card-text>
+				<v-card-actions>
+					<v-row justify="space-around">
+						<v-btn @click="exportFn">Export</v-btn>
+					</v-row>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</v-row>
 </template>
 <script>
@@ -244,6 +261,16 @@
 		},
 		data(){
 			return{
+				exportDialog:false,
+				exportType:null,
+				exportTypeItems:[
+					{
+						'text':'Name','value':'name'
+					},
+					{
+						'text':'Address','value':'address'
+					}
+				],
 				pageTitle:'',
 				pending:false,
 				tally:false,
@@ -368,12 +395,22 @@
 			filterToggle(){
 				this.filterPanel = (this.filterPanel == -1) ? 0: -1
 			},
-			exportData(){
-				this.waitDialog = true
-				axios.get('customers/export').then((res)=>{
-					this.waitDialog = false
-					window.location = res.data
-				})
+			exportFn(){
+				if(this.exportType == 'name' || this.exportType == 'address')
+				{
+					this.waitDialog = true
+					axios.get('customers/export?type='+this.exportType).then((res)=>{
+						this.waitDialog = false
+						window.location = res.data
+					}).catch((error)=>{
+						this.waitDialog = false
+						this.triggerSb({text:'Something went wrong',color:'info'})
+						this.exportDialog = false
+					})
+				}
+				else{
+					this.triggerSb({text:'Please select export type!!',color:'error'})
+				}
 			},
 			triggerSb(val){
 				this.snackbar = false

@@ -1,5 +1,5 @@
 {
-	"authHost": "http://laravel.ss",
+	"authHost": "http://localhost:8000/",
 	"authEndpoint": "/broadcasting/auth",
 	"clients": [
 		{

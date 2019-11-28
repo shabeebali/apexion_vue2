@@ -60,6 +60,9 @@ Route::middleware('auth:api')->group(function(){
     Route::get('users/roles/permissions','Backend\UserRoleController@permissions');
     Route::get('categories/export','Backend\CategoryController@export');
     Route::post('categories/import','Backend\CategoryController@import');
+
+    Route::get('customers/export','Backend\CustomerController@export');
+    Route::post('customers/import','Backend\CustomerController@import');
     Route::resources([
         'users_roles'=>'Backend\UserRoleController',
         'users' => 'Backend\UserController',
