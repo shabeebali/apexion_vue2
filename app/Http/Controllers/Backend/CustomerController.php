@@ -12,6 +12,12 @@ use App\Model\Country;
 use App\Model\State;
 use App\Model\City;
 use Illuminate\Support\Facades\Validator;
+use App\Imports\CustomerImport;
+use App\Exports\CustomerExport;
+use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
+
 class CustomerController extends Controller
 {
     /**
@@ -206,5 +212,49 @@ class CustomerController extends Controller
         }
         $address->salepersons()->sync([]);
         $address->delete();
+    }
+
+    public function export(Request $request) 
+    {
+        $filename = 'customers_'.Str::slug(today()->toDateString(),'_').'.xlsx';
+        Excel::store(new CustomerExport($request->type), $filename, 'public');
+        return asset(Storage::url($filename));
+    }
+
+    public function import(Request $request)
+    {
+        $file = $request->file('file');
+        $method =  $request->method;
+        $type = $request->type;
+        //dd($file->extension());
+        if($file->extension() != 'xlsx' && $file->extension() != 'zip')
+        {
+            return response()->json([
+                'status' => 'file_failed',
+                'message' => 'Error: The uploaded file is not valid. Please try again'
+            ],422);
+        }
+        else{
+            try {
+                $import = new CustomerImport($method,$type);
+                $import->import($request->file('file'));
+            } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+
+                 $failures = $e->failures();
+                
+                 foreach ($failures as $failure) {
+                    $msg = $failure->errors();
+                    $messages[$failure->row()][$failure->attribute()]['message'] = $msg[0];
+                 }
+                 return response()->json([
+                    'status' => 'failed',
+                    'messages' => $messages
+                ],422);
+            }
+           return response()->json([
+                'status' => 'success',
+                'message' => 'Import Completed successfully'
+            ]);
+        }
     }
 }
