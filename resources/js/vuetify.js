@@ -72,7 +72,7 @@ import Vuetify, {
 	VTabsSlider,
 	VTextarea,
 } from 'vuetify/lib'
-
+import { Scroll } from 'vuetify/lib/directives'
 Vue.use(Vuetify, {
 	components: {
 		VApp,
@@ -143,6 +143,9 @@ Vue.use(Vuetify, {
 		VTabsItems,
 		VTabsSlider,
 		VTextarea,
+	},
+	directives: {
+	    Scroll,
 	},
 })
 const opts = {

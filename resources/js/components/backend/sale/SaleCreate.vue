@@ -121,10 +121,10 @@
 														</template>
 	                                            	</v-autocomplete>
 	                                            </td>
-	                                            <td><v-text-field class="text-right" style="direction:rtl;" v-model="qty" @click.native="$event.target.select()"></v-text-field></td>
-	                                            <td><v-text-field class="text-right" style="direction:rtl;" :loading="rateLoading" v-model="rate" @click.native="$event.target.select()"></v-text-field></td>
-	                                            <td><v-text-field class="text-right" style="direction:rtl;" readonly :value="gst+'%'"></v-text-field @click.native="$event.target.select()"></td>
-	                                            <td><v-text-field class="text-right" style="direction:rtl;" readonly :rules="[rules.decimal]" :value="(parseInt(qty)*parseFloat(rate)).toFixed(2)" @click.native="$event.target.select()"></v-text-field></td>
+	                                            <td><v-text-field class="text-left" style="" v-model="qty" @click.native="$event.target.select()"></v-text-field></td>
+	                                            <td><v-text-field class="text-left" style="" :loading="rateLoading" v-model="rate" @click.native="$event.target.select()"></v-text-field></td>
+	                                            <td><v-text-field class="text-left" style="" readonly :value="gst+'%'"></v-text-field @click.native="$event.target.select()"></td>
+	                                            <td><v-text-field class="text-left" style="" readonly :rules="[rules.decimal]" :value="(parseInt(qty)*parseFloat(rate)).toFixed(2)" @click.native="$event.target.select()"></v-text-field></td>
 
 	                                            <td><v-btn icon rounded small :disabled="productSelect == null || isNaN(parseInt(qty)*parseFloat(rate))" @click.stop="addLine"><v-icon>mdi-plus-circle</v-icon></v-btn></td>
 	                                        </tr>
@@ -166,6 +166,9 @@
 	                                        </tr>
 	                                    </tbody>
 	                                </v-simple-table>
+	                                <v-row justify="space-around">
+	                                	<v-btn tile color="primary" @click="save()">Save</v-btn>
+	                                </v-row>
 	                            </v-card-text>
 	                        </v-card>
 	                    </v-col>
