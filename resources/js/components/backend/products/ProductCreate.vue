@@ -8,7 +8,7 @@
 					<v-btn text @click.stop="closeConfirm = true">Cancel</v-btn>
 				</v-toolbar-items>
 	        </v-toolbar>
-	        <v-card-text id="targ" v-scroll:#targ="onScroll">
+	        <v-card-text>
 				<v-form ref="form" v-model="detailsFormVal">
 					<v-text-field
 						autofocus
@@ -155,7 +155,7 @@
 						</v-col>
 					</v-row>
 					<h4>Stock</h4>
-					<v-switch v-model="batchMode" label="Batch Mode"></v-switch>
+					<v-switch v-model="batchMode" label="Batch Mode" @change="stockUpd"></v-switch>
 					<v-tabs v-model="stockTab" background-color="teal darken-4" class="elevation-2" dark centered icons-and-text>
 						<v-tabs-slider></v-tabs-slider>
 						<v-tab v-for="(item,index) in warehouses" :key="index"> Warehouse {{warehouses[index].name}}
@@ -232,7 +232,6 @@
 					</v-row>
 					<v-row justify="space-around">
 							<v-btn tile color="primary" @click="save()" :loading="btnloading">Save</v-btn>
-							<v-btn tile color="primary" @click="scr()" >Scroll</v-btn>
 						</v-col>
 					</v-row>
 				</v-form>
@@ -290,116 +289,99 @@
 		watch:{
 			dialog:function(){
 				if(this.dialog == true){
-
-					axios.get('taxonomies?withcat=1').then((res)=>{
-						this.taxonomies = res.data.data
-					})
-					axios.get('pricelists').then((res)=>{
-						var data = res.data.data
-						data.forEach((item,index)=>{
-							data[index].value = '0'
+					axios.all([
+						axios.get('taxonomies?withcat=1').then((res)=>{
+							this.taxonomies = res.data.data
+						}),
+						axios.get('pricelists').then((res)=>{
+							var data = res.data.data
+							data.forEach((item,index)=>{
+								data[index].value = '0'
+							})
+							this.pricelists = data
+						}),
+						axios.get('warehouses').then((res)=>{
+							var data = res.data.data
+							data.forEach((item,index)=>{
+								data[index].items = [
+									{
+										date_menu:false,
+										value : '0',
+										batch:'',
+										expiry_date:new Date().toISOString().substr(0, 10),
+									}
+								]
+							})
+							this.warehouses = data
 						})
-						this.pricelists = data
-					})
-					axios.get('warehouses').then((res)=>{
-						var data = res.data.data
-						data.forEach((item,index)=>{
-							data[index].items = [
-								{
-									date_menu:false,
-									value : '0',
-									batch:'',
-									expiry_date:new Date().toISOString().substr(0, 10),
-								}
-							]
-						})
-						this.warehouses = data
-					})
-					this.btnloading = false
-					if(this.mode == 'create'){
-						this.submitTxt = 'Save'
-						this.formTitle = 'Create Product'
-						this.dialog2 = true
-					}
-					if(this.mode == 'edit'){
-						this.waitDialog = true
-						this.submitTxt = 'Update'
-						this.formTitle = 'Edit Product'
-						axios.get('products/'+this.pId).then((response)=>{
-							Object.keys(this.fd).forEach((key)=>{
-								if(key == 'gst'){
-									this.fd[key].value = parseInt(response.data[key]).toString()
-								}
-								else if(key == 'approved'){
-									this.fd.approved.value = response.data.publish.toString()
-								}
-								else if(key == 'tally'){
-									this.fd.tally.value = response.data.tally.toString()
-								}
-								else{
-									this.fd[key].value = response.data[key]
-								}
-							})
-							response.data.categories.forEach((item,i1)=>{
-								this.taxonomies.forEach((tax,i2)=>{
-									if(item.taxonomy_id == tax.id){
-										this.taxonomies[i2].value = item.id
-									}
-								})
-							})
-							response.data.pricelists.forEach((item,i1)=>{
-								this.pricelists.forEach((pl,i2)=>{
-									if(item.id == pl.id){
-										this.pricelists[i2].value = item.pivot.margin.toString()
-									}
-								})
-							})
-							this.aliases = []
-							response.data.alias.forEach((item,ind)=>{
-								this.aliases.push({id:item.id,label:'Alias '+(ind+1).toString(),value:item.alias,error:''})
-							})
-							this.warehouses.forEach((wh,i2)=>{
-								this.warehouses[i2].items = []
-							})
-							response.data.stocks.forEach((item,i1)=>{
-								this.warehouses.forEach((wh,i2)=>{
-									if(item.warehouse_id == wh.id){
-										this.warehouses[i2].items.push({
-											value : item.qty.toString(),
-											expiry_date:item.expiry_date ? item.expiry_date: new Date().toISOString().substr(0, 10),
-											date_menu:false,
-											batch:item.batch
-										})
-									}
-								})
-							})
-							this.batchMode = response.data.expirable == 1 ? true : false
-							this.waitDialog = false
+					]).then(()=>{
+						this.btnloading = false
+						if(this.mode == 'create'){
+							this.submitTxt = 'Save'
+							this.formTitle = 'Create Product'
 							this.dialog2 = true
-						})
-					}
+						}
+						if(this.mode == 'edit'){
+							this.waitDialog = true
+							this.submitTxt = 'Update'
+							this.formTitle = 'Edit Product'
+							axios.get('products/'+this.pId).then((response)=>{
+								Object.keys(this.fd).forEach((key)=>{
+									if(key == 'gst'){
+										this.fd[key].value = parseInt(response.data[key]).toString()
+									}
+									else if(key == 'approved'){
+										this.fd.approved.value = response.data.publish.toString()
+									}
+									else if(key == 'tally'){
+										this.fd.tally.value = response.data.tally.toString()
+									}
+									else{
+										this.fd[key].value = response.data[key]
+									}
+								})
+								response.data.categories.forEach((item,i1)=>{
+									this.taxonomies.forEach((tax,i2)=>{
+										if(item.taxonomy_id == tax.id){
+											this.taxonomies[i2].value = item.id
+										}
+									})
+								})
+								response.data.pricelists.forEach((item,i1)=>{
+									this.pricelists.forEach((pl,i2)=>{
+										if(item.id == pl.id){
+											this.pricelists[i2].value = item.pivot.margin.toString()
+										}
+									})
+								})
+								this.aliases = []
+								response.data.alias.forEach((item,ind)=>{
+									this.aliases.push({id:item.id,label:'Alias '+(ind+1).toString(),value:item.alias,error:''})
+								})
+								this.warehouses.forEach((wh,i2)=>{
+									this.warehouses[i2].items = []
+								})
+								response.data.stocks.forEach((item,i1)=>{
+									this.warehouses.forEach((wh,i2)=>{
+										if(item.warehouse_id == wh.id){
+											this.warehouses[i2].items.push({
+												id: item.id,
+												value : item.qty.toString(),
+												expiry_date:item.expiry_date ? item.expiry_date: new Date().toISOString().substr(0, 10),
+												date_menu:false,
+												batch:item.batch
+											})
+										}
+									})
+								})
+								this.batchMode = response.data.expirable == 1 ? true : false
+								this.waitDialog = false
+								this.dialog2 = true
+							})
+						}
+					})
 				}
 			},
-			batchMode:{
-				handler(){
-					if(this.batchMode == false){
-						this.warehouses.forEach((warehouse,index)=>{
-							var total = 0
-							warehouse.items.forEach((item)=>{
-								total += parseInt(item.value)
-							})
-							this.warehouses[index].items = [
-								{
-									value : total.toString(),
-									expiry_date:new Date().toISOString().substr(0, 10),
-									date_menu:false,
-									batch:''
-								}
-							]
-						})
-					}
-				}
-			}
 		},
 		props:['mode','dialog','pId'],
 		data(){
@@ -500,10 +482,6 @@
 			}
 		},
 		methods:{
-			onScroll (e) {
-		        console.log(e.target.scrollingElement.scrollTop)
-			},
-
 			addStockLine(index){
 				this.warehouses[index].items.push({value:'0',batch:'',expiry_date:new Date().toISOString().substr(0, 10),date_menu:false,})
 			},
@@ -512,7 +490,18 @@
 				this.aliases.push({label:newLabel,value:'',error:''})
 			},
 			deleteStockLine(index,index2){
-				this.warehouses[index].items.splice(index2,1)
+				if(this.mode == 'edit'){
+					this.waitDialog = true
+					if(this.warehouses[index].items[index2].id != undefined){
+						axios.post('products/remove_stock/'+this.warehouses[index].items[index2].id).	then((res)=>{
+							this.waitDialog = false
+							this.warehouses[index].items.splice(index2,1)
+						})
+					}
+				}
+				else{
+					this.warehouses[index].items.splice(index2,1)
+				}
 			},
 			deleteAlias(index){
 				this.aliases.splice(index,1)
@@ -562,6 +551,27 @@
 				this.sbText = text
 				this.sbColor = color
 				this.snackbar = true
+			},
+			stockUpd(){
+				if(this.batchMode == false){
+					this.warehouses.forEach((warehouse,index)=>{
+						var total = 0
+						warehouse.items.forEach((item,index2)=>{
+							if(this.warehouses[index].items[index2].id != undefined){
+								axios.post('products/remove_stock/'+this.warehouses[index].items[index2].id)
+							}
+							total += parseInt(item.value)
+						})
+						this.warehouses[index].items = [
+							{
+								value : total.toString(),
+								expiry_date:new Date().toISOString().substr(0, 10),
+								date_menu:false,
+								batch:''
+							}
+						]
+					})
+				}
 			},
 			save(){
 				this.btnloading = true
@@ -621,9 +631,6 @@
 					})
 				}
 			},
-			scr(){
-				this.$vuetify.goTo(this.$refs.form)
-			}
 		}
 	}
 </script>

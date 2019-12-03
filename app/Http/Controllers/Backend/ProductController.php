@@ -7,8 +7,10 @@ use App\Model\Product;
 use App\Model\Taxonomy;
 use App\Model\Pricelist;
 use App\Model\Warehouse;
+use App\Model\ProductStock;
 use Illuminate\Http\Request;
 use App\Imports\ProductImport;
+
 use App\User;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ProductCreated;
@@ -158,7 +160,7 @@ class ProductController extends Controller
         $product = Product::find($id);
         $product->categories()->sync([]);
         $product->pricelists()->sync([]);
-        $product->warehouses()->sync([]);
+        $product->stocks()->delete();
         $product->tags()->sync([]);
         $aliases = $product->alias()->get();
         if($aliases->count() > 0)
@@ -231,5 +233,10 @@ class ProductController extends Controller
             'created_at' => today(),
             'user' => \Auth::user(),
         ]);
+    }
+
+    public function remove_stock(Request $request, $id)
+    {
+        ProductStock::destroy($id);
     }
 }

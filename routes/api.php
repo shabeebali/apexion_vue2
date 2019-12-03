@@ -48,12 +48,14 @@ Route::middleware('auth:api')->group(function(){
         ];
     });
     Route::post('products/add_comment/{id}','Backend\ProductController@add_comment');
+    Route::post('products/import','Backend\ProductController@import');
+    Route::post('products/remove_stock/{id}','Backend\ProductController@remove_stock');
     Route::post('customers/check/','Backend\CustomerController@check');
     Route::put('customers/check/{id}','Backend\CustomerController@check');
     Route::get('customers/add_search','Backend\CustomerController@addSearch');
     Route::get('customers/delete_address/{id}','Backend\CustomerController@deleteAddress');
     Route::get('products/notif_test','Backend\ProductController@notif_test');
-    Route::post('products/import','Backend\ProductController@import');
+    
     Route::get('menu','Backend\MenuController');
     Route::post('products/upload','Backend\ProductController@upload');
     Route::post('users/chpass/{id}','Backend\UserController@change_pass');
