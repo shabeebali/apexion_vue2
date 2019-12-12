@@ -25,6 +25,6 @@ class HomeController extends Controller
     public function index(Request $req)
     {
 
-        return view('home');
+        return redirect('/admin');
     }
 }

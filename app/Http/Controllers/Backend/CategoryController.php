@@ -60,6 +60,7 @@ class CategoryController extends Controller
                 'delete' => $user->can('delete',Category::class)? 'true': 'false',
                 'filtered' => $filtered,
                 'create' => $user->can('create',Category::class)? 'true': 'false',
+                'import' => $user->id == 1 ? 'true' : 'false'
             ],
             'total' => $total,
         ]);
@@ -139,7 +140,10 @@ class CategoryController extends Controller
         $this->authorize('update',Category::class);
         $taxonomy = Taxonomy::find($request->taxonomy_id);
         $val_array = [
-            'name'=>'required|unique:categories,name,'.$id,
+            'name'=>[
+                'required',
+                Rule::unique('categories')->where('taxonomy_id',$request->taxonomy_id)->ignore($id)
+            ]
         ];
         if($taxonomy->in_pc){
             $val_array['code'] = [

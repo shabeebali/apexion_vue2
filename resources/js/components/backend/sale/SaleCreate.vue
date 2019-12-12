@@ -26,7 +26,7 @@
 							</v-autocomplete>
 						</v-col>
 						<v-col cols="12" md="4">
-							<v-select label="Saleperson" v-model="fd.saleperson_id" :items="salepersons" item-text="name" item-value="id" :rules="[rules.required]">
+							<v-select label="Saleperson" v-model="fd.saleperson_id" :items="salepersons" item-text="name" item-value="id" :rules="[rules.required]" @change="setRate(); updateBill();">
 							</v-select>
 						</v-col>
 						<v-col cols="12" md="4">
@@ -243,12 +243,6 @@
 	                this.setRate() 
 	            }
 	        },
-	        pricelistSelect:{
-	            handler(){
-	                this.setRate() 
-	                this.updateBill()
-	            }
-	        },
 	        discount:{
 	            handler(){
 	                this.updateTotal()
@@ -294,6 +288,8 @@
 				formVal:'',
 				addSearch:'',
 				fd:{
+					pricelist_id:0,
+					saleperson_id:0,
 					address_id:'',
 					createdby_id:this.$store.state.user.id
 				},

@@ -10,16 +10,38 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
     <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/materialdesignicons.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/vuetify.min.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/vue.js') }}"></script>
+    <script src="{{ asset('js/axios.min.js') }}"></script>
+    <script src="{{ asset('js/vuetify.min.js') }}"></script>
+    <script src="{{ asset('js/lodash.min.js') }}"></script>
 </head>
 <body>
+    <script>
+        window.axios = axios;
+
+        window.base_url = document.head.querySelector('meta[name="base-url"]');
+        window.axios.defaults.baseURL = window.base_url.content+'/api';
+
+        window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+        window.axios.interceptors.response.use((response)=> {
+            return response;
+        },(error)=> {
+            if (401 === error.response.status) {
+                window.location.reload(true)
+            } else {
+                return Promise.reject(error);
+            }
+        });
+    </script>
     <div id="app">
         <v-app>
             <v-app-bar absolute app color="transparent" flat>
@@ -47,7 +69,7 @@
                             </v-btn>
                         </template>
                         <v-list>
-                            <v-list-item to="/profile">
+                            <v-list-item href="/admin/profile">
                                 <v-list-item-title >Profile</v-list-item-title>
                             </v-list-item>
                             <v-list-item onclick="event.preventDefault();
@@ -72,21 +94,21 @@
                         <v-list-group dark no-action subgroup v-if="item.children" color="#fdfdfd">
                             <template v-slot:activator>
                                 <v-list-item-content>
-                                    <v-list-item-title>${item.title}$</v-list-item-title>
+                                    <v-list-item-title>@{{item.title}}</v-list-item-title>
                                 </v-list-item-content>
                             </template>
-                            <v-icon slot="prependIcon">${item.icon}$</v-icon>
-                            <v-list-item dark exact v-for="(it,index) in item.children" :key="index" :to="it.target">
+                            <v-icon slot="prependIcon">@{{item.icon}}</v-icon>
+                            <v-list-item dark exact v-for="(it,index) in item.children" :key="index" :href="'/admin'+it.target">
                                 <v-list-item-content>
-                                    <v-list-item-title>${it.title}$</v-list-item-title>
+                                    <v-list-item-title>@{{it.title}}</v-list-item-title>
                                 </v-list-item-content>
                             </v-list-item>
                         </v-list-group>
-                        <v-list-item dark exact v-else :to="item.target">
+                        <v-list-item dark exact v-else :href="item.target">
                             <v-list-item-icon>
-                                <v-icon>${item.icon}$</v-icon>
+                                <v-icon>@{{item.icon}}</v-icon>
                             </v-list-item-icon>
-                            <v-list-item-title>${item.title}$</v-list-item-title>
+                            <v-list-item-title>@{{item.title}}</v-list-item-title>
                         </v-list-item>
                     </template>
                 </v-list>
@@ -100,5 +122,6 @@
             </v-content>
         </v-app>
     </div>
+    @yield('script')
 </body>
 </html>

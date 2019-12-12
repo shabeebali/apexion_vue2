@@ -26,4 +26,25 @@
     </v-col>
     <v-col cols="12" md="4"></v-col>
 </v-row>
+<script>
+    new Vue({
+        vuetify: new Vuetify(),
+        data(){
+            return{
+                sidebar_left:false,
+                sidebar_left_items:[],
+            }
+        },
+        mounted(){
+            //axios.get('menu').then((res)=>{
+            //    this.sidebar_left_items = res.data
+            //})
+        },
+        computed:{
+            baseUrl(){
+                return window.base_url.content
+            },
+        },
+    }).$mount('#app')
+</script>
 @endsection

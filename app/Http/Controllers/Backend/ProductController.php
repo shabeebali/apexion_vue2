@@ -10,7 +10,7 @@ use App\Model\Warehouse;
 use App\Model\ProductStock;
 use Illuminate\Http\Request;
 use App\Imports\ProductImport;
-
+use Illuminate\Support\Facades\Storage;
 use App\User;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\ProductCreated;
@@ -34,6 +34,7 @@ class ProductController extends Controller
                 'delete' => $user->can('delete',Product::class)? 'true': 'false',
                 'filtered' => $data['filtered'],
                 'create' => $user->can('create',Product::class) ? 'true': 'false',
+                'import' => $user->id == 1 ? 'true' : 'false'
             ],
             'total' => $data['total'],
         ]);
@@ -181,6 +182,9 @@ class ProductController extends Controller
 
     public function upload(Request $request)
     {
+        $request->validate([
+            'file' => 'mimes:jpeg,bmp,png'
+        ]);
         $path = $request->file('file')->store('products');
         return 'storage/'.$path;
     }

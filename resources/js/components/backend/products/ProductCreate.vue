@@ -573,6 +573,9 @@
 					})
 				}
 			},
+			closeDialog(){
+				window.location.href = '{{$prev_url}}'
+			},
 			save(){
 				this.btnloading = true
 				this.$refs.form.validate();

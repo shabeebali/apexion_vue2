@@ -170,7 +170,7 @@ class Product extends Model
                             'batch' => $item['batch']
                         ],
                         [
-                            'expiry_date' => $item['expiry_date'],
+                            'expiry_date' => $item['expiry_date'] ? $item['expiry_date']:null,
                             'qty' => $item['value'],
                         ]
                     );
@@ -265,6 +265,7 @@ class Product extends Model
         $this->pricelists()->sync($pl_sync);
         foreach ($warehouses as $warehouse) {
             $items = json_decode($row['warehouse_'.$warehouse->slug],true);
+            dd($items);
             foreach ($items as $item) {
                 $stock = ProductStock::updateOrCreate(
                     [
@@ -273,7 +274,7 @@ class Product extends Model
                         'batch' => $item['batch']
                     ],
                     [
-                        'expiry_date' => $item['expiry_date'],
+                        'expiry_date' => $item['expiry_date'] ? $item['expiry_date']:null,
                         'qty' => $item['value'],
                     ]
                 );

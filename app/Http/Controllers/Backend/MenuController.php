@@ -22,7 +22,7 @@ class MenuController extends Controller
           'icon'=>'mdi-gauge'
         ];
         $menu[] = [
-            'title'=>'Products',
+            'title'=>'Catalog',
             'target'=>'/products',
             'icon'=>'mdi-inbox-multiple',
             'children'=>[
@@ -31,17 +31,25 @@ class MenuController extends Controller
                   'target'=>'/products',
                 ],
                 [
-                  'title'=>'Pending',
+                  'title'=>'Products(Pending)',
                   'target'=>'/products/pending',
                 ],
                 [
-                  'title'=>'Tally',
+                  'title'=>'Products(Tally)',
                   'target'=>'/products/tally',
+                ],
+                [
+                  'title'=>'Categories',
+                  'target'=>'/categories',
+                ],
+                [
+                  'title'=>'Taxonomy',
+                  'target'=>'/taxonomies',
                 ],
             ]
         ];
         $menu[] = [
-            'title'=>'Customers',
+            'title'=>'CRM',
             'target'=>'/customers',
             'icon'=>'mdi-inbox-multiple',
             'children'=>[
@@ -50,39 +58,20 @@ class MenuController extends Controller
                   'target'=>'/customers',
                 ],
                 [
-                  'title'=>'Pending',
+                  'title'=>'Customers(Pending)',
                   'target'=>'/customers/pending',
                 ],
                 [
-                  'title'=>'Tally',
+                  'title'=>'Customers(Tally)',
                   'target'=>'/customers/tally',
                 ],
             ]
-        ];
-        $menu[] =[
-          'title'=>'Categories',
-          'target'=>'/categories',
-          'icon'=>'mdi-book-variant',
-          'children'=>[
-            [
-              'title'=>'Categories',
-              'target'=>'/categories',
-            ],
-            [
-              'title'=>'Taxonomy',
-              'target'=>'/taxonomies',
-            ],
-          ]
         ];
         $menu[] = [
           'title'=>'Inventory',
           'target'=>'/inventory',
           'icon'=>'mdi-warehouse',
           'children'=>[
-            [
-              'title'=>'Inventory',
-              'target'=>'/inventory',
-            ],
             [
               'title'=>'Warehouse',
               'target'=>'/warehouses',
@@ -95,7 +84,7 @@ class MenuController extends Controller
           'icon'=>'mdi-printer-pos',
           'children'=>[
             [
-              'title'=>'Sales',
+              'title'=>'Sale Order',
               'target'=>'/sales',
             ],
             [
@@ -105,7 +94,7 @@ class MenuController extends Controller
           ]
         ];
         $menu[] = [
-          'title'=>'Users',
+          'title'=>'Settings',
           'target'=>'/users',
           'icon'=>'mdi-account',
           'children'=>[
@@ -115,7 +104,7 @@ class MenuController extends Controller
             ],
             [
               'title'=>'Roles',
-              'target'=>'/users/roles',
+              'target'=>'/user_roles',
             ],
           ]
         ];

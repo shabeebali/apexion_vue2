@@ -49,6 +49,7 @@ class UserController extends Controller
             $user = new User;
             if($user->dbsave($request)){
                 return response()->json(['message'=>'success']);
+                //return redirect('/admin/users')->with('success','User created successfully');
             }
         }
     }

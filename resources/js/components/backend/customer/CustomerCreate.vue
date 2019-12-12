@@ -346,21 +346,25 @@
 		},
 		methods:{
 			updState(index){
+				this.waitDialog = true
 				this.stateLoading = true
 				axios.get('places?country_id='+this.fd.addresses[index].country_id).then((res)=>{
 					this.fd.addresses[index].states = res.data
 					this.fd.addresses[index].state_id = 0
 					this.stateLoading = false
 					this.updCity(index)
+					this.waitDialog = false
 				})
 			},
 			updCity(index){
 				if(this.fd.addresses[index].state_id != 0){
+					this.waitDialog = true
 					this.cityLoading = true
 					axios.get('places?state_id='+this.fd.addresses[index].state_id).then((res)=>{
 						this.fd.addresses[index].cities = res.data
 						this.fd.addresses[index].city_id = 0
 						this.cityLoading = false
+						this.waitDialog = false
 					})
 				}
 				else{
@@ -436,10 +440,10 @@
 				axios.post(this.route,this.fD).then((response)=>{
 					this.btnloading = false
 					if(this.mode == 'edit'){
-						this.$emit('trigger-sb',{text:'Category Updated Successfully',color:'success'})
+						this.$emit('trigger-sb',{text:'Customer Updated Successfully',color:'success'})
 					}
 					else{
-						this.$emit('trigger-sb',{text:'Category Created Successfully',color:'success'})
+						this.$emit('trigger-sb',{text:'Customer Created Successfully',color:'success'})
 					}
 					this.closeDialog()
 					this.$emit('update-list')
@@ -481,7 +485,7 @@
 					}
 					else{
 						this.route = 'customers'
-						this.checkRoute = 'customers/check/'
+						this.checkRoute = 'customers/check'
 					}
 					axios.post(this.checkRoute,this.fD).then((res)=>{
 						if(res.data.message == 'warning'){
