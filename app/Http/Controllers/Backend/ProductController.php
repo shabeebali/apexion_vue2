@@ -8,6 +8,8 @@ use App\Model\Taxonomy;
 use App\Model\Pricelist;
 use App\Model\Warehouse;
 use App\Model\ProductStock;
+use App\Model\ProductAlias;
+use App\Model\ProductMedias;
 use Illuminate\Http\Request;
 use App\Imports\ProductImport;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +25,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+        Storage::delete('products/sZ69isJhUoQXjZKpGxBEWXNZhlTwiIsBOHBYqzhi.jpeg');
         $this->authorize('view',Product::class);
         $user = \Auth::user();
         $data =  Product::getIndex($request);
@@ -101,7 +104,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with(['categories.taxonomy','pricelists','stocks','alias','medias','comments.user'])->find($id);
+        $product = Product::with(['categories.taxonomy','pricelists','stocks.warehouse','alias','medias','comments.user'])->find($id);
         return $product;
 
     }
@@ -239,6 +242,15 @@ class ProductController extends Controller
         ]);
     }
 
+    public function delete_alias(Request $request,$id)
+    {
+        ProductAlias::destroy($id);
+    }
+    public function delete_media(Request $request,$id)
+    {
+        ProductMedias::destroy($id);
+        Storage::delete(substr($request->url,8));
+    }
     public function remove_stock(Request $request, $id)
     {
         ProductStock::destroy($id);

@@ -181,10 +181,12 @@ class Product extends Model
         if($row['medias']){
             $medias = explode(",", $row['medias']);
             foreach ($medias as $url) {
-                $media = new ProductMedias;
-                $media->url = $url;
-                $media->product_id = $this->id;
-                $media->save();
+                $media = ProductMedias::firstOrCreate(
+                    [
+                        'url' => $url,
+                        'product_id' => $this->id
+                    ]
+                );
             }
         }
         $aliases = [];
@@ -265,7 +267,6 @@ class Product extends Model
         $this->pricelists()->sync($pl_sync);
         foreach ($warehouses as $warehouse) {
             $items = json_decode($row['warehouse_'.$warehouse->slug],true);
-            dd($items);
             foreach ($items as $item) {
                 $stock = ProductStock::updateOrCreate(
                     [
@@ -283,11 +284,13 @@ class Product extends Model
         $this->expirable = $row['expirable'];
         if($row['medias']){
             $medias = explode(",", $row['medias']);
-            foreach ($medias as $url) {
-                $media = new ProductMedias;
-                $media->url = $url;
-                $media->product_id = $this->id;
-                $media->save();
+            foreach (json_decode($row['medias'],true) as $item){
+                $media = ProductMedias::updateOrCreate(
+                    [
+                        'url' => $item['url'],
+                        'product_id' => $this->id
+                    ]
+                );
             }
         }
         $aliases = [];
@@ -357,7 +360,6 @@ class Product extends Model
         $count = 0;
         $pc = $pc.str_pad($count, 3,0,STR_PAD_LEFT);
         if(!$id){
-
             $data['sku'] = $pc;
             while(Validator::make($data,['sku'=>'unique:products,sku'])->fails()){
                 $pc = substr($pc, 0, -3);

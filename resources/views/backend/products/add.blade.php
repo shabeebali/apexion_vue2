@@ -94,7 +94,7 @@
                     <v-row>
                         <v-col cols="12" md="4">
                             <v-text-field v-for="(item,index) in aliases" :key="index" :label="aliases[index].label" v-model="aliases[index].value" :error-messages="aliases[index].error"
-                            @keydown="aliases[index].error = ''" :append-outer-icon="aliases.length > 1 ? 'mdi-minus-circle':''" v-on:click:append-outer="deleteAlias(index)">
+                            @keydown="aliases[index].error = ''" append-outer-icon="mdi-minus-circle" v-on:click:append-outer="deleteAlias(index)">
                             </v-text-field>
                             <v-btn text @click.stop="addAlias">Add Alias</v-btn>
                         </v-col>
@@ -450,18 +450,7 @@
                 this.aliases.push({label:newLabel,value:'',error:''})
             },
             deleteStockLine(index,index2){
-                if(this.mode == 'edit'){
-                    this.waitDialog = true
-                    if(this.warehouses[index].items[index2].id != undefined){
-                        axios.post('products/remove_stock/'+this.warehouses[index].items[index2].id).   then((res)=>{
-                            this.waitDialog = false
-                            this.warehouses[index].items.splice(index2,1)
-                        })
-                    }
-                }
-                else{
-                    this.warehouses[index].items.splice(index2,1)
-                }
+                this.warehouses[index].items.splice(index2,1)
             },
             deleteAlias(index){
                 this.aliases.splice(index,1)

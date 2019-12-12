@@ -50,6 +50,8 @@ Route::middleware('auth:api')->group(function(){
     Route::post('products/add_comment/{id}','Backend\ProductController@add_comment');
     Route::post('products/import','Backend\ProductController@import');
     Route::post('products/remove_stock/{id}','Backend\ProductController@remove_stock');
+    Route::post('products/delete_alias/{id}','Backend\ProductController@delete_alias');
+    Route::post('products/delete_media/{id}','Backend\ProductController@delete_media');
     Route::post('customers/check/','Backend\CustomerController@check');
     Route::put('customers/check/{id}','Backend\CustomerController@check');
     Route::get('customers/add_search','Backend\CustomerController@addSearch');

@@ -94,7 +94,7 @@
                     <v-row>
                         <v-col cols="12" md="4">
                             <v-text-field v-for="(item,index) in aliases" :key="index" :label="aliases[index].label" v-model="aliases[index].value" :error-messages="aliases[index].error"
-                            @keydown="aliases[index].error = ''" :append-outer-icon="aliases.length > 1 ? 'mdi-minus-circle':''" v-on:click:append-outer="deleteAlias(index)">
+                            @keydown="aliases[index].error = ''" append-outer-icon="mdi-minus-circle" v-on:click:append-outer="deleteAlias(index)">
                             </v-text-field>
                             <v-btn text @click.stop="addAlias">Add Alias</v-btn>
                         </v-col>
@@ -172,6 +172,7 @@
                                             <v-col cols="12" md="3">
                                                 <v-text-field 
                                                     label="Batch"
+                                                    :rules="[reqIfExpiry]"
                                                     v-model="warehouses[index].items[index2].batch">
                                                 </v-text-field>
                                             </v-col>
@@ -188,7 +189,7 @@
                                                         <v-text-field
                                                             v-model="warehouses[index].items[index2].expiry_date"
                                                             label="Expiry Date"
-                                                            prepend-icon="mdi-calendar"              
+                                                            prepend-icon="mdi-calendar"     
                                                             readonly
                                                             clearable
                                                             v-on="on"
@@ -222,9 +223,9 @@
                         append-outer-icon="mdi-cloud-upload"
                         @click:append-outer="uploadImg"></v-file-input>
                     <v-row>
-                        <v-col cols="6" md="2" v-for="(url,index) in medias" :key="index">
-                            <v-img max-height="250" max-width="250" :src="baseUrl+'/'+url" @click.stop="imgModal(baseUrl+'/'+url)" style="cursor:pointer"></v-img>
-                            <v-btn text color="info" @click="deleteMedia(url)">Delete</v-btn>
+                        <v-col cols="6" md="2" v-for="(item,index) in medias" :key="index">
+                            <v-img max-height="250" max-width="250" :src="baseUrl+'/'+item.url" @click.stop="imgModal(baseUrl+'/'+item.url)" style="cursor:pointer"></v-img>
+                            <v-btn text color="info" @click="deleteMedia(index)">Delete</v-btn>
                         </v-col>
                     </v-row>
                     <v-row>
@@ -490,7 +491,7 @@
                     })
                     this.expirable = response.data.expirable == 1 ? true : false
                     response.data.medias.forEach((media)=>{
-                        this.medias.push(media.url)
+                        this.medias.push({url:media.url,id:media.id})
                     })
                 })
             }).finally(()=>{
@@ -503,6 +504,12 @@
             },       
         },
         methods:{
+            reqIfExpiry(val){
+                if(this.expirable == true){
+                    return this.rules.required(val)
+                }
+                return true
+            },
             closeDialog(){
                 window.location.href='{{$prev_url}}'
             },
@@ -518,28 +525,37 @@
                 this.aliases.push({label:newLabel,value:'',error:''})
             },
             deleteStockLine(index,index2){
-                if(this.mode == 'edit'){
-                    this.waitDialog = true
-                    if(this.warehouses[index].items[index2].id != undefined){
-                        axios.post('products/remove_stock/'+this.warehouses[index].items[index2].id).   then((res)=>{
-                            this.waitDialog = false
-                            this.warehouses[index].items.splice(index2,1)
-                        })
-                    }
-                }
-                else{
-                    this.warehouses[index].items.splice(index2,1)
+                this.waitDialog = true
+                if(this.warehouses[index].items[index2].id != undefined){
+                    axios.post('products/remove_stock/'+this.warehouses[index].items[index2].id).   then((res)=>{
+                        this.waitDialog = false
+                        this.warehouses[index].items.splice(index2,1)
+                    })
                 }
             },
             deleteAlias(index){
-                this.aliases.splice(index,1)
-                Object.keys(this.aliases).forEach((key,index)=>{
-                    this.aliases[key].label = 'Alias '+(index+1)
+                this.waitDialog = true
+                axios.post('products/delete_alias/'+this.aliases[index].id).then(()=>{
+                    this.aliases.splice(index,1)
+                    Object.keys(this.aliases).forEach((key,index)=>{
+                        this.aliases[key].label = 'Alias '+(index+1)
+                    })
+                    this.waitDialog = false
                 })
             },
-            deleteMedia(url){
-                const index = this.medias.indexOf(url)
-                if (index >= 0) this.medias.splice(index, 1)
+            deleteMedia(index){
+                if(this.medias[index].id){
+                    this.waitDialog = true
+                    var fD = new FormData()
+                    fD.append('url',this.medias[index].url)
+                    axios.post('products/delete_media/'+this.medias[index].id,fD).then(()=>{
+                        this.waitDialog = false
+                        this.medias.splice(index, 1)
+                    })
+                }
+                else{
+                    this.medias.splice(index, 1)
+                }
             },
             calculatePrice(el){
                 const val = ((parseFloat(this.fd.landing_price.value) * (1+(parseFloat(this.fd.gst.value)/100)))*(1+(parseFloat(el)/100))).toFixed(2)
@@ -555,7 +571,7 @@
                     }
                 }).then((response)=>{
                     this.waitDialog = false
-                    this.medias.push(response.data)
+                    this.medias.push({url:response.data,id:null})
                     this.imgFile = null
                 }).catch((error)=>{
                     this.imgFile = null
@@ -612,7 +628,7 @@
                     this.warehouses.forEach((item)=>{
                         fD.append('warehouse_'+item.slug,JSON.stringify(item.items))
                     })
-                    fD.append('medias',this.medias)
+                    fD.append('medias',JSON.stringify(this.medias))
                     fD.append('aliases',JSON.stringify(this.aliases))
                     fD.append('expirable',this.expirable ? 1 : 0)
                     fD.append('comment',this.comment ? this.comment : '')
@@ -621,7 +637,7 @@
                     axios.post(route,fD).then((response)=>{
                         this.btnloading = false
                         this.emitSb('Category Updated Successfully','success')
-                        //window.location.href = '{{$prev_url}}'
+                        window.location.href = '{{$prev_url}}'
                     }).catch((error)=> {
                         if(error.response.status == 422){
                             this.btnloading = false
