@@ -51,7 +51,7 @@ class MenuController extends Controller
         $menu[] = [
             'title'=>'CRM',
             'target'=>'/customers',
-            'icon'=>'mdi-inbox-multiple',
+            'icon'=>'mdi-handshake',
             'children'=>[
                 [
                   'title'=>'Customers',

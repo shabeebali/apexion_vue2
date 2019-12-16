@@ -272,6 +272,7 @@
 	            qty:1,
 	            gst:0,
 	            rate:0,
+	            items:[],
 	            productItems:[],
             	productSelect:null,
 				productLoading:false,

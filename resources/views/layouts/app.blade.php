@@ -19,6 +19,7 @@
     <!-- Styles -->
     <link href="{{ asset('css/materialdesignicons.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/vuetify.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/theme.css') }}" rel="stylesheet">
     <script src="{{ asset('js/vue.js') }}"></script>
     <script src="{{ asset('js/axios.min.js') }}"></script>
     <script src="{{ asset('js/vuetify.min.js') }}"></script>
@@ -83,12 +84,12 @@
                             </form>
                 @endguest
             </v-app-bar>
-            <v-navigation-drawer app color="teal darken-3" dark  mobile-break-point="991" :permanent="$vuetify.breakpoint.mdAndUp" width="250" v-model="sidebar_left" >
+            <v-navigation-drawer app color="grey darken-4" dark  mobile-break-point="991" :permanent="$vuetify.breakpoint.mdAndUp" width="250" v-model="sidebar_left" >
                 <template v-slot:img="attrs">
                     <v-img v-bind="attrs" gradient="to top, rgba(0, 0, 0, .7), rgba(0, 0, 0, .7)"/>
                 </template>
                 <v-img contain max-width="200" class="mx-auto mt-3" :src="baseUrl+'/images/apexion_logo.svg'"></v-img>
-                <v-list class="mt-4" nav dense color="teal darken-3">
+                <v-list class="mt-4" nav dense color="grey darken-4">
                     
                     <template v-for="(item,index) in sidebar_left_items">
                         <v-list-group dark no-action subgroup v-if="item.children" color="#fdfdfd">
@@ -123,5 +124,6 @@
         </v-app>
     </div>
     @yield('script')
+    <script src="{{ asset('js/theme.js') }}" defer></script>
 </body>
 </html>

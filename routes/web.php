@@ -1,5 +1,6 @@
 <?php
 use Illuminate\Support\Facades\View;
+use Illuminate\Http\Request;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\View;
 Route::prefix('/admin')->group(function(){
 	Auth::routes();
 	Route::middleware('auth:web')->group(function(){
-		Route::get('{folder?}/{file?}/{param?}',function($folder = null, $file= null, $param = null){
+		Route::get('{folder?}/{file?}/{param?}',function(Request $request, $folder = null, $file= null, $param = null){
+			$user = $request->user();
 			if($folder != null){
 				if($file != null){
 					$filename = 'backend.'.$folder.'.'.$file;
@@ -29,9 +31,9 @@ Route::prefix('/admin')->group(function(){
 			}
 			if(View::exists($filename)){
 				if($param){
-					return view($filename,['prev_url'=> url()->previous(),'id'=>$param]);
+					return view($filename,['prev_url'=> url()->previous(),'id'=>$param,'user'=>$user]);
 				}
-				return view($filename,['prev_url'=> url()->previous()]);
+				return view($filename,['prev_url'=> url()->previous(),'user'=>$user]);
 			}
 			else abort(404);
 		});

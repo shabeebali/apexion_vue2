@@ -286,7 +286,7 @@
 
 @section('script')
 <script>
-    new Vue({
+    var vue = new Vue({
         vuetify: new Vuetify(),
         data(){
             return{

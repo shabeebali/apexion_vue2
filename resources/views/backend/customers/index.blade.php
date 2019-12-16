@@ -4,7 +4,7 @@
 <v-row>
     <v-col class="mx-4">
         <v-toolbar dense color="transparent" flat>
-            <v-toolbar-title>Products pending approval</v-toolbar-title>
+            <v-toolbar-title>Customers</v-toolbar-title>
             <div class="flex-grow-1"></div>
             <v-toolbar-items>
                 <div>
@@ -18,7 +18,7 @@
                     </v-tooltip>
                 </div>
                 <div v-if="meta.import == 'true'">
-                    <v-tooltip bottom>
+                    <v-tooltip bottom >
                         <template v-slot:activator="{ on }">
                             <v-btn v-on="on" color="transparent" dense depressed @click.stop="importDialog = true">
                                 <v-icon>mdi-upload</v-icon>
@@ -30,7 +30,7 @@
                 <div>
                     <v-tooltip bottom>
                         <template v-slot:activator="{ on }">
-                            <v-btn v-on="on" color="transparent" dense depressed @click.stop="exportData">
+                            <v-btn v-on="on" color="transparent" dense depressed @click.stop="exportDialog = true">
                                 <v-icon>mdi-download</v-icon>
                             </v-btn>
                         </template>
@@ -43,7 +43,7 @@
                     </v-btn>
                 </div>
                 <div>
-                    <v-btn v-if="meta.create == 'true'" color="primary" dense depressed :href="baseUrl+'/admin/products/add'">Create</v-btn>
+                    <v-btn v-if="meta.create == 'true'" color="primary" dense depressed :href="baseUrl+'/admin/customers/add'">Create</v-btn>
                 </div>
             </v-toolbar-items>
         </v-toolbar>
@@ -56,7 +56,7 @@
                             <div class="flex-grow-1"></div>
                             <v-toolbar-items>
                                 <v-btn text @click.stop="$refs.filterForm.reset(); getDataFromApi()">Reset</v-btn>
-                                <v-btn text color="primary" @click.stop="applyFilter">Apply</v-btn>
+                                <v-btn text color="primary" @click.stop="getDataFromApi">Apply</v-btn>
                             </v-toolbar-items>
                         </v-toolbar>
                         <v-card-text>
@@ -64,10 +64,10 @@
                                 <v-row>
                                     <v-col cols="12" md="6">
                                         <v-autocomplete
-                                            label="Category"
+                                            label="Saleperson"
                                             multiple
-                                            v-model="filterdata.categories"
-                                            :items="filterables.categories"
+                                            v-model="filterdata.salepersons"
+                                            :items="filterables.salepersons"
                                             item-text="name"
                                             item-value="id"
                                             chips
@@ -84,23 +84,9 @@
                                                     @{{ data.item.name }}
                                                 </v-chip>
                                             </template>
-                                            <template v-slot:item="data">
-                                                <v-list-item-content>
-                                                <v-list-item-title v-html="     data.item.name"></v-list-item-title>
-                                                <v-list-item-subtitle> @{{data.item.taxonomy.name}}</v-list-item-subtitle>
-                                                </v-list-item-content>
-                                            </template>
                                         </v-autocomplete>   
                                     </v-col>
-                                    <v-col cols="12" md="3">
-                                        <v-select
-                                            label="GST"
-                                            multiple
-                                            v-model="filterdata.gst"
-                                            :items="filterables.gst"
-                                            ></v-select>
-                                    </v-col>
-                                    <v-col cols="12" md="3">
+                                    <v-col cols="12" md="6">
                                     </v-col>
                                 </v-row>
                             </v-form>
@@ -110,15 +96,15 @@
             </v-expansion-panel>
         </v-expansion-panels>
         <v-card class="mt-2">
-        <v-card-title>
-            <v-text-field
-                v-model="search"
-                append-icon="mdi-magnify"
-                label="Search"
-                single-line
-                hide-details
-                ></v-text-field>
-        </v-card-title>
+            <v-card-title>
+                <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                    ></v-text-field>
+            </v-card-title>
             <v-card-text>
                 <div class="text-center">
                     <template v-for="(item,index) in meta.filtered">
@@ -149,7 +135,10 @@
                         </v-tooltip>
                     </template>
                     <template v-slot:item.name="{item}">
-                        <a @click.stop="showProduct(item.id)">@{{item.name}}</a>
+                        <a @click.stop="showCustomer(item.id)">@{{item.name}}</a>
+                    </template>
+                    <template v-slot:item.tag_name="{item}">
+                        <div v-html="item.tag_name"></div>
                     </template>
                 </v-data-table>
             </v-card-text>
@@ -177,7 +166,7 @@
                 Do you really Want to continue?</v-alert>
             </v-card-text>
             <v-card-actions>
-                <v-btn text color="error" @click.stop="deleteProduct">Yes</v-btn>
+                <v-btn text color="error" @click.stop="deleteCustomer">Yes</v-btn>
                 <v-btn text color="success" @click.stop="confirmDialog = false">No</v-btn>
             </v-card-actions>
         </v-card>
@@ -220,6 +209,23 @@
             </v-row>
         </v-card>
     </v-dialog>
+    <v-dialog v-model="exportDialog" width="360">
+        <v-card>
+            <v-card-title>
+                <v-toolbar flat>
+                    <v-toolbar-title>Export Customer</v-toolbar-title>
+                </v-toolbar>
+            </v-card-title>
+            <v-card-text>
+                <v-select label="Export Type" v-model="exportType" :items="exportTypeItems"></v-select>
+            </v-card-text>
+            <v-card-actions>
+                <v-row justify="space-around">
+                    <v-btn @click="exportFn">Export</v-btn>
+                </v-row>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </v-row>
 @endsection
 
@@ -231,6 +237,16 @@
             return{
                 sidebar_left:false,
                 sidebar_left_items:[],
+                exportDialog:false,
+                exportType:null,
+                exportTypeItems:[
+                    {
+                        'text':'Name','value':'name'
+                    },
+                    {
+                        'text':'Address','value':'address'
+                    }
+                ],
                 search:'',
                 filterPanel:-1,
                 confirmDialog:false,
@@ -243,11 +259,12 @@
                 showDialog:false,
                 file:'',
                 delete_id : 0,
-                pId : 0,
+                cId : 0,
                 snackbar:false,
                 sbTimeout:3000,
                 sbText:'',
                 sbColor:'',
+                dialog:false,
                 loading:false,
                 options:{},
                 headers:[
@@ -260,20 +277,10 @@
                         value:'name'
                     },
                     {
-                        text:'SKU',
-                        value:'sku',
-                    },
-                    {
-                        text:'MRP',
-                        value:'mrp',
-                    },
-                    {
-                        text:'Landing Price',
-                        value:'landing_price',
-                    },
-                    {
-                        text:'GST',
-                        value:'gst',
+                        text:'Address Tag',
+                        value:'tag_name',
+                        sortable:false,
+                        width:500,
                     },
                     {
                         text:'Action',
@@ -283,17 +290,10 @@
                 ],
                 items:[],
                 filterables:{
-                    categories:[],
-                    gst:[
-                        {text:'5%', value:'5'},
-                        {text:'12%', value:'12'},
-                        {text:'18%', value:'18'},
-                    ],
-                    taxonomies:[],
+                    salepersons:[],
                 },
                 filterdata:{
-                    categories:[],
-                    gst:[],
+                    salepersons:[],
                 },
                 filtered:[],
                 totalItems:0,
@@ -329,25 +329,21 @@
             },
         },
         mounted(){
-            this.options.page = 1
             this.waitDialog = true
+            this.options.page=1
             axios.all([
-                axios.get('categories').then((res)=>{
-                    this.filterables.categories = res.data.data
-                }),
-                axios.get('taxonomies').then((res)=>{
-                    this.filterables.taxonomies = _.groupBy(res.data.data,'id')
+                axios.get('users?role=Sale').then((res)=>{
+                    this.filterables.salepersons = res.data
                 }),
                 axios.get('menu').then((res)=>{
                     this.sidebar_left_items = res.data
                 })
             ]).then(()=>{
                 this.deboucedSearch = _.debounce(()=>{
-                    this.applyFilter()
-                },300)
+                    this.getDataFromApi()
+                },300);
                 this.waitDialog = false
-            })
-            
+            })   
             var message = window.localStorage.getItem('message')
 			var message_status = window.localStorage.getItem('message_status')
 			if(message && message_status){
@@ -363,8 +359,8 @@
         },
         methods:{
             removeCat(item) {
-                const index = this.filterdata.categories.indexOf(item.id)
-                if (index >= 0) this.filterdata.categories.splice(index, 1)
+                const index = this.filterdata.salepersons.indexOf(item.id)
+                if (index >= 0) this.filterdata.salepersons.splice(index, 1)
             },
             upload(){
                 this.importErrors = ''
@@ -374,15 +370,12 @@
                 var fD = new FormData()
                 fD.append('file',this.file)
                 fD.append('method',this.importMethod)
-                axios.post('/products/import',fD,{
+                axios.post('/customers/import',fD,{
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 }).then((response)=>{
                     this.waitDialog = false
-                    this.importDialog = false
-                    this.triggerSb({text:'Products Imported Successfully',color:'success'})
-                    this.getDataFromApi()
                 }).catch((error)=>{
                     this.waitDialog = false
                     if(error.response.status == 422){
@@ -412,17 +405,27 @@
                         }
                     }
                 })
-                this.applyFilter()
+                this.getDataFromApi()
             },
             filterToggle(){
                 this.filterPanel = (this.filterPanel == -1) ? 0: -1
             },
-            exportData(){
-                this.waitDialog = true
-                axios.get('products/export').then((res)=>{
-                    this.waitDialog = false
-                    window.location = res.data
-                })
+            exportFn(){
+                if(this.exportType == 'name' || this.exportType == 'address')
+                {
+                    this.waitDialog = true
+                    axios.get('customers/export?type='+this.exportType).then((res)=>{
+                        this.waitDialog = false
+                        window.location = res.data
+                    }).catch((error)=>{
+                        this.waitDialog = false
+                        this.triggerSb({text:'Something went wrong',color:'info'})
+                        this.exportDialog = false
+                    })
+                }
+                else{
+                    this.triggerSb({text:'Please select export type!!',color:'error'})
+                }
             },
             triggerSb(val){
                 this.snackbar = false
@@ -433,30 +436,22 @@
             getDataFromApi(){
                 this.loading = true
                 const { sortBy, sortDesc, page, itemsPerPage } = this.options
-                var params = '?pending=1&page='+page+'&rpp='+itemsPerPage+'&search='+this.search+'&'
+                var params = '?page='+page+'&rpp='+itemsPerPage+'&search='+this.search+'&'
                 if(sortBy.length == 1){
                     params = params+'sortby='+sortBy[0]+'&'
                 }
                 if(sortDesc.length == 1 && sortDesc[0] == true){
                     params = params+'descending=1&'
                 }
-                if(this.filterdata.categories.length > 0){
-                    params = params+'categories='
-                    this.filterdata.categories.forEach((id)=>{
+                if(this.filterdata.salepersons.length > 0){
+                    params = params+'salepersons='
+                    this.filterdata.salepersons.forEach((id)=>{
                         params = params+id+'-'
                     })
                     params = params.substring(0,params.length -1)
                     params = params+'&'
                 }
-                if(this.filterdata.gst.length > 0){
-                    params = params+'gst='
-                    this.filterdata.gst.forEach((id)=>{
-                        params = params+id+'-'
-                    })
-                    params = params.substring(0,params.length -1)
-                    params = params+'&'
-                }
-                axios.get('products'+params).then((response)=>{
+                axios.get('customers'+params).then((response)=>{
                     this.loading = false
                     this.items = response.data.data
                     this.meta = response.data.meta
@@ -464,7 +459,7 @@
                 })
             },
             edit(id){
-                window.location.href = this.baseUrl+'/admin/products/edit/'+id
+                window.location.href = this.baseUrl+'/admin/customers/edit/'+id
             },
             deleteConfirm(id){
                 this.delete_id = id
@@ -472,8 +467,8 @@
             },
             deleteProduct(){
                 this.confirmDialog = false
-                axios.delete('products/'+this.delete_id,{_method: 'DELETE'}).then((res)=>{
-                    this.triggerSb({text:'Product is deleted from database',color:'info'})
+                axios.delete('customers/'+this.delete_id,{_method: 'DELETE'}).then((res)=>{
+                    this.triggerSb({text:'Customer is deleted from database',color:'info'})
                     this.getDataFromApi()
                 }).catch((error)=> {
                     if(error.response.status == 403){
@@ -484,11 +479,8 @@
                     }
                 })
             },
-            showProduct(id){
-                window.location.href = this.baseUrl+'/admin/products/view/'+id
-            },
-            applyFilter(){
-                this.options.page == 1 ? this.getDataFromApi() : this.options.page = 1
+            showCustomer(id){
+                window.location.href = this.baseUrl+'/admin/customers/view/'+id
             }
         }
     }).$mount('#app')

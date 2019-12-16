@@ -25,7 +25,6 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        Storage::delete('products/sZ69isJhUoQXjZKpGxBEWXNZhlTwiIsBOHBYqzhi.jpeg');
         $this->authorize('view',Product::class);
         $user = \Auth::user();
         $data =  Product::getIndex($request);
@@ -254,5 +253,24 @@ class ProductController extends Controller
     public function remove_stock(Request $request, $id)
     {
         ProductStock::destroy($id);
+    }
+
+    public function getRate(Request $request)
+    {
+        $ids = explode(",", $request->id);
+        $model = Product::with('pricelists')->whereIn('id',$ids)->get();
+        if($request->pl != 'undefined' || $request->pl != 'null')
+        {
+            $model->transform(function($obj,$key) use ($request){
+                foreach ($obj->pricelists as $pl) {
+                    if($pl->id == $request->pl){
+                        $obj->margin = $pl->pivot->margin;
+                        break;
+                    }
+                }
+                return $obj;
+            });   
+        }
+        return response()->json($model);
     }
 }

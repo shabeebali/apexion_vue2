@@ -38,6 +38,7 @@ class CustomerController extends Controller
                 'delete' => $user->can('delete',Customer::class)? 'true': 'false',
                 'filtered' => $data['filtered'],
                 'create' => $user->can('create',Customer::class) ? 'true': 'false',
+                'import' => $user->id == 1 ? 'true' : 'false'
             ],
             'total' => $model->count(),
         ]);
@@ -203,7 +204,7 @@ class CustomerController extends Controller
         $model = Address::with('city','state','country','phones','salepersons')->where('tag_name','like','%'.$request->search.'%')->limit($request->rpp)->get();
         return $model->toArray();
     }
-    public function deleteAddress($id)
+    public function deleteAddress(Request $request, $id)
     {
         $this->authorize('delete',Customer::class);
         $address = Address::find($id);
@@ -213,7 +214,11 @@ class CustomerController extends Controller
         $address->salepersons()->sync([]);
         $address->delete();
     }
-
+    public function deletePhone(Request $request, $id)
+    {
+        $this->authorize('delete',Customer::class);
+        Phone::destroy($id);
+    }
     public function export(Request $request) 
     {
         $filename = 'customers_'.Str::slug(today()->toDateString(),'_').'.xlsx';
