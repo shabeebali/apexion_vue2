@@ -53,12 +53,12 @@ Route::middleware('auth:api')->group(function(){
     Route::post('products/delete_alias/{id}','Backend\ProductController@delete_alias');
     Route::post('products/delete_media/{id}','Backend\ProductController@delete_media');
     Route::get('products/getrate','Backend\ProductController@getRate');
+    Route::get('products/notif_test','Backend\ProductController@notif_test');
     Route::post('customers/check/','Backend\CustomerController@check');
     Route::put('customers/check/{id}','Backend\CustomerController@check');
     Route::get('customers/add_search','Backend\CustomerController@addSearch');
     Route::post('customers/delete_address/{id}','Backend\CustomerController@deleteAddress');
     Route::post('customers/delete_phone/{id}','Backend\CustomerController@deletePhone');
-    Route::get('products/notif_test','Backend\ProductController@notif_test');
     
     Route::get('menu','Backend\MenuController');
     Route::post('products/upload','Backend\ProductController@upload');
@@ -79,6 +79,7 @@ Route::middleware('auth:api')->group(function(){
         'products' =>'Backend\ProductController',
         'customers'=>'Backend\CustomerController',
         'sales'=>'Backend\SaleController',
+        'config'=>'Backend\ConfigController',
     ]);
     
 });

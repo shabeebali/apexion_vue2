@@ -29,7 +29,7 @@
                             </v-autocomplete>
                         </v-col>
                         <v-col cols="12" md="4">
-                            <v-select label="Saleperson" v-model="fd.saleperson_id" :items="salepersons" item-text="name" item-value="id" :rules="[rules.required]" @change="setRate(); updateBill();">
+                            <v-select label="Saleperson" v-model="fd.saleperson_id" :items="salepersons" item-text="name" item-value="id" :rules="[rules.required]" @change="updateBill();">
                             </v-select>
                         </v-col>
                         <v-col cols="12" md="4">
@@ -109,7 +109,6 @@
                                                       :loading="productLoading"
                                                       :items="productItems"
                                                       :search-input.sync="searchProduct"
-                                                      cache-items
                                                       class="mx-0 py-0 mt-0"
                                                       flat
                                                       clearable
@@ -140,8 +139,8 @@
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td class="text-right">GST</td>
-                                                <td><v-text-field readonly class="input-right" style="direction:rtl;" v-model="tax" append-icon="mdi-plus"></v-text-field></td>
+                                                <td class="input-right">GST</td>
+                                                <td><v-text-field readonly class="input-right" style="" v-model="tax" prepend-icon="mdi-plus"></v-text-field></td>
                                                 <td></td>
                                             </tr>
                                             <tr>
@@ -149,8 +148,8 @@
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td class="text-right">Discount</td>
-                                                <td><v-text-field class="input-right" style="direction:rtl;" v-model="discount" append-icon="mdi-minus"></v-text-field></td>
+                                                <td class="input-right">Discount</td>
+                                                <td><v-text-field class="input-right" style="" v-model="discount" prepend-icon="mdi-minus"></v-text-field></td>
                                                 <td></td>
                                             </tr>
                                             <tr>
@@ -158,8 +157,8 @@
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td class="text-right">Freight</td>
-                                                <td><v-text-field class="text-end" style="direction:rtl;" v-model="freight" append-icon="mdi-plus"></v-text-field></td>
+                                                <td class="input-right">Freight</td>
+                                                <td><v-text-field class="input-right" style="" v-model="freight" prepend-icon="mdi-plus"></v-text-field></td>
                                                 <td></td>
                                             </tr>
                                             <tr>
@@ -167,8 +166,8 @@
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td class="text-right">Total</td>
-                                                <td><v-text-field readonly class="input-right" style="direction:rtl;" v-model="total"></v-text-field></td>
+                                                <td class="input-right">Total</td>
+                                                <td><v-text-field readonly class="input-right" style="" v-model="total"></v-text-field></td>
                                                 <td></td>
                                             </tr>
                                         </tbody>
@@ -349,19 +348,26 @@
             updateTotal(){
                 var temp = 0;
                 var temp2 = 0
-                Object.keys(this.items).forEach((key)=>{
-                    var price = parseFloat(this.items[key].price)     
-                    var tax = (parseFloat(this.items[key].price)*(parseFloat(this.items[key].gst)/100)).toFixed(2)
-                    temp2 = parseFloat(temp2) + tax
+                //console.log(this.items)
+                Object.keys(this.items).forEach((key)=>{    
                     if(this.gstSwitch === '0'){
-                        this.items[key].price = (price - tax) //update each item price
-                        temp = parseFloat(temp)+(price - tax) // accumulate total
+                        var taxIndividual = (parseFloat(this.items[key].rate)*(parseFloat(this.items[key].gst)/100)).toFixed(2)
+                        //console.log('taxIndividual:'+ taxIndividual)
+                        var taxItem = taxIndividual*parseInt(this.items[key].qty)
+                        //console.log('taxItem:'+ taxItem)
+                        //this.items[key].rate = (parseFloat(this.items[key].rate)-parseFloat(taxIndividual)).toFixed(2)
+                        this.items[key].price = parseFloat(this.items[key].rate)*parseInt(this.items[key].qty) //update each item price
+                        temp = parseFloat(temp)+parseFloat(this.items[key].rate) // 
+                        //console.log('temp:'+ temp)
+                        temp2 = parseFloat(temp2) + parseFloat(taxItem)
+                        //console.log('temp2:'+ temp2)
                     }
                     else{
-                        temp = parseFloat(temp)+price
+                        temp = parseFloat(temp)+parseFloat(this.items[key].price)
                     }
                 })
-                this.tax = temp2
+                //console.log(this.items)
+                this.tax = temp2.toFixed(2)
                 if(this.gstSwitch === '0'){
                     this.total = (parseFloat(temp)+parseFloat(temp2)-parseFloat(this.discount)+parseFloat(this.freight)).toFixed(2)
                 }

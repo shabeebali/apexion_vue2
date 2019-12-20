@@ -361,30 +361,6 @@
             deleteAddress(index){
                 this.fd.addresses.splice(index,1)
             },
-            submitData(){
-                axios.post(this.route,this.fD).then((response)=>{
-                    this.btnloading = false
-                    this.emitSb('Customer Created Successfully','success')
-                    window.location.href = '{{$prev_url}}'
-                }).catch((error)=> {
-                    if(error.response.status == 422){
-                        this.btnloading = false
-                        var errors = error.response.data.errors
-                        this.fd.name.error = errors.name
-                        Object.keys(errors).forEach((key)=>{
-                            var keys = key.split(".")
-                            if(keys[1] in this.fd.addresses[0]){
-                                this.fd.addresses[keys[0]][keys[1]].error = errors[key]
-                            }
-                        })
-                        this.triggerSb('There are errors in the form submitted. Please check!!','error')
-                    }
-                    if(error.response.status == 403){
-                        this.btnloading = false
-                        this.triggerSb('You are not authorised to do this action','error')
-                    }
-                })
-            },
             save(){
                 this.btnloading = true
                 if(!this.$refs.form.validate()){
@@ -393,22 +369,35 @@
                     this.btnloading = false
                 }
                 else{
-                    this.fD = new FormData()
-                    this.fD.append('name',this.fd.name.value)
-                    this.fD.append('addresses',JSON.stringify(this.fd.addresses))
-                    this.route = 'customers'
-                    this.checkRoute = 'customers/check'
-                    axios.post(this.checkRoute,this.fD).then((res)=>{
-                        if(res.data.message == 'warning'){
-                            this.duplicateMessage = res.data.warning
-                            this.duplicateConfirm = true
+                    fD = new FormData()
+                    fD.append('name',this.fd.name.value)
+                    fD.append('addresses',JSON.stringify(this.fd.addresses))
+                    var route = 'customers'
+                    axios.post(route,fD).then((response)=>{
+                        this.btnloading = false
+                        this.emitSb('Customer Created Successfully','success')
+                        window.location.href = '{{$prev_url}}'
+                    }).catch((error)=> {
+                        if(error.response.status == 422){
+                            this.btnloading = false
+                            var errors = error.response.data.errors
+                            this.fd.name.error = errors.name
+                            Object.keys(errors).forEach((key)=>{
+                                var keys = key.split(".")
+                                if(keys[1] in this.fd.addresses[0]){
+                                    this.fd.addresses[keys[0]][keys[1]].error = errors[key]
+                                }
+                            })
+                            this.triggerSb('There are errors in the form submitted. Please check!!','error')
                         }
-                        else{
-                            this.submitData()
+                        if(error.response.status == 403){
+                            this.btnloading = false
+                            this.triggerSb('You are not authorised to do this action','error')
                         }
                     })
                 }
-            }
+                
+            },
         }
     }).$mount('#app')
 </script>

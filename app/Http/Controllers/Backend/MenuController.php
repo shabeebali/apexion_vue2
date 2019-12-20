@@ -106,6 +106,10 @@ class MenuController extends Controller
               'title'=>'Roles',
               'target'=>'/user_roles',
             ],
+            [
+              'title'=>'Configuration',
+              'target'=>'/config',
+            ],
           ]
         ];
         return $menu;
