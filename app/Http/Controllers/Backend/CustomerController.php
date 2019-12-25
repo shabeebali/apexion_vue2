@@ -262,4 +262,33 @@ class CustomerController extends Controller
             ]);
         }
     }
+    public function getAttributes()
+    {
+        $countries = Country::all()->map(function($item){
+            return [
+                'text'=> $item['name'],
+                'value' => $item['id']
+            ];
+        });
+        $states = State::select('id','name')->get()->map(function($item){
+            return [
+                'text'=> $item['name'],
+                'value' => $item['id']
+            ];
+        });
+        return [
+            [
+                'text'=>'Country',
+                'value' => 'country',
+                'type' => 'select',
+                'items' => $countries->all()
+            ],
+            [
+                'text'=>'State',
+                'value' => 'state',
+                'type' => 'select',
+                'items' => $states->all(),
+            ],
+        ];
+    }
 }

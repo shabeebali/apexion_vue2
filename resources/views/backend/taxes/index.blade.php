@@ -145,6 +145,12 @@
             },
         },
         methods:{
+            triggerSb(val){
+                this.snackbar = false
+                this.sbText = val.text
+                this.sbColor = val.color
+                this.snackbar = true
+            },
             edit(id){
                 window.location.href = this.baseUrl+'/admin/taxes/edit/'+id
             },

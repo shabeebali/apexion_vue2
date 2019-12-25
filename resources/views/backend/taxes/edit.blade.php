@@ -89,13 +89,6 @@
                     type:'percentage',
                     value:'',
                     rules:[
-                        {
-                            ruleEntity:null,
-                            ruleAttribute:null,
-                            ruleComparator:null,
-                            ruleValue:null,
-                            value_type : 'text'
-                        }
                     ]
                 },
                 errorMsgs:{
@@ -131,9 +124,60 @@
             }
         },
         mounted(){
-            axios.get('menu').then((res)=>{
-                this.sidebar_left_items = res.data
-            })
+            this.waitDialog = true
+            axios.all([
+                axios.get('menu').then((res)=>{
+                    this.sidebar_left_items = res.data
+                }),
+                axios.get('taxes/{{$id}}').then((res)=>{
+                    this.fd.name = res.data.name
+                    this.fd.value = res.data.value
+                    this.fd.type = res.data.type
+                    this.fd.applyToAll = res.data.apply_to_all == 1 ? true : false
+                    if(res.data.rules.length > 0){
+                        res.data.rules.forEach((item,index)=>{
+                            this.fd.rules.push({
+                                ruleEntity: item.rule_entity,
+                                ruleAttribute: item.rule_attribute,
+                                ruleComparator: item.rule_comparator,
+                                ruleValue: isNaN(item.rule_value) ? item.rule_value : parseInt(item.rule_value),
+                                value_type : 'text'
+                            })
+                            this.waitDialog = true
+                            axios.get(this.fd.rules[index].ruleEntity+'/get_attributes').then((res)=>{
+                                this.attributeItems = res.data
+                            }).finally(()=>{
+                                this.attributeItems.forEach((item)=>{
+                                    if(item.value == this.fd.rules[index].ruleAttribute){
+                                        if(item.type == 'select'){
+                                            this.ruleValueItems = item.items
+                                            this.fd.rules[index].ruleValue = this.fd.rules[index].ruleValue.toString().split(",").map((item)=>{
+                                                return isNaN(item) ? item : parseInt(item)
+                                            })
+                                        }
+                                        this.fd.rules[index].value_type = item.type
+                                    }
+                                })
+                                this.waitDialog = false
+                            })
+                        })
+                    }
+                    else{
+                        this.fd.rules.push(
+                            {
+                                ruleEntity:null,
+                                ruleAttribute:null,
+                                ruleComparator:null,
+                                ruleValue:null,
+                                value_type : 'text'
+                            }
+                        )
+                    }
+                }).finally(()=>{
+                    this.waitDialog = false
+                })
+            ])
+            
         },
         computed:{
             baseUrl(){
@@ -193,10 +237,11 @@
                     fD.append('type',this.fd.type)
                     fD.append('apply_to_all',this.fd.applyToAll)
                     fD.append('value',this.fd.value)
+                    fD.append('_method','PUT')
                     if(!this.fd.applyToAll){
                         fD.append('rules',JSON.stringify(this.fd.rules))
                     }
-                    axios.post('taxes',fD).then((res)=>{
+                    axios.post('taxes/{{$id}}',fD).then((res)=>{
                         this.waitDialog = false
                         this.emitSb('Tax Created Successfully','success')
                         window.location.href = '{{$prev_url}}'

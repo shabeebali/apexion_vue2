@@ -16,7 +16,7 @@ class CreateTaxesTable extends Migration
         Schema::create('taxes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->decimal('value');
+            $table->decimal('value',8,2);
             $table->string('type');
             $table->boolean('apply_to_all');
             $table->timestamps();

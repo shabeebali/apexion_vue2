@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Model\Tax;
+use Illuminate\Support\Str;
 
 class TaxController extends Controller
 {
@@ -26,6 +27,7 @@ class TaxController extends Controller
         ]);
     }
 
+
     /**
      * Store a newly created resource in storage.
      *
@@ -34,7 +36,29 @@ class TaxController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $val_arr =[
+            'name' =>'required|unique:taxes',
+            'value' => 'required|numeric',
+        ];
+        $request->validate($val_arr);
+        //dd($request->toArray());
+        $obj = new Tax;
+        $obj->name = $request->name;
+        $obj->type = $request->type;
+        $obj->value = $request->value;
+        $obj->apply_to_all = $request->apply_to_all == 'true' ? true : false;
+        $obj->save();
+        if($request->apply_to_all == 'false'){
+            $rules = json_decode($request->rules,true);
+            foreach ($rules as $rule) {
+                $obj->rules()->create([
+                    'rule_entity' => $rule['ruleEntity'],
+                    'rule_attribute' => $rule['ruleAttribute'],
+                    'rule_comparator' => $rule['ruleComparator'],
+                    'rule_value' => $rule['value_type'] == 'select' ? implode($rule['ruleValue']) : $rule['ruleValue'],
+                ]);
+            }
+        }
     }
 
     /**
@@ -45,7 +69,7 @@ class TaxController extends Controller
      */
     public function show($id)
     {
-        //
+        return Tax::with('rules')->find($id);
     }
 
     /**
@@ -57,7 +81,32 @@ class TaxController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $val_arr =[
+            'name' =>'required|unique:taxes,name,'.$id,
+            'value' => 'required|numeric',
+        ];
+        $request->validate($val_arr);
+        //dd($request->toArray());
+        $obj = Tax::find($id);
+        $obj->name = $request->name;
+        $obj->type = $request->type;
+        $obj->value = $request->value;
+        $obj->apply_to_all = $request->apply_to_all == 'true' ? true : false;
+        $obj->save();
+        if($request->apply_to_all == 'false'){
+            $rules = json_decode($request->rules,true);
+            foreach ($rules as $rule) {
+                $obj->rules()->firstOrcreate([
+                    'rule_entity' => $rule['ruleEntity'],
+                    'rule_attribute' => $rule['ruleAttribute'],
+                    'rule_comparator' => $rule['ruleComparator'],
+                    'rule_value' => $rule['value_type'] == 'select' ? implode(",",$rule['ruleValue']) : $rule['ruleValue'],
+                ]);
+            }
+        }
+        else{
+            $obj->rules()->delete();
+        }
     }
 
     /**

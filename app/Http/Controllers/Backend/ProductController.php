@@ -273,4 +273,34 @@ class ProductController extends Controller
         }
         return response()->json($model);
     }
+    public function getAttributes()
+    {
+        return [
+            [
+                'text'=>'HSN Code',
+                'value' => 'hsn_code',
+                'type' => 'text'
+            ],
+            [
+                'text'=>'GST',
+                'value' => 'gst',
+                'type' => 'select',
+                'items' => [
+                    ['text'=>'5%', 'value' => '5'],
+                    ['text'=>'12%', 'value' => '12'],
+                    ['text'=>'18%', 'value' => '18'],
+                ]
+            ],
+            [
+                'text'=>'MRP',
+                'value' => 'mrp',
+                'type' => 'text'
+            ],
+            [
+                'text'=>'Weight',
+                'value' => 'weight',
+                'type' => 'text'
+            ],
+        ];
+    }
 }
