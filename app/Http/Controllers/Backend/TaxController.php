@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Model\Config;
-class ConfigController extends Controller
+use App\Model\Tax;
+
+class TaxController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,17 +15,15 @@ class ConfigController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $model = Tax::all();
+        return response()->json([
+            'data' => $model ? $model->toArray() : '',
+            'meta' => [
+                'edit' => 'true',
+                'delete' => 'true',
+                'create' => 'true',
+            ]
+        ]);
     }
 
     /**
@@ -34,15 +33,8 @@ class ConfigController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {   
-        $model = Config::all();
-        foreach ($model as $obj) {
-            if($request->has($obj->name)){
-                $inst = Config::find($obj->id);
-                $inst->value = $request->input($obj->name);
-                $inst->save();
-            }
-        }
+    {
+        
     }
 
     /**
@@ -57,17 +49,6 @@ class ConfigController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -76,7 +57,7 @@ class ConfigController extends Controller
      */
     public function update(Request $request, $id)
     {
-        
+        //
     }
 
     /**

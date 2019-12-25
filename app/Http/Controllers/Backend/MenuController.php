@@ -91,6 +91,10 @@ class MenuController extends Controller
               'title'=>'Pricelist',
               'target'=>'/pricelists',
             ],
+            [
+              'title'=>'Tax Rules',
+              'target'=>'/taxes',
+            ],
           ]
         ];
         $menu[] = [

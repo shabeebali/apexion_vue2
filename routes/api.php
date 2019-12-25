@@ -80,6 +80,7 @@ Route::middleware('auth:api')->group(function(){
         'customers'=>'Backend\CustomerController',
         'sales'=>'Backend\SaleController',
         'config'=>'Backend\ConfigController',
+        'taxes'=>'Backend\TaxController',
     ]);
     
 });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Model\Pricelist;
+use App\Model\Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 class PricelistController extends Controller
@@ -24,6 +25,7 @@ class PricelistController extends Controller
                 'edit' => $user->can('update',Pricelist::class)? 'true': 'false',
                 'delete' => $user->can('delete',Pricelist::class)? 'true': 'false',
                 'create' => $user->can('create',Pricelist::class)? 'true': 'false',
+                'so_default_pl' => Config::where('name','so_default_pl')->first()->value,
             ]
         ]);
     }

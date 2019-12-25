@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Model\Warehouse;
+use App\Model\Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -25,6 +26,7 @@ class WarehouseController extends Controller
                 'edit' => $user->can('update',Warehouse::class)? 'true': 'false',
                 'delete' => $user->can('delete',Warehouse::class)? 'true': 'false',
                 'create' => $user->can('create',Warehouse::class)? 'true': 'false',
+                'so_default_wh' => Config::where('name','so_default_wh')->first()->value,
             ]
         ]);
     }

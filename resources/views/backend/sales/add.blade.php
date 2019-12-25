@@ -29,11 +29,11 @@
                             </v-autocomplete>
                         </v-col>
                         <v-col cols="12" md="4">
-                            <v-select label="Saleperson" v-model="fd.saleperson_id" :items="salepersons" item-text="name" item-value="id" :rules="[rules.required]" @change="updateBill();">
+                            <v-select label="Saleperson" v-model="fd.saleperson_id" :items="salepersons" item-text="name" item-value="id" :rules="[rules.required]">
                             </v-select>
                         </v-col>
                         <v-col cols="12" md="4">
-                            <v-select v-model="fd.pricelist_id" :items="pricelists" item-text="name" item-value="id" label="Pricelist" @change="changePl()">
+                            <v-select v-model="fd.pricelist_id" :items="pricelists" item-text="name" item-value="id" label="Pricelist" :readonly="items.length > 0">
                             </v-select>
                         </v-col>
                     </v-row>
@@ -68,7 +68,10 @@
                                     <v-select v-model="fd.createdby_id" :items="warehouseStaffs" item-text="name" item-value="id" :rules="[rules.required]" label="Created By"></v-select>
                                 </v-col>
                                 <v-col cols="12" md="4">
-                                    <v-switch v-model="gstSwitch" true-value="1" false-value="0" label="GST Included" @change="updateBill()"/>
+                                    <v-select v-model="fd.warehouse" :items="warehouses" item-text="name" item-value="id" :rules="[rules.required]" label="Warehouse"></v-select>
+                                </v-col>
+                                <v-col cols="12" md="4">
+                                    <v-switch v-model="gstSwitch" true-value="1" false-value="0" label="GST Included" :readonly="items.length > 0"/>
                                 </v-col>
                             </v-row>
                         </v-col>
@@ -203,6 +206,10 @@
         		</v-card-text>
         	</v-card>
         </v-dialog>
+        <v-snackbar v-model="snackbar" right botttom :color="sbColor" :timeout="sbTimeout" >
+            @{{sbText}}
+            <v-btn dark text @click.stop="snackbar = false"> Close</v-btn>
+        </v-snackbar>
     </v-col>
 </v-row>
 @endsection
@@ -243,7 +250,8 @@
                     pricelist_id:null,
                     saleperson_id:null,
                     address_id:'',
-                    createdby_id: null
+                    createdby_id: null,
+                    warehouse:null,
                 },
                 addresses:[
                 ],
@@ -255,16 +263,28 @@
                     decimal: value => !isNaN(value) || 'Must be an number',
                 },
                 gstSwitch:'1',
+                warehouses:[],
+                sbColor:'',
+                sbText:'',
+                sbTimeout:10000,
+                snackbar:false,
             }
         },
         mounted(){
             this.waitDialog = true
             axios.all([
-                axios.get('pricelists').then((res)=>{this.pricelists = res.data.data}),
+                axios.get('pricelists').then((res)=>{
+                    this.pricelists = res.data.data
+                    this.fd.pricelist_id = parseInt(res.data.meta.so_default_pl)
+                }),
                 axios.get('users?role=Sale').then((res)=>{this.salepersons = res.data}),
                 axios.get('users?role=Warehouse').then((res)=>{this.warehouseStaffs = res.data}),
                 axios.get('menu').then((res)=>{
                     this.sidebar_left_items = res.data
+                }),
+                axios.get('warehouses').then((res)=>{
+                    this.warehouses = res.data.data
+                    this.fd.warehouse = parseInt(res.data.meta.so_default_wh)
                 })
             ]).then(()=>{
                 this.fd.createdby_id = parseInt('{{$user->id}}')
@@ -312,13 +332,6 @@
             },
         },
         methods:{
-            changePl(){
-                this.productSelect = null
-                this.qty = 1
-                this.rate = 0
-                this.gst = 0
-                this.updateBill()
-            },
             prodFilter(item, queryText, itemText){
                 const textOne = item.name.toLowerCase()
                 const textTwo = item.sku.toLowerCase()
@@ -346,69 +359,14 @@
                 window.location.href = '{{$prev_url}}'
             },
             updateTotal(){
-                var temp = 0;
-                var temp2 = 0
-                //console.log(this.items)
-                Object.keys(this.items).forEach((key)=>{    
-                    if(this.gstSwitch === '0'){
-                        var taxIndividual = (parseFloat(this.items[key].rate)*(parseFloat(this.items[key].gst)/100)).toFixed(2)
-                        //console.log('taxIndividual:'+ taxIndividual)
-                        var taxItem = taxIndividual*parseInt(this.items[key].qty)
-                        //console.log('taxItem:'+ taxItem)
-                        //this.items[key].rate = (parseFloat(this.items[key].rate)-parseFloat(taxIndividual)).toFixed(2)
-                        this.items[key].price = parseFloat(this.items[key].rate)*parseInt(this.items[key].qty) //update each item price
-                        temp = parseFloat(temp)+parseFloat(this.items[key].rate) // 
-                        //console.log('temp:'+ temp)
-                        temp2 = parseFloat(temp2) + parseFloat(taxItem)
-                        //console.log('temp2:'+ temp2)
-                    }
-                    else{
-                        temp = parseFloat(temp)+parseFloat(this.items[key].price)
-                    }
+                var total = 0
+                Object.keys(this.items).forEach((key)=>{
+                    total += parseFloat(this.items[key].price)
                 })
-                //console.log(this.items)
-                this.tax = temp2.toFixed(2)
-                if(this.gstSwitch === '0'){
-                    this.total = (parseFloat(temp)+parseFloat(temp2)-parseFloat(this.discount)+parseFloat(this.freight)).toFixed(2)
-                }
-                else{
-                    this.total = (parseFloat(temp)-parseFloat(this.discount)+parseFloat(this.freight)).toFixed(2)
-                }
+                //this.total = total + parseFloat(this.tax) + parseFloat(this.freight) + this.
+
             },
-            updateBill(){
-                if(this.items.length > 0){
-                    this.waitDialog = true
-                    var ids = []
-                    this.items.forEach((item)=>{
-                        ids.push(item.id)
-                    })
-                    axios.get('products/getrate?&id='+ids.toString()+'&pl='+this.fd.pricelist_id).then((res)=>{
-                        res.data.forEach((item)=>{
-                            Object.keys(this.items).forEach((key)=>{
-                                if(this.items[key].id == item.id){
-                                    var gst = item.gst
-                                    var landing_price = item.landing_price
-                                    var margin = item.margin
-                                    this.items[key].gst = gst
-                                    if(this.gstSwitch === '0' && parseFloat(landing_price) != 0 && parseFloat(margin) != 0 ){
-                                        this.items[key].rate = (parseFloat(landing_price)*((parseFloat(margin)/100)+1)).toFixed(2)
-                                    }
-                                    else {
-                                        if(parseFloat(landing_price) != 0 && parseFloat(margin) != 0){
-                                            this.items[key].rate = (((parseFloat(landing_price)*((parseFloat(margin)/100)+1)).toFixed(2)
-        )*((parseFloat(gst)/100)+1)).toFixed(2)
-                                        }
-                                    }
-                                    this.items[key].price = (parseFloat(this.items[key].rate)*parseInt(this.items[key].qty)).toFixed(2)
-                                }   
-                            })
-                        })
-                    }).finally(()=>{
-                        this.waitDialog = false
-                        this.updateTotal()
-                    })
-                }   
-            },
+
             setRate(){
                 if(this.fd.pricelist_id != null && this.fd.pricelist_id != undefined && this.productSelect != undefined && this.productSelect != null){
                     var grouped = _.groupBy(this.productItems,'id')
@@ -438,23 +396,29 @@
 
             },
             addLine(){
-                this.items.push({
-                    'id':this.productSelect,
-                    'line':this.count,
-                    'product':this.searchProduct,
-                    'qty':this.qty,
-                    'rate':this.rate,
-                    'gst':this.gst,
-                    'price': (parseInt(this.qty)*parseFloat(this.rate)).toFixed(2),
-                    'pos': parseInt(this.count)-1
-                })
-                this.count=parseInt(this.count)+1
-                this.qty = 1
-                this.rate = 0
-                this.gst = 0
-                this.searchProduct=null
-                this.productSelect=null
-                this.updateTotal()
+                if(!this.$refs.form.validate()){
+                    this.triggerSb('First clear the error in the form above, then add','info');
+                    this.$vuetify.goTo(0)
+                }
+                else{
+                    this.items.push({
+                        'id':this.productSelect,
+                        'line':this.count,
+                        'product':this.searchProduct,
+                        'qty':this.qty,
+                        'rate':this.rate,
+                        'gst':this.gst,
+                        'price': (parseInt(this.qty)*parseFloat(this.rate)).toFixed(2),
+                        'pos': parseInt(this.count)-1
+                    })
+                    this.count=parseInt(this.count)+1
+                    this.qty = 1
+                    this.rate = 0
+                    this.gst = 0
+                    this.searchProduct=null
+                    this.productSelect=null
+                    this.updateTotal()
+                }
             },
             removeItem(pos){
                 this.items.splice(pos,1)
@@ -470,6 +434,11 @@
             emitSb(text,color){
                 window.localStorage.setItem('message',text)
                 window.localStorage.setItem('message_status',color)
+            },
+            triggerSb(text,color){
+                this.sbText = text
+                this.sbColor = color
+                this.snackbar = true
             },
         }
     }).$mount('#app')

@@ -15,12 +15,20 @@
 				<v-expansion-panel-content>
 					<v-row>
 						<v-col cols="6">
-							<p class="text-right">Default warehouse for sale order</p>
+							<p class="text-right mt-5">Default warehouse for sale order</p>
 						</v-col>
 						<v-col cols="6">
 							<v-select :items="warehouses" v-model="so_default_wh" item-text="name" item-value="id"></v-select>
 						</v-col>
 					</v-row>
+                    <v-row>
+                        <v-col cols="6">
+                            <p class="text-right mt-5">Default pricelist for sale order</p>
+                        </v-col>
+                        <v-col cols="6">
+                            <v-select :items="pricelists" v-model="so_default_pl" item-text="name" item-value="id"></v-select>
+                        </v-col>
+                    </v-row>
 				</v-expansion-panel-content>
 			</v-expansion-panel>
 		</v-expansion-panels>
@@ -52,8 +60,11 @@
                 sbText:'',
                 sbTimeout:10000,
                 snackbar:false,
-                warehouses:{},
+                warehouses:[],
                 so_default_wh:null,
+                pricelists:[],
+                so_default_pl:null,
+                btnloading:false,
                 panels:[0],
             }
         },
@@ -65,8 +76,12 @@
 	            }),
 	            axios.get('warehouses').then((res)=>{
 	            	this.warehouses = res.data.data
-	            	this.so_default_wh = this.warehouses[0].id
-	            })
+	            	this.so_default_wh = parseInt(res.data.meta.so_default_wh)
+	            }),
+                axios.get('pricelists').then((res)=>{
+                    this.pricelists = res.data.data
+                    this.so_default_pl = parseInt(res.data.meta.so_default_pl)
+                })
         	]).then(()=>{
         		this.waitDialog = false
         	})
@@ -88,6 +103,7 @@
         		this.btnloading = true
         		var fD = new FormData
         		fD.append('so_default_wh',this.so_default_wh)
+                fD.append('so_default_pl',this.so_default_pl)
         		axios.post('config',fD).then((res)=>{
         			this.btnloading = false
                     this.triggerSb('Settings saved successfully','success')
