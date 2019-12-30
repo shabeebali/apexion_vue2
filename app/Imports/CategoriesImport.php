@@ -32,7 +32,9 @@ class CategoriesImport implements ToCollection, WithHeadingRow
     {
         if($this->method == 'create')
         {
+            //dd($this->taxonomy_id);
             $taxonomy = Taxonomy::find($this->taxonomy_id);
+            //dd($taxonomy->toArray());
             $val_array = [
                 '*.name' => [
                     'required',
@@ -40,11 +42,13 @@ class CategoriesImport implements ToCollection, WithHeadingRow
                 ],
             ];
             if($taxonomy->in_pc){
-                $val_array['*.code'] = [
-                    'required',
-                    'size:'.$taxonomy->code_length,
-                    Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id)
-                ];
+                if($taxonomy->autogen != 1){
+                    $val_array['*.code'] = [
+                        'required',
+                        'size:'.$taxonomy->code_length,
+                        Rule::unique('categories')->where('taxonomy_id',$this->taxonomy_id)
+                    ];
+                }
             }
             $rows = $rows->toArray();
             $validator = Validator::make($rows, $val_array, [], []);

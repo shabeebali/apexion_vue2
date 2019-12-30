@@ -87,7 +87,10 @@ class CategoryController extends Controller
         $this->authorize('create',Category::class);
         $taxonomy = Taxonomy::find($request->taxonomy_id);
         $val_array = [
-            'name'=>'required|unique:categories',
+            'name'=> [
+                'required',
+                Rule::unique('categories')->where('taxonomy_id',$request->taxonomy_id) 
+            ],
         ];
         if($taxonomy->in_pc){
             $val_array['code'] = [
