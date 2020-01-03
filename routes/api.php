@@ -5,6 +5,8 @@ use App\Model\Country;
 use App\Model\State;
 use App\Model\City;
 use App\User;
+use App\Model\Address;
+use App\Model\Tax;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -46,6 +48,40 @@ Route::middleware('auth:api')->group(function(){
             'countries' => $countries,
             'phone_countries' => $phone_countries
         ];
+    });
+    Route::get('tax_info/{id}',function($id){
+        $acc = Address::find($id);
+        $taxes = Tax::with('rules')->get();
+        $data = [];
+        foreach ($taxes as $tax) {
+            //dd($tax->apply_to_all);
+            if($tax->apply_to_all == 1){
+                $data[] = [
+                    'name' => $tax->name,
+                    'type' => $tax->type,
+                    'value' => $tax->value,
+                ];
+            }
+            else{
+                //dd('kiiti');
+                $tax_include = false;
+                foreach ($tax->rules as $rule) {
+                    $attribute = $rule->rule_attribute.'_id';
+                    $value = $rule->rule_value;
+                    if($acc->$attribute == $value){
+                        $tax_include = true;
+                    }
+                }
+                if($tax_include){
+                    $data[] = [
+                        'name' => $tax->name,
+                        'type' => $tax->type,
+                        'value' => $tax->value,
+                    ];
+                }
+            }  
+        }
+        return $data;
     });
     Route::post('products/add_comment/{id}','Backend\ProductController@add_comment');
     Route::post('products/import','Backend\ProductController@import');

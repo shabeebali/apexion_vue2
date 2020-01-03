@@ -33,7 +33,7 @@
                             </v-select>
                         </v-col>
                         <v-col cols="12" md="4">
-                            <v-select v-model="fd.pricelist_id" :items="pricelists" item-text="name" item-value="id" label="Pricelist" :readonly="items.length > 0">
+                            <v-select v-model="fd.pricelist_id" :items="pricelists" item-text="name" item-value="id" label="Pricelist" :disabled="items.length > 0">
                             </v-select>
                         </v-col>
                     </v-row>
@@ -64,14 +64,11 @@
                         </v-col>
                         <v-col cols="12" md="8">
                             <v-row>
-                                <v-col cols="12" md="4">
+                                <v-col cols="12" md="6">
                                     <v-select v-model="fd.createdby_id" :items="warehouseStaffs" item-text="name" item-value="id" :rules="[rules.required]" label="Created By"></v-select>
                                 </v-col>
-                                <v-col cols="12" md="4">
-                                    <v-select v-model="fd.warehouse" :items="warehouses" item-text="name" item-value="id" :rules="[rules.required]" label="Warehouse"></v-select>
-                                </v-col>
-                                <v-col cols="12" md="4">
-                                    <v-switch v-model="gstSwitch" true-value="1" false-value="0" label="GST Included" :readonly="items.length > 0"/>
+                                <v-col cols="12" md="6">
+                                    <v-select v-model="fd.warehouse" :items="warehouses" item-text="name" item-value="id" :rules="[rules.required]" label="Warehouse" :disabled="items.length > 0"></v-select>
                                 </v-col>
                             </v-row>
                         </v-col>
@@ -90,7 +87,7 @@
                                                 <th class="text-right" >Quantity</th>
                                                 <th class="text-right" >Rate</th>
                                                 <th class="text-right" >GST</th>
-                                                <th class="text-right" >Price</th>
+                                                <th class="text-right" >Price(Incl. Tax)</th>
                                                 <th class="text-center">Action</th>
                                             </tr>
                                         </thead>
@@ -135,16 +132,6 @@
                                                 <td><v-text-field class="input-right" style="" readonly :rules="[rules.decimal]" :value="(parseInt(qty)*parseFloat(rate)).toFixed(2)" @click.native="$event.target.select()"></v-text-field></td>
 
                                                 <td><v-btn icon rounded small :disabled="productSelect == null || isNaN((parseInt(qty)*parseFloat(rate)).toFixed(2))" @click.stop="addLine"><v-icon>mdi-plus-circle</v-icon></v-btn></td>
-                                            </tr>
-                                            
-                                            <tr v-if="gstSwitch == '0'">
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td class="input-right">GST</td>
-                                                <td><v-text-field readonly class="input-right" style="" v-model="tax" prepend-icon="mdi-plus"></v-text-field></td>
-                                                <td></td>
                                             </tr>
                                             <tr>
                                                 <td></td>
@@ -262,12 +249,12 @@
                     required: value=> !!value||'Required.',
                     decimal: value => !isNaN(value) || 'Must be an number',
                 },
-                gstSwitch:'1',
                 warehouses:[],
                 sbColor:'',
                 sbText:'',
                 sbTimeout:10000,
                 snackbar:false,
+                taxes : []
             }
         },
         mounted(){
@@ -353,6 +340,12 @@
                     var index = Object.keys(grouped).indexOf(this.fd.address_id.toString())
                     this.selectedAdd =  this.addresses[index]
                     this.fd.saleperson_id = this.addresses[index].salepersons[0].id
+                    this.waitDialog = true
+                    axios.get('tax_info/'+this.selectedAdd.id).then((res)=>{
+                        this.taxes = res.data
+                    }).finally(()=>{
+                        this.waitDialog = false
+                    })
                 }
             },
             closeDialog(){
@@ -373,20 +366,25 @@
                     var index = Object.keys(grouped).indexOf(this.productSelect.toString())
                     //console.log('grouped : '+grouped)
                     //console.log('index : '+index)
-                    var gst = this.productItems[index].gst
+                    var gst = parseFloat(this.productItems[index].gst)
                     this.gst = gst
-                    var landing_price = this.productItems[index].landing_price
+                    var landing_price = parseFloat(this.productItems[index].landing_price)
                     var margin = 0
                     this.productItems[index].pricelists.forEach((pl)=>{
-                        if(this.fd.pricelist_id == pl.id) margin = pl.pivot.margin
+                        if(this.fd.pricelist_id == pl.id) margin = parseFloat(pl.pivot.margin)
                     })
-                    if(this.gstSwitch === '0'){
-                        this.rate = (parseFloat(landing_price)*((parseFloat(margin)/100)+1)).toFixed(2)
+                    this.rate = (landing_price*((margin/100)+1))*((gst/100)+1)
+                    if(this.taxes.length > 0){
+                        this.taxes.forEach((tax)=>{
+                            if(tax.type == 'percentage')
+                                this.rate = this.rate*((parseFloat(tax.value)/100)+1)
+                            else{
+                                this.rate = this.rate + parseFloat(tax.value)
+                            }
+                        })
                     }
-                    else {
-                        this.rate = (((parseFloat(landing_price)*((parseFloat(margin)/100)+1)).toFixed(2)
-)*((parseFloat(gst)/100)+1)).toFixed(2)
-                    }
+                    this.rate = this.rate.toFixed(2)
+                    
                 }
                 if(this.productSelect == undefined){
                     this.rate = 0

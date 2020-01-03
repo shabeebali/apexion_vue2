@@ -89,7 +89,8 @@
                     type:'percentage',
                     value:'',
                     rules:[
-                    ]
+                    ],
+                    delete_rules_ids : [],
                 },
                 errorMsgs:{
                     name:'',
@@ -141,7 +142,8 @@
                                 ruleAttribute: item.rule_attribute,
                                 ruleComparator: item.rule_comparator,
                                 ruleValue: isNaN(item.rule_value) ? item.rule_value : parseInt(item.rule_value),
-                                value_type : 'text'
+                                value_type : 'text',
+                                id:item.id
                             })
                             this.waitDialog = true
                             axios.get(this.fd.rules[index].ruleEntity+'/get_attributes').then((res)=>{
@@ -216,6 +218,7 @@
                 )
             },
             deleteRule(index){
+                this.fd.delete_rules_ids.push(this.fd.rules[index].id)
                 this.fd.rules.splice(index,1)
             },
             updRuleValue(index){
@@ -237,6 +240,7 @@
                     fD.append('type',this.fd.type)
                     fD.append('apply_to_all',this.fd.applyToAll)
                     fD.append('value',this.fd.value)
+                    fD.append('delete_rules_ids',JSON.stringify(this.fd.delete_rules_ids))
                     fD.append('_method','PUT')
                     if(!this.fd.applyToAll){
                         fD.append('rules',JSON.stringify(this.fd.rules))

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Model\Tax;
+use App\Model\TaxRule;
 use Illuminate\Support\Str;
 
 class TaxController extends Controller
@@ -103,6 +104,8 @@ class TaxController extends Controller
                     'rule_value' => $rule['value_type'] == 'select' ? implode(",",$rule['ruleValue']) : $rule['ruleValue'],
                 ]);
             }
+            $delete_ids = json_decode(($request->delete_rules_ids));
+            TaxRule::destroy($delete_ids);
         }
         else{
             $obj->rules()->delete();
