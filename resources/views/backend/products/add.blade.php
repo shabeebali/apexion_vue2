@@ -80,15 +80,6 @@
                                 prepend-inner-icon="mdi-currency-inr">
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" md="3">
-                            <v-select
-                                label="GST"
-                                v-model="fd.gst.value"
-                                suffix="%"
-                                :items="fd.gst.items"
-                                :rules="[rules.required]">
-                            </v-select>
-                        </v-col>
                         <v-col cols="12" md="3"></v-col>
                     </v-row>
                     <v-row>
@@ -114,15 +105,15 @@
                     <v-row>
                         <v-col cols="12" md="6">
                             <h4>Category</h4>
-                            <template v-for="(item,index) in taxonomies">
+                            @foreach($taxonomies as $taxonomy)
                                 <v-autocomplete 
-                                    :label="taxonomies[index].name"
-                                    :items="taxonomies[index].categories"
+                                    label="{{$taxonomy->name}}"
+                                    :items="taxonomies[{{$loop->index}}].categories"
                                     item-text="name"
                                     item-value="id"
-                                    v-model="taxonomies[index].value"
+                                    v-model="fd.taxonomy_{{$taxonomy->slug}}"
                                     :rules="[rules.required]"></v-autocomplete>
-                            </template>
+                            @endforeach
                         </v-col>
                         <v-col cols="12" md="6">
                             <h4>Pricelist</h4>
@@ -151,66 +142,7 @@
                         </v-col>
                     </v-row>
                     <h4>Stock</h4>
-                    <v-switch v-model="expirable" label="Expirable Product"></v-switch>
-                    <v-tabs v-model="stockTab" class="elevation-4"  centered icons-and-text>
-                        <v-tabs-slider></v-tabs-slider>
-                        <v-tab v-for="(item,index) in warehouses" :key="index"> Warehouse @{{warehouses[index].name}}
-                            <v-icon>mdi-warehouse</v-icon>
-                        </v-tab>
-                        <v-tabs-items v-model="stockTab">
-                            <v-tab-item v-for="(item,index) in warehouses" :key="index">
-                                <v-card flat>
-                                    <v-card-text>
-                                        <v-row v-for="(it,index2) in warehouses[index].items" :key="index2">
-                                            <v-col cols="12" md="3">
-                                                <v-text-field 
-                                                    label="Quantity"
-                                                    v-model="warehouses[index].items[index2].value"
-                                                    :rules="[rules.whole,rules.required]">
-                                                </v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" md="3">
-                                                <v-text-field 
-                                                    label="Batch"
-                                                    v-model="warehouses[index].items[index2].batch">
-                                                </v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" md="3">
-                                                <v-menu
-                                                    v-model="warehouses[index].items[index2].date_menu"
-                                                    :close-on-content-click="false"
-                                                    :nudge-right="40"
-                                                    transition="scale-transition"
-                                                    offset-y
-                                                    min-width="290px"
-                                                    >
-                                                    <template v-slot:activator="{ on }">
-                                                        <v-text-field
-                                                            v-model="warehouses[index].items[index2].expiry_date"
-                                                            label="Expiry Date"
-                                                            prepend-icon="mdi-calendar"              
-                                                            readonly
-                                                            v-on="on"
-                                                            ></v-text-field>
-                                                    </template>
-                                                    <v-date-picker v-model="warehouses[index].items[index2].expiry_date"  @input="warehouses[index].items[index2].date_menu = false">
-                                                    </v-date-picker>
-                                                </v-menu>
-                                            </v-col>
-                                            <v-col cols="12" md="3">
-                                                <v-btn v-if="warehouses[index].items.length > 1" depressed @click.stop="deleteStockLine(index,index2)">Remove</v-btn>
-                                            </v-col>
-                                        </v-row>
-                                        <v-row>
-                                            <v-col>
-                                                <v-btn v-if="expirable" text @click.stop="addStockLine(index)">Add</v-btn>
-                                            </v-col>
-                                        </v-row>
-                                    </v-card-text>
-                                </v-card>
-                            </v-tab-item>
-                        </v-tabs-items>
-                    </v-tabs>
+                    <v-switch v-model="expirable" label="Expirable Product ?"></v-switch>
                     <v-file-input 
                         prepend-icon="mdi-camera" 
                         v-model="imgFile"
@@ -302,7 +234,6 @@
                 imgDialog:false,
                 btnloading:false,
                 detailsFormVal:null,
-                stockTab:null,
                 imgUrl:null,
                 sbColor:'',
                 sbText:'',
@@ -337,28 +268,26 @@
                         value:'',
                         error:'',
                     },
-                    gst:{
-                        value:'',
-                        error:'',
-                        items:[
-                            {text:'5%', value:'5'},
-                            {text:'12%', value:'12'},
-                            {text:'18%', value:'18'},
-                        ],
-                    },
                     tally:{
                         value:0
                     },
                     approved:{
                         value:0
                     },
+                    @foreach ($taxonomies as $taxonomy)
+                        @foreach($taxonomy->categories as $category)
+                            @if($category->slug == 'none')
+                                taxonomy_{{$taxonomy->slug}}: {{$category->id}},
+                                @break
+                            @endif
+                        @endforeach
+                    @endforeach
                 },
                 aliases:[
                     {label:'Alias 1',value:'',error:''}
                 ],
-                taxonomies:[],
+                taxonomies:@json($taxonomies),
                 pricelists:[],
-                warehouses:[],
                 expirable: false,
                 medias:[],
                 comment:'',
@@ -386,29 +315,12 @@
         mounted(){
             this.waitDialog = true
             axios.all([
-                axios.get('taxonomies?withcat=1').then((res)=>{
-                    this.taxonomies = res.data.data
-                }),
                 axios.get('pricelists').then((res)=>{
                     var data = res.data.data
                     data.forEach((item,index)=>{
                         data[index].value = '0'
                     })
                     this.pricelists = data
-                }),
-                axios.get('warehouses').then((res)=>{
-                    var data = res.data.data
-                    data.forEach((item,index)=>{
-                        data[index].items = [
-                            {
-                                date_menu:false,
-                                value : '0',
-                                batch:'',
-                                expiry_date:'',
-                            }
-                        ]
-                    })
-                    this.warehouses = data
                 }),
                 axios.get('menu').then((res)=>{
                     this.sidebar_left_items = res.data
@@ -463,8 +375,8 @@
                 if (index >= 0) this.medias.splice(index, 1)
             },
             calculatePrice(el){
-                const val = ((parseFloat(this.fd.landing_price.value) * (1+(parseFloat(this.fd.gst.value)/100)))*(1+(parseFloat(el)/100))).toFixed(2)
-                return isNaN(val) ? '-': val.toString()
+                //const val = ((parseFloat(this.fd.landing_price.value) * (1+(parseFloat(this.fd.gst.value)/100)))*(1+(parseFloat(el)/100))).toFixed(2)
+                //return isNaN(val) ? '-': val.toString()
             },
             uploadImg(){
                 this.waitDialog = true
@@ -490,27 +402,6 @@
                 this.imgUrl = url
                 this.imgDialog = true
             },
-            stockUpd(){
-                if(this.batchMode == false){
-                    this.warehouses.forEach((warehouse,index)=>{
-                        var total = 0
-                        warehouse.items.forEach((item,index2)=>{
-                            if(this.warehouses[index].items[index2].id != undefined){
-                                axios.post('products/remove_stock/'+this.warehouses[index].items[index2].id)
-                            }
-                            total += parseInt(item.value)
-                        })
-                        this.warehouses[index].items = [
-                            {
-                                value : total.toString(),
-                                expiry_date:new Date().toISOString().substr(0, 10),
-                                date_menu:false,
-                                batch:''
-                            }
-                        ]
-                    })
-                }
-            },
             save(){
                 this.btnloading = true
                 this.$refs.form.validate();
@@ -529,9 +420,6 @@
                     })
                     this.pricelists.forEach((item)=>{
                         fD.append('pricelist_'+item.slug,item.value)
-                    })
-                    this.warehouses.forEach((item)=>{
-                        fD.append('warehouse_'+item.slug,JSON.stringify(item.items))
                     })
                     fD.append('medias',this.medias)
                     fD.append('aliases',JSON.stringify(this.aliases))

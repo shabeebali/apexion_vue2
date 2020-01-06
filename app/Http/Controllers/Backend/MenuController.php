@@ -91,10 +91,7 @@ class MenuController extends Controller
               'title'=>'Pricelist',
               'target'=>'/pricelists',
             ],
-            [
-              'title'=>'Tax Rules',
-              'target'=>'/taxes',
-            ],
+            
           ]
         ];
         $menu[] = [
@@ -109,6 +106,10 @@ class MenuController extends Controller
             [
               'title'=>'Roles',
               'target'=>'/user_roles',
+            ],
+            [
+              'title'=>'Taxes',
+              'target'=>'/taxes',
             ],
             [
               'title'=>'Configuration',

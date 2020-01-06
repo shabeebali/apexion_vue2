@@ -7,7 +7,7 @@ use App\Model\Product;
 use App\Model\Taxonomy;
 use App\Model\Pricelist;
 use App\Model\Warehouse;
-use App\Model\ProductStock;
+use App\Model\Tax;
 use App\Model\ProductAlias;
 use App\Model\ProductMedias;
 use Illuminate\Http\Request;
@@ -49,7 +49,13 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        $taxes = Tax::all();
+        $taxonomies = Taxonomy::with('categories')->get();
+        return view('backend.products.add',[
+            'taxes' => $taxes,
+            'prev_url'=> url()->previous(),
+            'taxonomies' => $taxonomies,
+        ]);
     }
 
     /**

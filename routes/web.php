@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 Route::prefix('/admin')->group(function(){
 	Auth::routes();
 	Route::middleware('auth:web')->group(function(){
+		Route::get('products/add','Backend\ProductController@create');
 		Route::get('{folder?}/{file?}/{param?}',function(Request $request, $folder = null, $file= null, $param = null){
 			$user = $request->user();
 			if($folder != null){

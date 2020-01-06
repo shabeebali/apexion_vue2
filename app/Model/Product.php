@@ -36,7 +36,7 @@ class Product extends Model
         return $this->hasMany('App\Model\ProductMedias','product_id');
     }
     public function stocks(){
-        return $this->hasMany('App\Model\ProductStock','product_id');
+        return $this->belongsToMany('App\Model\WarehouseRack','product_stocks','product_id','rack_id')->withPivot('stock')->withTimestamps();
     }
 	public function website_info(){
     	return $this->hasOne('App\Model\ProductWebsite','product_id');
