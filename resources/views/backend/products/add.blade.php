@@ -1,10 +1,11 @@
 @extends('layouts.app')
-
+@section('page-title')
+    Create Product
+@endsection
 @section('content')
 <v-row>
     <v-col class="mx-4">
         <v-card >
-            <v-card-title>Create Product</v-card-title>
             <v-card-text>
                 <v-form ref="form" v-model="detailsFormVal" v-on:submit.prevent="">
                     <v-text-field
@@ -80,7 +81,15 @@
                                 prepend-inner-icon="mdi-currency-inr">
                             </v-text-field>
                         </v-col>
-                        <v-col cols="12" md="3"></v-col>
+                        <v-col cols="12" md="3">
+                            <v-select
+                                label="GST"
+                                v-model="fd.gst.value"
+                                suffix="%"
+                                :items="fd.gst.items"
+                                :rules="[rules.required]">
+                            </v-select>
+                        </v-col>
                     </v-row>
                     <v-row>
                         <v-col cols="12" md="4">
@@ -91,30 +100,31 @@
                         </v-col>
                         <v-col cols="12" md="8">
                             <v-row>
-                                <v-col cols="12" md="3" v-if="user.meta.approve_product == true">
+                                <v-col cols="12" md="6" v-if="user.meta.approve_product == true">
                                     <v-switch v-model="fd.approved.value" label="Approved?" true-value=1 false-value=0>
                                     </v-switch>
                                 </v-col>
-                                <v-col cols="12" md="3" v-if="user.meta.tally_product == true">
+                                <v-col cols="12" md="6" v-if="user.meta.tally_product == true">
                                     <v-switch v-model="fd.tally.value" label="Tally updated?" true-value=1 false-value=0>
                                     </v-switch>
                                 </v-col>
                             </v-row>
                         </v-col>
                     </v-row>
+                    <h4>Category</h4>
                     <v-row>
-                        <v-col cols="12" md="6">
-                            <h4>Category</h4>
-                            @foreach($taxonomies as $taxonomy)
+                        @foreach($taxonomies as $taxonomy)
+                            <v-col cols="12" md="3">
                                 <v-autocomplete 
-                                    label="{{$taxonomy->name}}"
-                                    :items="taxonomies[{{$loop->index}}].categories"
-                                    item-text="name"
-                                    item-value="id"
-                                    v-model="fd.taxonomy_{{$taxonomy->slug}}"
-                                    :rules="[rules.required]"></v-autocomplete>
-                            @endforeach
-                        </v-col>
+                                label="{{$taxonomy->name}}"
+                                :items="taxonomies[{{$loop->index}}].categories"
+                                item-text="name"
+                                item-value="id"
+                                v-model="fd.taxonomy_{{$taxonomy->slug}}"
+                                :rules="[rules.required]"></v-autocomplete>
+                            </v-col>
+                        @endforeach
+                    </v-row>
                         <v-col cols="12" md="6">
                             <h4>Pricelist</h4>
                             <template v-for="(item,index) in pricelists">
@@ -273,6 +283,15 @@
                     },
                     approved:{
                         value:0
+                    },
+                    gst:{
+                        value:'',
+                        error:'',
+                        items:[
+                            {text:'5%', value:'5'},
+                            {text:'12%', value:'12'},
+                            {text:'18%', value:'18'},
+                        ],
                     },
                     @foreach ($taxonomies as $taxonomy)
                         @foreach($taxonomy->categories as $category)

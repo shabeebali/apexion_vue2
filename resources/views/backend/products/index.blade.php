@@ -1,53 +1,53 @@
 @extends('layouts.app')
-
+@section('page-title')
+    Products
+@endsection
+@section('top-menu1')
+    <v-toolbar-items>
+        <div>
+            <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                    <v-btn v-on="on" color="transparent" dense depressed @click.stop="filterToggle">
+                        <v-icon>mdi-filter</v-icon>
+                    </v-btn>
+                </template>
+                <span>Filter</span>
+            </v-tooltip>
+        </div>
+        <div v-if="meta.import == 'true'">
+            <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                    <v-btn v-on="on" color="transparent" dense depressed @click.stop="importDialog = true">
+                        <v-icon>mdi-upload</v-icon>
+                    </v-btn>
+                </template>
+                <span>Import</span>
+            </v-tooltip>
+        </div>
+        <div>
+            <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                    <v-btn v-on="on" color="transparent" dense depressed @click.stop="exportData">
+                        <v-icon>mdi-download</v-icon>
+                    </v-btn>
+                </template>
+                <span>Export</span>
+            </v-tooltip>
+        </div>
+        <div>
+            <v-btn color="transparent" class="mr-2" dense depressed @click.stop="getDataFromApi">
+                <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+        </div>
+        <div>
+            <v-btn tile v-if="meta.create == 'true'" color="primary" dense depressed :href="baseUrl+'/admin/products/add'">Create</v-btn>
+        </div>
+    </v-toolbar-items>
+@endsection
 @section('content')
 <v-row>
     <v-col class="mx-4">
-        <v-toolbar dense color="transparent" flat>
-            <v-toolbar-title>Products</v-toolbar-title>
-            <div class="flex-grow-1"></div>
-            <v-toolbar-items>
-                <div>
-                    <v-tooltip bottom>
-                        <template v-slot:activator="{ on }">
-                            <v-btn v-on="on" color="transparent" dense depressed @click.stop="filterToggle">
-                                <v-icon>mdi-filter</v-icon>
-                            </v-btn>
-                        </template>
-                        <span>Filter</span>
-                    </v-tooltip>
-                </div>
-                <div v-if="meta.import == 'true'">
-                    <v-tooltip bottom>
-                        <template v-slot:activator="{ on }">
-                            <v-btn v-on="on" color="transparent" dense depressed @click.stop="importDialog = true">
-                                <v-icon>mdi-upload</v-icon>
-                            </v-btn>
-                        </template>
-                        <span>Import</span>
-                    </v-tooltip>
-                </div>
-                <div>
-                    <v-tooltip bottom>
-                        <template v-slot:activator="{ on }">
-                            <v-btn v-on="on" color="transparent" dense depressed @click.stop="exportData">
-                                <v-icon>mdi-download</v-icon>
-                            </v-btn>
-                        </template>
-                        <span>Export</span>
-                    </v-tooltip>
-                </div>
-                <div>
-                    <v-btn color="transparent" class="mr-2" dense depressed @click.stop="getDataFromApi">
-                        <v-icon>mdi-refresh</v-icon>
-                    </v-btn>
-                </div>
-                <div>
-                    <v-btn v-if="meta.create == 'true'" color="primary" dense depressed :href="baseUrl+'/admin/products/add'">Create</v-btn>
-                </div>
-            </v-toolbar-items>
-        </v-toolbar>
-        <v-expansion-panels class="mt-2" v-model="filterPanel">
+        <v-expansion-panels v-model="filterPanel">
             <v-expansion-panel>
                 <v-expansion-panel-content>
                     <v-card flat>
@@ -109,7 +109,7 @@
                 </v-expansion-panel-content>
             </v-expansion-panel>
         </v-expansion-panels>
-        <v-card class="mt-2">
+        <v-card >
         <v-card-title>
             <v-text-field
                 v-model="search"

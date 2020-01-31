@@ -46,11 +46,9 @@
     <div id="app">
         <v-app>
             <v-app-bar absolute app color="transparent" flat>
-                <v-app-bar-nav-icon v-if="$vuetify.breakpoint.smAndDown" @click="sidebar_left = !sidebar_left"></v-app-bar-nav-icon>
+                <v-app-bar-nav-icon  @click="sidebar_left = !sidebar_left"></v-app-bar-nav-icon>
                 <v-toolbar-title>
-                    <v-btn dark link text depressed class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Laravel') }}
-                    </v-btn>
+                    <h3>@yield('page-title')</h3>
                 </v-toolbar-title>
                 <div class="flex-grow-1"></div>
                 
@@ -62,7 +60,9 @@
                         @endif
                     </v-toolbar-items>
                 @else
-                    <v-btn text>Welcome {{ Auth::user()->name }}</v-btn>
+                    <div>
+                        @yield('top-menu1')
+                    </div>
                     <v-menu left bottom offset-y min-width="200">
                         <template v-slot:activator="{ on }">
                             <v-btn icon v-on="on">
@@ -84,7 +84,7 @@
                             </form>
                 @endguest
             </v-app-bar>
-            <v-navigation-drawer app color="blue darken-4" dark  mobile-break-point="991" :permanent="$vuetify.breakpoint.mdAndUp" width="250" v-model="sidebar_left" >
+            <v-navigation-drawer app color="blue darken-4" dark  width="250" v-model="sidebar_left" >
                 <template v-slot:img="attrs">
                     <v-img v-bind="attrs" gradient="to top, rgba(0, 0, 0, .7), rgba(0, 0, 0, .7)"/>
                 </template>
@@ -116,7 +116,7 @@
             </v-navigation-drawer>
             <v-content>
                 <v-container fluid class="pa-0">
-                    <main class="py-4">
+                    <main>
                         @yield('content')
                     </main>
                 </v-container>

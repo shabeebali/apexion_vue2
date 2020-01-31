@@ -28,7 +28,7 @@ Route::prefix('/admin')->group(function(){
 				}
 			}
 			else{
-				$filename = 'backend.dashboard.index';
+				$filename = 'backend.dashboard';
 			}
 			if(View::exists($filename)){
 				if($param){
@@ -48,4 +48,5 @@ Route::prefix('/admin')->group(function(){
 		*/
 	});
 });
-Route::get('/home','HomeController@index');
+Route::get('/','HomeController@index');
+//Route::get('/home','HomeController@index');
